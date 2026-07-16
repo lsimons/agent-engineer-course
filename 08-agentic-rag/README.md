@@ -127,6 +127,175 @@ The core of agentic RAG is a loop, not a pipeline. The agent iterates through re
              to step 1   to User
 ```
 
+<div id="rag-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+  <h3 style="margin: 0 0 4px 0; font-size: 1.3rem; color: #1a1a2e;">Basic RAG vs. Agentic RAG</h3>
+  <p style="margin: 0 0 16px 0; font-size: 0.9rem; color: #666;">Watch both pipelines process the same query side by side. Agentic RAG iterates and self-corrects.</p>
+
+  <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;">
+    <button onclick="ragStepThrough()" id="rag-step-btn" style="padding: 8px 18px; border-radius: 8px; border: none; background: #4285f4; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Step Through</button>
+    <button onclick="ragAutoPlay()" id="rag-auto-btn" style="padding: 8px 18px; border-radius: 8px; border: none; background: #34a853; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer;">&#9654; Auto-play</button>
+    <button onclick="ragReset()" style="padding: 8px 18px; border-radius: 8px; border: 1px solid #ccc; background: #fff; color: #666; font-size: 0.85rem; cursor: pointer;">Reset</button>
+    <span id="rag-iteration" style="margin-left: auto; font-size: 0.82rem; color: #888; font-weight: 600;"></span>
+  </div>
+
+  <!-- Basic RAG -->
+  <div style="margin-bottom: 16px;">
+    <div style="font-weight: 700; font-size: 0.9rem; color: #4285f4; margin-bottom: 8px;">Basic RAG <span style="font-weight: 400; color: #888;">— one-shot pipeline</span></div>
+    <div id="rag-basic-flow" style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;"></div>
+  </div>
+
+  <!-- Agentic RAG -->
+  <div>
+    <div style="font-weight: 700; font-size: 0.9rem; color: #9333ea; margin-bottom: 8px;">Agentic RAG <span style="font-weight: 400; color: #888;">— iterative with self-correction</span></div>
+    <div id="rag-agentic-flow" style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;"></div>
+    <div id="rag-loop-indicator" style="margin-top: 8px; font-size: 0.8rem; color: #9333ea; min-height: 20px;"></div>
+  </div>
+
+  <!-- Comparison log -->
+  <div id="rag-log" style="margin-top: 16px; padding: 14px; background: #fff; border-radius: 10px; border: 2px solid #e0e0e0; min-height: 60px; font-size: 0.82rem; color: #444;">
+    <div style="color: #999;">Click "Step Through" or "Auto-play" to begin the comparison.</div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var basicSteps = [
+    { label: 'Query', color: '#4285f4', icon: '❓' },
+    { label: 'Retrieve', color: '#34a853', icon: '🔍' },
+    { label: 'Generate', color: '#9333ea', icon: '✍️' },
+    { label: 'Answer', color: '#34a853', icon: '✅' }
+  ];
+
+  var agenticSteps = [
+    { label: 'Query', color: '#4285f4', icon: '❓', phase: 1 },
+    { label: 'Plan', color: '#fbbc04', icon: '📋', phase: 1 },
+    { label: 'Retrieve', color: '#34a853', icon: '🔍', phase: 1 },
+    { label: 'Evaluate', color: '#ea4335', icon: '🔎', phase: 1 },
+    { label: 'Refine', color: '#ea4335', icon: '🔄', phase: 2 },
+    { label: 'Retrieve', color: '#34a853', icon: '🔍', phase: 2 },
+    { label: 'Evaluate', color: '#fbbc04', icon: '🔎', phase: 2 },
+    { label: 'Generate', color: '#9333ea', icon: '✍️', phase: 3 },
+    { label: 'Verify', color: '#ea4335', icon: '🛡️', phase: 3 },
+    { label: 'Answer', color: '#34a853', icon: '✅', phase: 3 }
+  ];
+
+  var logMessages = {
+    basic: [
+      'User query: "How did our customer satisfaction change after the chatbot launch?"',
+      'Retrieving documents... Found 3 results for exact query. Some may not be relevant.',
+      'Generating answer from retrieved documents (no quality check)...',
+      'Basic RAG complete. Single-pass answer delivered. No verification performed.'
+    ],
+    agentic: [
+      'User query: "How did our customer satisfaction change after the chatbot launch?"',
+      'Planning retrieval strategy: decomposing into sub-queries (pre-launch scores, launch date, post-launch scores).',
+      'Iteration 1: Retrieving documents for "customer satisfaction scores before chatbot"...',
+      'Evaluating results... Relevance: medium. Missing chatbot launch date. Need more data.',
+      'Refining query: searching for "chatbot launch date" and "CSAT post-chatbot deployment"...',
+      'Iteration 2: Retrieved 5 more targeted documents including the launch report.',
+      'Evaluating results... Relevance: high. Have pre/post data and launch timeline. Sufficient.',
+      'Generating answer grounded in 6 verified sources with citations...',
+      'Verifying: checking each claim against source documents. All claims supported.',
+      'Agentic RAG complete. Verified answer with citations delivered. 2 retrieval iterations used.'
+    ]
+  };
+
+  var basicPos = -1, agenticPos = -1;
+  var autoInterval = null;
+
+  function renderFlow(containerId, steps, currentPos) {
+    var el = document.getElementById(containerId);
+    el.innerHTML = steps.map(function(s, i) {
+      var active = i <= currentPos;
+      var isCurrent = i === currentPos;
+      return '<div style="display:flex;align-items:center;gap:4px;">' +
+        '<div style="padding:8px 12px;border-radius:8px;background:' + (active ? s.color : '#e8e8e8') + ';color:' + (active ? '#fff' : '#aaa') + ';font-size:0.78rem;font-weight:600;transition:all 0.3s;white-space:nowrap;' + (isCurrent ? 'box-shadow:0 0 0 3px ' + s.color + '33;transform:scale(1.05);' : '') + '">' +
+        s.icon + ' ' + s.label + '</div>' +
+        (i < steps.length - 1 ? '<div style="color:' + (active ? s.color : '#ccc') + ';font-size:1rem;font-weight:700;">&rarr;</div>' : '') +
+        '</div>';
+    }).join('');
+  }
+
+  function getIteration() {
+    if (agenticPos < 4) return 1;
+    if (agenticPos < 7) return 2;
+    return 3;
+  }
+
+  function updateLog() {
+    var log = document.getElementById('rag-log');
+    var lines = [];
+    for (var i = 0; i <= basicPos && i < logMessages.basic.length; i++) {
+      lines.push('<div style="padding:4px 0;border-left:3px solid #4285f4;padding-left:10px;margin-bottom:4px;"><strong style="color:#4285f4;">Basic:</strong> ' + logMessages.basic[i] + '</div>');
+    }
+    for (var j = 0; j <= agenticPos && j < logMessages.agentic.length; j++) {
+      lines.push('<div style="padding:4px 0;border-left:3px solid #9333ea;padding-left:10px;margin-bottom:4px;"><strong style="color:#9333ea;">Agentic:</strong> ' + logMessages.agentic[j] + '</div>');
+    }
+    if (lines.length > 0) log.innerHTML = lines.join('');
+  }
+
+  function render() {
+    renderFlow('rag-basic-flow', basicSteps, basicPos);
+    renderFlow('rag-agentic-flow', agenticSteps, agenticPos);
+    var iterEl = document.getElementById('rag-iteration');
+    if (agenticPos >= 0) {
+      iterEl.textContent = 'Agentic Iteration: ' + getIteration();
+    } else {
+      iterEl.textContent = '';
+    }
+    var loopEl = document.getElementById('rag-loop-indicator');
+    if (agenticPos >= 3 && agenticPos <= 4) {
+      loopEl.innerHTML = '&#x21bb; Results not sufficient — refining query and re-retrieving...';
+    } else if (agenticPos >= 6 && agenticPos <= 6) {
+      loopEl.innerHTML = '&#x2705; Results sufficient — proceeding to generate and verify.';
+    } else {
+      loopEl.innerHTML = '';
+    }
+    updateLog();
+  }
+
+  window.ragStepThrough = function() {
+    if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+    var maxBasic = basicSteps.length - 1;
+    var maxAgentic = agenticSteps.length - 1;
+
+    // Step basic faster since it has fewer steps
+    if (basicPos < maxBasic) basicPos++;
+    if (agenticPos < maxAgentic) agenticPos++;
+    // Let basic finish faster to show the contrast
+    if (basicPos < maxBasic && agenticPos >= 2) basicPos = maxBasic;
+    render();
+  };
+
+  window.ragAutoPlay = function() {
+    if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+    ragReset();
+    var totalSteps = agenticSteps.length;
+    var step = 0;
+    autoInterval = setInterval(function() {
+      // Basic finishes in first 4 steps
+      if (basicPos < basicSteps.length - 1) basicPos++;
+      if (agenticPos < agenticSteps.length - 1) agenticPos++;
+      step++;
+      render();
+      if (step >= totalSteps) clearInterval(autoInterval);
+    }, 800);
+  };
+
+  window.ragReset = function() {
+    if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+    basicPos = -1;
+    agenticPos = -1;
+    render();
+    document.getElementById('rag-log').innerHTML = '<div style="color: #999;">Click "Step Through" or "Auto-play" to begin the comparison.</div>';
+    document.getElementById('rag-iteration').textContent = '';
+    document.getElementById('rag-loop-indicator').innerHTML = '';
+  };
+
+  render();
+})();
+</script>
+
 Let us walk through each step in detail.
 
 ### Step 1: query planning
@@ -307,7 +476,7 @@ Google Cloud provides several building blocks for implementing agentic RAG:
 
 ### Vertex AI RAG engine
 
-The [Vertex AI RAG Engine](https://cloud.google.com/vertex-ai/generative-ai/docs/rag-overview) provides managed infrastructure for RAG pipelines. It handles document ingestion, chunking, embedding, and retrieval so you can focus on the agentic logic.
+The [Vertex AI RAG Engine](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview) provides managed infrastructure for RAG pipelines. It handles document ingestion, chunking, embedding, and retrieval so you can focus on the agentic logic.
 
 Key features:
 - Managed vector search with automatic indexing
@@ -317,7 +486,7 @@ Key features:
 
 ### Vertex AI Agent engine
 
-The [Vertex AI Agent Engine](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview) lets you build agents that use RAG as one of their tools. The agent can decide when to search, which data sources to query, and how to combine results.
+The [Vertex AI Agent Engine](https://docs.cloud.google.com/agent-builder/agent-engine/overview) lets you build agents that use RAG as one of their tools. The agent can decide when to search, which data sources to query, and how to combine results.
 
 ### Building the loop
 
@@ -453,5 +622,9 @@ Build an agentic RAG system for a technical documentation use case:
 
 ## Further reading
 
-- [Vertex AI RAG Engine Overview](https://cloud.google.com/vertex-ai/generative-ai/docs/rag-overview) - Managed RAG infrastructure on Google Cloud
-- [Vertex AI Agent Engine Overview](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview) - Building agents that use RAG as a tool on Vertex AI
+- [Vertex AI RAG Engine Overview](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview) - Managed RAG infrastructure on Google Cloud
+- [Vertex AI Agent Engine Overview](https://docs.cloud.google.com/agent-builder/agent-engine/overview) - Building agents that use RAG as a tool on Vertex AI
+
+---
+
+**Next lesson:** [Evaluating and Testing Agents](../09-evaluating-and-testing-agents/)

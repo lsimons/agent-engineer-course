@@ -116,6 +116,295 @@ An agent with access to tools can do real damage. It might send emails it should
 | Agent encounters sensitive data during retrieval | Agent does not include it in the response |
 | User asks agent to take an action outside its domain | Agent redirects to appropriate resource |
 
+<div id="eval-dashboard" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
+  <div style="background: linear-gradient(135deg, #4285f4, #5e97f6); padding: 20px 24px; color: white;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <div style="font-size: 1.25rem; font-weight: 700;">Agent Evaluation Dashboard</div>
+        <div style="font-size: 0.85rem; opacity: 0.9;">Interactive view of the four quality pillars</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div id="eval-overall" style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 8px 16px; text-align: center;">
+          <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Overall Score</div>
+          <div id="eval-overall-score" style="font-size: 1.5rem; font-weight: 800;">--</div>
+        </div>
+        <button id="eval-run-btn" onclick="runEvaluation()" style="background: white; color: #4285f4; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.2s;">Run Eval</button>
+      </div>
+    </div>
+  </div>
+  <div style="display: flex; border-bottom: 2px solid #e8eaed;">
+    <button class="eval-tab eval-tab-active" onclick="switchEvalTab('effectiveness')" id="eval-tab-effectiveness" style="flex: 1; padding: 12px 8px; border: none; background: white; cursor: pointer; font-size: 0.8rem; font-weight: 600; color: #4285f4; border-bottom: 3px solid #4285f4; transition: all 0.2s;">Effectiveness</button>
+    <button class="eval-tab" onclick="switchEvalTab('efficiency')" id="eval-tab-efficiency" style="flex: 1; padding: 12px 8px; border: none; background: #f8f9fa; cursor: pointer; font-size: 0.8rem; font-weight: 500; color: #5f6368; border-bottom: 3px solid transparent; transition: all 0.2s;">Efficiency</button>
+    <button class="eval-tab" onclick="switchEvalTab('robustness')" id="eval-tab-robustness" style="flex: 1; padding: 12px 8px; border: none; background: #f8f9fa; cursor: pointer; font-size: 0.8rem; font-weight: 500; color: #5f6368; border-bottom: 3px solid transparent; transition: all 0.2s;">Robustness</button>
+    <button class="eval-tab" onclick="switchEvalTab('safety')" id="eval-tab-safety" style="flex: 1; padding: 12px 8px; border: none; background: #f8f9fa; cursor: pointer; font-size: 0.8rem; font-weight: 500; color: #5f6368; border-bottom: 3px solid transparent; transition: all 0.2s;">Safety</button>
+  </div>
+  <div id="eval-panel-effectiveness" style="padding: 24px;">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+      <span style="font-size: 1.5rem;">🎯</span>
+      <div><div style="font-weight: 700; font-size: 1rem;">Effectiveness</div><div style="font-size: 0.8rem; color: #5f6368;">Does it achieve the goal?</div></div>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div style="background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="font-size: 0.75rem; color: #5f6368; margin-bottom: 8px;">Task Completion Rate</div>
+        <svg width="120" height="120" viewBox="0 0 120 120" style="display: block; margin: 0 auto;">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#e8eaed" stroke-width="10"/>
+          <circle id="eval-gauge-completion" cx="60" cy="60" r="50" fill="none" stroke="#34a853" stroke-width="10" stroke-dasharray="0 314" stroke-linecap="round" transform="rotate(-90 60 60)" style="transition: stroke-dasharray 1s ease;"/>
+          <text x="60" y="60" text-anchor="middle" dy="6" style="font-size: 20px; font-weight: 700; fill: #202124;" id="eval-text-completion">--%</text>
+        </svg>
+        <div style="font-size: 0.7rem; color: #5f6368; margin-top: 4px;">Target: &gt; 90%</div>
+      </div>
+      <div style="background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="font-size: 0.75rem; color: #5f6368; margin-bottom: 8px;">Answer Correctness</div>
+        <svg width="120" height="120" viewBox="0 0 120 120" style="display: block; margin: 0 auto;">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#e8eaed" stroke-width="10"/>
+          <circle id="eval-gauge-correctness" cx="60" cy="60" r="50" fill="none" stroke="#4285f4" stroke-width="10" stroke-dasharray="0 314" stroke-linecap="round" transform="rotate(-90 60 60)" style="transition: stroke-dasharray 1s ease;"/>
+          <text x="60" y="60" text-anchor="middle" dy="6" style="font-size: 20px; font-weight: 700; fill: #202124;" id="eval-text-correctness">--%</text>
+        </svg>
+        <div style="font-size: 0.7rem; color: #5f6368; margin-top: 4px;">Target: &gt; 85%</div>
+      </div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 16px; margin-top: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+      <div style="font-size: 0.75rem; color: #5f6368; margin-bottom: 8px;">User Satisfaction</div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="flex: 1; background: #e8eaed; border-radius: 8px; height: 24px; overflow: hidden;">
+          <div id="eval-bar-satisfaction" style="height: 100%; background: linear-gradient(90deg, #fbbc04, #34a853); border-radius: 8px; width: 0%; transition: width 1s ease;"></div>
+        </div>
+        <span id="eval-text-satisfaction" style="font-weight: 700; font-size: 0.9rem; min-width: 50px;">--/5.0</span>
+      </div>
+      <div style="font-size: 0.7rem; color: #5f6368; margin-top: 4px;">Target: &gt; 4.0/5.0</div>
+    </div>
+  </div>
+  <div id="eval-panel-efficiency" style="padding: 24px; display: none;">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+      <span style="font-size: 1.5rem;">⚡</span>
+      <div><div style="font-weight: 700; font-size: 1rem;">Efficiency</div><div style="font-size: 0.8rem; color: #5f6368;">At what cost?</div></div>
+    </div>
+    <div style="display: grid; gap: 12px;">
+      <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><span style="font-size: 0.75rem; color: #5f6368;">Avg Latency</span><span id="eval-text-latency" style="font-weight: 700; font-size: 0.9rem;">-- s</span></div>
+        <div style="background: #e8eaed; border-radius: 8px; height: 20px; overflow: hidden;"><div id="eval-bar-latency" style="height: 100%; background: #4285f4; border-radius: 8px; width: 0%; transition: width 1s ease;"></div></div>
+        <div style="font-size: 0.7rem; color: #5f6368; margin-top: 4px;">Target: &lt; 10s</div>
+      </div>
+      <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><span style="font-size: 0.75rem; color: #5f6368;">Tokens Per Task</span><span id="eval-text-tokens" style="font-weight: 700; font-size: 0.9rem;">--</span></div>
+        <div style="background: #e8eaed; border-radius: 8px; height: 20px; overflow: hidden;"><div id="eval-bar-tokens" style="height: 100%; background: #9333ea; border-radius: 8px; width: 0%; transition: width 1s ease;"></div></div>
+        <div style="font-size: 0.7rem; color: #5f6368; margin-top: 4px;">Target: &lt; 10,000</div>
+      </div>
+      <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><span style="font-size: 0.75rem; color: #5f6368;">Cost Per Task</span><span id="eval-text-cost" style="font-weight: 700; font-size: 0.9rem;">$--</span></div>
+        <div style="background: #e8eaed; border-radius: 8px; height: 20px; overflow: hidden;"><div id="eval-bar-cost" style="height: 100%; background: #34a853; border-radius: 8px; width: 0%; transition: width 1s ease;"></div></div>
+        <div style="font-size: 0.7rem; color: #5f6368; margin-top: 4px;">Target: &lt; $0.10</div>
+      </div>
+      <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><span style="font-size: 0.75rem; color: #5f6368;">LLM Calls Per Task</span><span id="eval-text-calls" style="font-weight: 700; font-size: 0.9rem;">--</span></div>
+        <div style="background: #e8eaed; border-radius: 8px; height: 20px; overflow: hidden;"><div id="eval-bar-calls" style="height: 100%; background: #fbbc04; border-radius: 8px; width: 0%; transition: width 1s ease;"></div></div>
+        <div style="font-size: 0.7rem; color: #5f6368; margin-top: 4px;">Target: &lt; 5</div>
+      </div>
+    </div>
+  </div>
+  <div id="eval-panel-robustness" style="padding: 24px; display: none;">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+      <span style="font-size: 1.5rem;">🛡️</span>
+      <div><div style="font-weight: 700; font-size: 1rem;">Robustness</div><div style="font-size: 0.8rem; color: #5f6368;">Does it handle edge cases?</div></div>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div style="background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="font-size: 0.75rem; color: #5f6368; margin-bottom: 12px;">Error Recovery Rate</div>
+        <svg width="120" height="120" viewBox="0 0 120 120" style="display: block; margin: 0 auto;">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#e8eaed" stroke-width="10"/>
+          <circle id="eval-gauge-recovery" cx="60" cy="60" r="50" fill="none" stroke="#fbbc04" stroke-width="10" stroke-dasharray="0 314" stroke-linecap="round" transform="rotate(-90 60 60)" style="transition: stroke-dasharray 1s ease;"/>
+          <text x="60" y="60" text-anchor="middle" dy="6" style="font-size: 20px; font-weight: 700; fill: #202124;" id="eval-text-recovery">--%</text>
+        </svg>
+      </div>
+      <div style="background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="font-size: 0.75rem; color: #5f6368; margin-bottom: 12px;">Edge Case Handling</div>
+        <svg width="120" height="120" viewBox="0 0 120 120" style="display: block; margin: 0 auto;">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#e8eaed" stroke-width="10"/>
+          <circle id="eval-gauge-edge" cx="60" cy="60" r="50" fill="none" stroke="#9333ea" stroke-width="10" stroke-dasharray="0 314" stroke-linecap="round" transform="rotate(-90 60 60)" style="transition: stroke-dasharray 1s ease;"/>
+          <text x="60" y="60" text-anchor="middle" dy="6" style="font-size: 20px; font-weight: 700; fill: #202124;" id="eval-text-edge">--%</text>
+        </svg>
+      </div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 16px; margin-top: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+      <div style="font-size: 0.75rem; color: #5f6368; margin-bottom: 10px;">Resilience Test Results</div>
+      <div id="eval-resilience-tests" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div class="eval-test-item" style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; padding: 8px; background: #f8f9fa; border-radius: 8px;"><span id="eval-icon-typo" style="opacity: 0.3;">✅</span> Misspelled query</div>
+        <div class="eval-test-item" style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; padding: 8px; background: #f8f9fa; border-radius: 8px;"><span id="eval-icon-ambig" style="opacity: 0.3;">✅</span> Ambiguous request</div>
+        <div class="eval-test-item" style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; padding: 8px; background: #f8f9fa; border-radius: 8px;"><span id="eval-icon-error" style="opacity: 0.3;">✅</span> Tool error recovery</div>
+        <div class="eval-test-item" style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; padding: 8px; background: #f8f9fa; border-radius: 8px;"><span id="eval-icon-contra" style="opacity: 0.3;">✅</span> Contradictory input</div>
+        <div class="eval-test-item" style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; padding: 8px; background: #f8f9fa; border-radius: 8px;"><span id="eval-icon-empty" style="opacity: 0.3;">✅</span> Empty input</div>
+        <div class="eval-test-item" style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; padding: 8px; background: #f8f9fa; border-radius: 8px;"><span id="eval-icon-long" style="opacity: 0.3;">✅</span> Very long input</div>
+      </div>
+    </div>
+  </div>
+  <div id="eval-panel-safety" style="padding: 24px; display: none;">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+      <span style="font-size: 1.5rem;">🔒</span>
+      <div><div style="font-weight: 700; font-size: 1rem;">Safety</div><div style="font-size: 0.8rem; color: #5f6368;">Does it stay within bounds?</div></div>
+    </div>
+    <div style="background: white; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px;">
+      <div style="font-size: 0.75rem; color: #5f6368; margin-bottom: 8px;">Safety Score</div>
+      <div style="position: relative; display: inline-block;">
+        <svg width="140" height="160" viewBox="0 0 140 160">
+          <path d="M70 10 L125 40 L125 90 C125 125 70 155 70 155 C70 155 15 125 15 90 L15 40 Z" fill="none" stroke="#e8eaed" stroke-width="4"/>
+          <path id="eval-shield-fill" d="M70 10 L125 40 L125 90 C125 125 70 155 70 155 C70 155 15 125 15 90 L15 40 Z" fill="#e8eaed" opacity="0.3" style="transition: fill 0.5s, opacity 0.5s;"/>
+          <text x="70" y="90" text-anchor="middle" dy="6" style="font-size: 28px; font-weight: 800; fill: #202124;" id="eval-text-safety-score">--</text>
+          <text x="70" y="110" text-anchor="middle" style="font-size: 11px; fill: #5f6368;">/100</text>
+        </svg>
+      </div>
+    </div>
+    <div style="display: grid; gap: 12px;">
+      <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><span style="font-size: 0.75rem; color: #5f6368;">Policy Compliance</span><span id="eval-text-policy" style="font-weight: 700; font-size: 0.9rem;">--%</span></div>
+        <div style="background: #e8eaed; border-radius: 8px; height: 16px; overflow: hidden;"><div id="eval-bar-policy" style="height: 100%; background: #34a853; border-radius: 8px; width: 0%; transition: width 1s ease;"></div></div>
+      </div>
+      <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><span style="font-size: 0.75rem; color: #5f6368;">Guardrail Violations</span><span id="eval-text-violations" style="font-weight: 700; font-size: 0.9rem;">--</span></div>
+        <div style="background: #e8eaed; border-radius: 8px; height: 16px; overflow: hidden;"><div id="eval-bar-violations" style="height: 100%; background: #ea4335; border-radius: 8px; width: 0%; transition: width 1s ease;"></div></div>
+      </div>
+      <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><span style="font-size: 0.75rem; color: #5f6368;">Harmful Output Rate</span><span id="eval-text-harmful" style="font-weight: 700; font-size: 0.9rem;">--%</span></div>
+        <div style="background: #e8eaed; border-radius: 8px; height: 16px; overflow: hidden;"><div id="eval-bar-harmful" style="height: 100%; background: #fbbc04; border-radius: 8px; width: 0%; transition: width 1s ease;"></div></div>
+      </div>
+    </div>
+  </div>
+  <div id="eval-status" style="padding: 12px 24px; background: #e8eaed; text-align: center; font-size: 0.8rem; color: #5f6368;">Click "Run Eval" to simulate an evaluation run</div>
+</div>
+
+<script>
+(function() {
+  var evalData = null;
+
+  window.switchEvalTab = function(tab) {
+    var tabs = ['effectiveness', 'efficiency', 'robustness', 'safety'];
+    tabs.forEach(function(t) {
+      var panel = document.getElementById('eval-panel-' + t);
+      var tabBtn = document.getElementById('eval-tab-' + t);
+      if (t === tab) {
+        panel.style.display = 'block';
+        tabBtn.style.background = 'white';
+        tabBtn.style.color = '#4285f4';
+        tabBtn.style.fontWeight = '600';
+        tabBtn.style.borderBottom = '3px solid #4285f4';
+      } else {
+        panel.style.display = 'none';
+        tabBtn.style.background = '#f8f9fa';
+        tabBtn.style.color = '#5f6368';
+        tabBtn.style.fontWeight = '500';
+        tabBtn.style.borderBottom = '3px solid transparent';
+      }
+    });
+  };
+
+  function rnd(min, max) { return Math.round((Math.random() * (max - min) + min) * 10) / 10; }
+  function getColor(val, good, warn) { return val >= good ? '#34a853' : val >= warn ? '#fbbc04' : '#ea4335'; }
+
+  function animateGauge(id, textId, val, maxVal) {
+    var circumference = 314;
+    var el = document.getElementById(id);
+    var txt = document.getElementById(textId);
+    var pct = val / maxVal;
+    el.style.stroke = getColor(val, maxVal * 0.85, maxVal * 0.7);
+    el.setAttribute('stroke-dasharray', (pct * circumference) + ' ' + circumference);
+    txt.textContent = Math.round(val) + '%';
+  }
+
+  window.runEvaluation = function() {
+    var btn = document.getElementById('eval-run-btn');
+    btn.textContent = 'Running...';
+    btn.style.opacity = '0.6';
+    btn.disabled = true;
+    document.getElementById('eval-status').textContent = 'Running evaluation suite... simulating 500 test cases';
+    document.getElementById('eval-status').style.background = '#e3f2fd';
+    document.getElementById('eval-status').style.color = '#1565c0';
+
+    setTimeout(function() {
+      var completion = rnd(82, 98);
+      var correctness = rnd(78, 96);
+      var satisfaction = rnd(3.2, 4.8);
+      var latency = rnd(1.5, 12);
+      var tokens = Math.round(rnd(3000, 14000));
+      var cost = rnd(0.02, 0.15);
+      var calls = rnd(2, 7);
+      var recovery = rnd(65, 95);
+      var edge = rnd(60, 92);
+      var policy = rnd(90, 100);
+      var violations = Math.round(rnd(0, 8));
+      var harmful = rnd(0, 3);
+      var safetyScore = Math.round((policy + (100 - violations * 5) + (100 - harmful * 10)) / 3);
+      safetyScore = Math.max(0, Math.min(100, safetyScore));
+
+      animateGauge('eval-gauge-completion', 'eval-text-completion', completion, 100);
+      animateGauge('eval-gauge-correctness', 'eval-text-correctness', correctness, 100);
+      var satPct = (satisfaction / 5) * 100;
+      document.getElementById('eval-bar-satisfaction').style.width = satPct + '%';
+      document.getElementById('eval-text-satisfaction').textContent = satisfaction.toFixed(1) + '/5.0';
+      document.getElementById('eval-bar-satisfaction').style.background = 'linear-gradient(90deg, ' + getColor(satisfaction, 4, 3.5) + ', ' + getColor(satisfaction, 4, 3.5) + ')';
+
+      var latPct = Math.min(100, (latency / 15) * 100);
+      document.getElementById('eval-bar-latency').style.width = latPct + '%';
+      document.getElementById('eval-bar-latency').style.background = getColor(15 - latency, 5, 3);
+      document.getElementById('eval-text-latency').textContent = latency.toFixed(1) + 's';
+
+      var tokPct = Math.min(100, (tokens / 15000) * 100);
+      document.getElementById('eval-bar-tokens').style.width = tokPct + '%';
+      document.getElementById('eval-bar-tokens').style.background = getColor(15000 - tokens, 5000, 3000);
+      document.getElementById('eval-text-tokens').textContent = tokens.toLocaleString();
+
+      var costPct = Math.min(100, (cost / 0.2) * 100);
+      document.getElementById('eval-bar-cost').style.width = costPct + '%';
+      document.getElementById('eval-bar-cost').style.background = getColor(0.2 - cost, 0.1, 0.05);
+      document.getElementById('eval-text-cost').textContent = '$' + cost.toFixed(2);
+
+      var callsPct = Math.min(100, (calls / 10) * 100);
+      document.getElementById('eval-bar-calls').style.width = callsPct + '%';
+      document.getElementById('eval-bar-calls').style.background = getColor(10 - calls, 5, 3);
+      document.getElementById('eval-text-calls').textContent = calls.toFixed(1);
+
+      animateGauge('eval-gauge-recovery', 'eval-text-recovery', recovery, 100);
+      animateGauge('eval-gauge-edge', 'eval-text-edge', edge, 100);
+
+      var tests = ['typo', 'ambig', 'error', 'contra', 'empty', 'long'];
+      tests.forEach(function(t, i) {
+        setTimeout(function() {
+          var pass = Math.random() > 0.15;
+          var el = document.getElementById('eval-icon-' + t);
+          el.textContent = pass ? '✅' : '❌';
+          el.style.opacity = '1';
+        }, i * 150);
+      });
+
+      document.getElementById('eval-bar-policy').style.width = policy + '%';
+      document.getElementById('eval-bar-policy').style.background = getColor(policy, 95, 85);
+      document.getElementById('eval-text-policy').textContent = policy.toFixed(1) + '%';
+
+      var violPct = Math.min(100, (violations / 20) * 100);
+      document.getElementById('eval-bar-violations').style.width = violPct + '%';
+      document.getElementById('eval-text-violations').textContent = violations + ' found';
+
+      var harmPct = Math.min(100, (harmful / 5) * 100);
+      document.getElementById('eval-bar-harmful').style.width = harmPct + '%';
+      document.getElementById('eval-text-harmful').textContent = harmful.toFixed(1) + '%';
+
+      var shield = document.getElementById('eval-shield-fill');
+      shield.style.fill = getColor(safetyScore, 85, 70);
+      shield.style.opacity = '0.2';
+      document.getElementById('eval-text-safety-score').textContent = safetyScore;
+
+      var overall = Math.round((completion + correctness + recovery + safetyScore) / 4);
+      document.getElementById('eval-overall-score').textContent = overall + '/100';
+
+      btn.textContent = 'Run Eval';
+      btn.style.opacity = '1';
+      btn.disabled = false;
+      document.getElementById('eval-status').textContent = 'Evaluation complete — 500 test cases processed. Click "Run Eval" to re-run.';
+      document.getElementById('eval-status').style.background = '#e6f4ea';
+      document.getElementById('eval-status').style.color = '#137333';
+    }, 1200);
+  };
+})();
+</script>
+
 ## System metrics vs. quality metrics
 
 Agent evaluation requires two categories of metrics that serve different purposes:
@@ -550,11 +839,11 @@ Google Cloud provides tools for evaluating agents at scale:
 
 ### Vertex AI Evaluation
 
-[Vertex AI's evaluation capabilities](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/evaluate) let you run structured evaluations on agent outputs. You can define evaluation criteria, run evaluations at scale, and track results over time.
+[Vertex AI's evaluation capabilities](https://docs.cloud.google.com/agent-builder/agent-engine/evaluate) let you run structured evaluations on agent outputs. You can define evaluation criteria, run evaluations at scale, and track results over time.
 
 ### Google ADK Evaluation
 
-The [Google Agent Development Kit evaluation framework](https://google.github.io/adk-docs/evaluate/) provides built-in support for testing agents during development. It integrates with the ADK's agent definition format and supports both automated checks and LLM-as-a-Judge evaluation.
+The [Google Agent Development Kit evaluation framework](https://adk.dev/evaluate/) provides built-in support for testing agents during development. It integrates with the ADK's agent definition format and supports both automated checks and LLM-as-a-Judge evaluation.
 
 ## Common evaluation mistakes
 
@@ -617,5 +906,9 @@ Build an evaluation suite for an agent of your choice:
 
 ## Further reading
 
-- [Vertex AI Agent Evaluation](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/evaluate) - Evaluating agents on Google Cloud's Vertex AI platform
-- [Google ADK Evaluation](https://google.github.io/adk-docs/evaluate/) - Built-in evaluation support in the Agent Development Kit
+- [Vertex AI Agent Evaluation](https://docs.cloud.google.com/agent-builder/agent-engine/evaluate) - Evaluating agents on Google Cloud's Vertex AI platform
+- [Google ADK Evaluation](https://adk.dev/evaluate/) - Built-in evaluation support in the Agent Development Kit
+
+---
+
+**Next lesson:** [Guardrails and Safety - Keeping Agents Trustworthy](../10-guardrails-and-safety/)

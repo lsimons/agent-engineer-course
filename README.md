@@ -76,10 +76,10 @@ This course follows a few principles:
 ## Additional resources
 
 - [Google Cloud AI documentation](https://cloud.google.com/ai)
-- [Vertex AI documentation](https://cloud.google.com/vertex-ai/docs)
-- [Agent Development Kit (ADK) documentation](https://google.github.io/adk-docs/)
+- [Vertex AI documentation](https://docs.cloud.google.com/vertex-ai/docs)
+- [Agent Development Kit (ADK) documentation](https://adk.dev/)
 - [Google Cloud AI codelabs](https://codelabs.developers.google.com/?cat=AI)
-- [Gemini API documentation](https://ai.google.dev/docs)
+- [Gemini API documentation](https://ai.google.dev/gemini-api/docs)
 
 ## Contributing
 

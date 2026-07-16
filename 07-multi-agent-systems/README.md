@@ -127,7 +127,7 @@ In a hierarchical architecture, a supervisor agent (the "manager") receives the 
 - Manager needs to be smart enough to decompose tasks well
 - More complex to implement than sequential
 
-In the [Google Agent Development Kit (ADK)](https://google.github.io/adk-docs/agents/), hierarchical patterns are well supported. You can define a parent agent that delegates to sub-agents, each with their own tools and instructions.
+In the [Google Agent Development Kit (ADK)](https://adk.dev/agents/), hierarchical patterns are well supported. You can define a parent agent that delegates to sub-agents, each with their own tools and instructions.
 
 ### 3. collaborative (peer network)
 
@@ -199,6 +199,193 @@ In a competitive architecture, multiple agents independently tackle the same pro
 | Hierarchical | Tree (manager + workers) | Dynamic task decomposition | Medium |
 | Collaborative | Mesh (peer-to-peer) | Complex problems needing diverse input | High |
 | Competitive | Parallel with judge | High-stakes decisions | Medium |
+
+<div id="multi-agent-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+  <h3 style="margin: 0 0 4px 0; font-size: 1.3rem; color: #1a1a2e;">Multi-Agent Architecture Visualizer</h3>
+  <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: #666;">Click an architecture to see animated message passing between agents.</p>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;" id="ma-tabs">
+    <button onclick="setMATab('sequential')" id="ma-btn-sequential" class="ma-tab-btn" style="padding: 10px 12px; border-radius: 10px; border: 2px solid #4285f4; background: #4285f4; color: #fff; font-size: 0.82rem; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s;">
+      <div>Sequential (Pipeline)</div><div style="font-weight: 400; font-size: 0.75rem; opacity: 0.85; margin-top: 2px;">A &rarr; B &rarr; C linear chain</div>
+    </button>
+    <button onclick="setMATab('hierarchical')" id="ma-btn-hierarchical" class="ma-tab-btn" style="padding: 10px 12px; border-radius: 10px; border: 2px solid #34a853; background: #fff; color: #34a853; font-size: 0.82rem; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s;">
+      <div>Hierarchical</div><div style="font-weight: 400; font-size: 0.75rem; opacity: 0.7; margin-top: 2px;">Coordinator delegates to workers</div>
+    </button>
+    <button onclick="setMATab('collaborative')" id="ma-btn-collaborative" class="ma-tab-btn" style="padding: 10px 12px; border-radius: 10px; border: 2px solid #fbbc04; background: #fff; color: #997000; font-size: 0.82rem; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s;">
+      <div>Collaborative</div><div style="font-weight: 400; font-size: 0.75rem; opacity: 0.7; margin-top: 2px;">Peer-to-peer with shared blackboard</div>
+    </button>
+    <button onclick="setMATab('competitive')" id="ma-btn-competitive" class="ma-tab-btn" style="padding: 10px 12px; border-radius: 10px; border: 2px solid #ea4335; background: #fff; color: #ea4335; font-size: 0.82rem; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s;">
+      <div>Competitive</div><div style="font-weight: 400; font-size: 0.75rem; opacity: 0.7; margin-top: 2px;">Multiple solutions, best one wins</div>
+    </button>
+  </div>
+
+  <div style="background: #fff; border-radius: 12px; padding: 16px; border: 2px solid #e0e0e0;">
+    <canvas id="ma-canvas" width="760" height="320" style="width: 100%; border-radius: 8px; display: block;"></canvas>
+    <div id="ma-metrics" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 16px;"></div>
+    <div id="ma-description" style="margin-top: 12px; font-size: 0.82rem; color: #555; padding: 10px; background: #f8f9fa; border-radius: 8px;"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var architectures = {
+    sequential: {
+      color: '#4285f4',
+      nodes: [
+        { x: 100, y: 160, label: 'Research', color: '#4285f4' },
+        { x: 300, y: 160, label: 'Draft', color: '#4285f4' },
+        { x: 500, y: 160, label: 'Review', color: '#4285f4' },
+        { x: 680, y: 160, label: 'Output', color: '#34a853' }
+      ],
+      edges: [[0,1],[1,2],[2,3]],
+      metrics: { latency: 'High (serial)', cost: 'Low', complexity: 'Low' },
+      desc: 'Each agent completes its work before passing to the next. Simple and predictable, but only as fast as the slowest agent.'
+    },
+    hierarchical: {
+      color: '#34a853',
+      nodes: [
+        { x: 380, y: 55, label: 'Coordinator', color: '#34a853' },
+        { x: 140, y: 200, label: 'Search', color: '#4285f4' },
+        { x: 380, y: 200, label: 'Analyze', color: '#fbbc04' },
+        { x: 620, y: 200, label: 'Draft', color: '#9333ea' },
+        { x: 380, y: 290, label: 'Result', color: '#34a853' }
+      ],
+      edges: [[0,1],[0,2],[0,3],[1,4],[2,4],[3,4]],
+      metrics: { latency: 'Medium (parallel workers)', cost: 'Medium', complexity: 'Medium' },
+      desc: 'A coordinator breaks down the task and delegates to specialists. Workers can run in parallel. Central quality control.'
+    },
+    collaborative: {
+      color: '#fbbc04',
+      nodes: [
+        { x: 200, y: 80, label: 'Security', color: '#ea4335' },
+        { x: 560, y: 80, label: 'Perf', color: '#4285f4' },
+        { x: 200, y: 260, label: 'Style', color: '#9333ea' },
+        { x: 560, y: 260, label: 'Logic', color: '#34a853' },
+        { x: 380, y: 170, label: 'Blackboard', color: '#fbbc04' }
+      ],
+      edges: [[0,4],[1,4],[2,4],[3,4],[0,1],[1,3],[3,2],[2,0]],
+      metrics: { latency: 'Variable', cost: 'Medium-High', complexity: 'High' },
+      desc: 'Agents communicate as peers through a shared blackboard. Good for problems needing diverse perspectives. Harder to predict.'
+    },
+    competitive: {
+      color: '#ea4335',
+      nodes: [
+        { x: 120, y: 100, label: 'Agent A', color: '#4285f4' },
+        { x: 120, y: 200, label: 'Agent B', color: '#34a853' },
+        { x: 120, y: 290, label: 'Agent C', color: '#9333ea' },
+        { x: 450, y: 195, label: 'Judge', color: '#ea4335' },
+        { x: 670, y: 195, label: 'Best', color: '#34a853' }
+      ],
+      edges: [[0,3],[1,3],[2,3],[3,4]],
+      metrics: { latency: 'Low (parallel)', cost: 'High (Nx)', complexity: 'Medium' },
+      desc: 'Multiple agents independently solve the same problem. A judge evaluates all solutions and selects the best. High quality but expensive.'
+    }
+  };
+
+  var currentArch = 'sequential';
+  var animFrame = null;
+  var particles = [];
+
+  window.setMATab = function(tab) {
+    currentArch = tab;
+    var btnColors = { sequential: '#4285f4', hierarchical: '#34a853', collaborative: '#fbbc04', competitive: '#ea4335' };
+    var textColors = { sequential: '#4285f4', hierarchical: '#34a853', collaborative: '#997000', competitive: '#ea4335' };
+    ['sequential','hierarchical','collaborative','competitive'].forEach(function(t) {
+      var btn = document.getElementById('ma-btn-' + t);
+      btn.style.background = t === tab ? btnColors[t] : '#fff';
+      btn.style.color = t === tab ? '#fff' : textColors[t];
+    });
+    particles = [];
+    renderMA();
+    startAnimation();
+  };
+
+  function renderMA() {
+    var arch = architectures[currentArch];
+    document.getElementById('ma-metrics').innerHTML =
+      '<div style="text-align:center;padding:8px;background:#f0f7ff;border-radius:8px;"><div style="font-size:0.72rem;color:#666;font-weight:600;">Latency</div><div style="font-size:0.85rem;font-weight:700;color:#4285f4;margin-top:2px;">' + arch.metrics.latency + '</div></div>' +
+      '<div style="text-align:center;padding:8px;background:#fff8f0;border-radius:8px;"><div style="font-size:0.72rem;color:#666;font-weight:600;">Cost</div><div style="font-size:0.85rem;font-weight:700;color:#fbbc04;margin-top:2px;">' + arch.metrics.cost + '</div></div>' +
+      '<div style="text-align:center;padding:8px;background:#f8f0ff;border-radius:8px;"><div style="font-size:0.72rem;color:#666;font-weight:600;">Complexity</div><div style="font-size:0.85rem;font-weight:700;color:#9333ea;margin-top:2px;">' + arch.metrics.complexity + '</div></div>';
+    document.getElementById('ma-description').textContent = arch.desc;
+  }
+
+  function startAnimation() {
+    if (animFrame) cancelAnimationFrame(animFrame);
+    var canvas = document.getElementById('ma-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var arch = architectures[currentArch];
+    var tick = 0;
+
+    function spawnParticle() {
+      var edgeIdx = Math.floor(Math.random() * arch.edges.length);
+      var e = arch.edges[edgeIdx];
+      particles.push({ from: e[0], to: e[1], t: 0, speed: 0.008 + Math.random() * 0.008 });
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      tick++;
+      if (tick % 30 === 0 && particles.length < 12) spawnParticle();
+
+      // Draw edges
+      arch.edges.forEach(function(e) {
+        var f = arch.nodes[e[0]], t = arch.nodes[e[1]];
+        ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(t.x, t.y);
+        ctx.strokeStyle = '#ddd'; ctx.lineWidth = 2; ctx.stroke();
+        // Arrow head
+        var angle = Math.atan2(t.y - f.y, t.x - f.x);
+        var headLen = 10;
+        var ax = t.x - 30 * Math.cos(angle), ay = t.y - 30 * Math.sin(angle);
+        ctx.beginPath();
+        ctx.moveTo(ax, ay);
+        ctx.lineTo(ax - headLen * Math.cos(angle - 0.4), ay - headLen * Math.sin(angle - 0.4));
+        ctx.moveTo(ax, ay);
+        ctx.lineTo(ax - headLen * Math.cos(angle + 0.4), ay - headLen * Math.sin(angle + 0.4));
+        ctx.strokeStyle = '#bbb'; ctx.lineWidth = 2; ctx.stroke();
+      });
+
+      // Draw particles
+      particles.forEach(function(p) {
+        p.t += p.speed;
+        if (p.t > 1) p.t = 0;
+        var f = arch.nodes[p.from], t = arch.nodes[p.to];
+        var px = f.x + (t.x - f.x) * p.t;
+        var py = f.y + (t.y - f.y) * p.t;
+        ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2);
+        ctx.fillStyle = arch.color; ctx.globalAlpha = 0.8; ctx.fill(); ctx.globalAlpha = 1;
+        ctx.beginPath(); ctx.arc(px, py, 8, 0, Math.PI * 2);
+        ctx.fillStyle = arch.color; ctx.globalAlpha = 0.2; ctx.fill(); ctx.globalAlpha = 1;
+      });
+
+      // Draw nodes
+      arch.nodes.forEach(function(n) {
+        ctx.beginPath(); ctx.arc(n.x, n.y, 26, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff'; ctx.fill();
+        ctx.strokeStyle = n.color; ctx.lineWidth = 3; ctx.stroke();
+        ctx.beginPath(); ctx.arc(n.x, n.y, 22, 0, Math.PI * 2);
+        ctx.fillStyle = n.color; ctx.globalAlpha = 0.1; ctx.fill(); ctx.globalAlpha = 1;
+        ctx.fillStyle = n.color; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(n.label, n.x, n.y);
+      });
+
+      animFrame = requestAnimationFrame(animate);
+    }
+    animate();
+  }
+
+  renderMA();
+  // Start animation when visible
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) startAnimation();
+      else if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+    });
+  }, { threshold: 0.1 });
+  var vizEl = document.getElementById('multi-agent-viz');
+  if (vizEl) observer.observe(vizEl);
+})();
+</script>
 
 ## Communication patterns
 
@@ -379,9 +566,9 @@ The Resolution Agent compiles the results and generates a customer-facing respon
 
 ### Building this with Google ADK
 
-The [Google Agent Development Kit (ADK)](https://google.github.io/adk-docs/agents/) provides built-in support for multi-agent patterns. You can define agents as classes with their own instructions, tools, and sub-agents. The ADK handles message passing between agents and provides tracing for debugging.
+The [Google Agent Development Kit (ADK)](https://adk.dev/agents/) provides built-in support for multi-agent patterns. You can define agents as classes with their own instructions, tools, and sub-agents. The ADK handles message passing between agents and provides tracing for debugging.
 
-For workflow agents that follow predictable patterns (like our sequential compliance check), ADK offers [workflow agents](https://google.github.io/adk-docs/agents/workflow-agents/) with built-in sequential, parallel, and loop constructs.
+For workflow agents that follow predictable patterns (like our sequential compliance check), ADK offers [workflow agents](https://adk.dev/agents/workflow-agents/) with built-in sequential, parallel, and loop constructs.
 
 ## Coordination challenges
 
@@ -502,5 +689,9 @@ A system that reviews user-generated content for policy violations, spam, misinf
 
 ## Further reading
 
-- [Google ADK - Agents Overview](https://google.github.io/adk-docs/agents/) - How to build agents and multi-agent systems with the Agent Development Kit
-- [Google ADK - Workflow Agents](https://google.github.io/adk-docs/agents/workflow-agents/) - Built-in sequential, parallel, and loop patterns for multi-agent workflows
+- [Google ADK - Agents Overview](https://adk.dev/agents/) - How to build agents and multi-agent systems with the Agent Development Kit
+- [Google ADK - Workflow Agents](https://adk.dev/agents/workflow-agents/) - Built-in sequential, parallel, and loop patterns for multi-agent workflows
+
+---
+
+**Next lesson:** [Agentic RAG](../08-agentic-rag/)

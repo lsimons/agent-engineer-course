@@ -1,8 +1,8 @@
-# Lesson 17: MCP deep dive - connecting agents to the world
+# Lesson 16: MCP deep dive - connecting agents to the world
 
 ## Introduction
 
-In [Lesson 14](../14-agent-protocols-mcp-and-a2a/README.md), we introduced MCP (Model Context Protocol) and A2A at a high level. This lesson goes deeper on MCP specifically - how it actually works under the hood, when it adds real value, when simpler approaches are better, and how to think about security.
+In [Lesson 14](../14-agent-protocols-mcp-and-a2a/), we introduced MCP (Model Context Protocol) and A2A at a high level. This lesson goes deeper on MCP specifically - how it actually works under the hood, when it adds real value, when simpler approaches are better, and how to think about security.
 
 We also tackle one of the most debated questions in the AI engineering community: when should you use MCP servers vs. just letting your agent use CLI tools directly?
 
@@ -11,6 +11,240 @@ We also tackle one of the most debated questions in the AI engineering community
 Your laptop can plug directly into a wall outlet. That works fine at home. But in an office with 50 devices, you want a power strip with surge protection, individual switches, and a circuit breaker. MCP is that power strip - it adds a layer of management between the agent and the tools it uses. Whether you need that layer depends on how many tools you have, who is using them, and how much control you need.
 
 > **Key takeaway:** MCP is a powerful protocol for connecting agents to external tools and data, but it has real trade-offs in cost and complexity. Understanding when MCP adds value versus when simpler approaches work better is a critical skill for agent builders.
+
+<div id="mcp-deep-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 920px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+  <div style="text-align: center; margin-bottom: 16px;">
+    <h3 style="margin: 0 0 4px 0; color: #1a1a2e; font-size: 1.3rem;">MCP Architecture Deep Dive</h3>
+    <p style="margin: 0; color: #666; font-size: 0.9rem;">Watch a request flow through the MCP stack. Toggle transport type and explore cost tradeoffs.</p>
+  </div>
+
+  <!-- Transport Toggle -->
+  <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 16px;">
+    <button id="mcp-transport-stdio" class="mcp-transport-btn" style="padding: 8px 18px; border-radius: 8px; border: 2px solid #4285f4; background: #4285f4; color: white; cursor: pointer; font-weight: 600; font-size: 0.82rem; transition: all 0.2s;">stdio (Local)</button>
+    <button id="mcp-transport-http" class="mcp-transport-btn" style="padding: 8px 18px; border-radius: 8px; border: 2px solid #e0e0e0; background: white; color: #666; cursor: pointer; font-weight: 600; font-size: 0.82rem; transition: all 0.2s;">Streamable HTTP (Remote)</button>
+  </div>
+
+  <!-- Architecture Diagram -->
+  <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px;">
+    <svg id="mcp-arch-svg" viewBox="0 0 820 200" style="width: 100%; height: auto;"></svg>
+    <div style="text-align: center; margin-top: 8px;">
+      <button id="mcp-send-btn" style="padding: 10px 28px; background: #4285f4; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.9rem; transition: all 0.2s;">▶ Send Request</button>
+    </div>
+  </div>
+
+  <!-- JSON-RPC Messages -->
+  <div id="mcp-messages" style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px; display: none;">
+    <div style="font-weight: 600; color: #1a1a2e; margin-bottom: 10px; font-size: 0.95rem;">JSON-RPC Messages</div>
+    <div id="mcp-msg-content" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+  </div>
+
+  <!-- Cost Comparison -->
+  <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+    <div style="font-weight: 600; color: #1a1a2e; margin-bottom: 12px; font-size: 0.95rem;">Cost Comparison: CLI vs MCP</div>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 16px;">
+      <div style="flex: 1; min-width: 200px;">
+        <label style="font-size: 0.8rem; color: #666; display: block; margin-bottom: 4px;">Number of tools: <strong id="mcp-tool-count-val">10</strong></label>
+        <input id="mcp-tool-count" type="range" min="1" max="50" value="10" style="width: 100%; accent-color: #4285f4;">
+      </div>
+      <div style="flex: 1; min-width: 200px;">
+        <label style="font-size: 0.8rem; color: #666; display: block; margin-bottom: 4px;">Calls per session: <strong id="mcp-calls-val">5</strong></label>
+        <input id="mcp-calls" type="range" min="1" max="50" value="5" style="width: 100%; accent-color: #4285f4;">
+      </div>
+    </div>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <div id="mcp-cli-cost-box" style="flex: 1; min-width: 180px; padding: 14px; border-radius: 10px; border: 2px solid #34a853; background: #34a85308;">
+        <div style="font-size: 0.78rem; color: #666; margin-bottom: 4px;">CLI Approach</div>
+        <div id="mcp-cli-tokens" style="font-size: 1.5rem; font-weight: 700; color: #34a853;"></div>
+        <div style="font-size: 0.72rem; color: #888; margin-top: 2px;">tokens per session</div>
+        <div id="mcp-cli-detail" style="font-size: 0.72rem; color: #888; margin-top: 6px;"></div>
+      </div>
+      <div id="mcp-mcp-cost-box" style="flex: 1; min-width: 180px; padding: 14px; border-radius: 10px; border: 2px solid #4285f4; background: #4285f408;">
+        <div style="font-size: 0.78rem; color: #666; margin-bottom: 4px;">MCP Approach</div>
+        <div id="mcp-mcp-tokens" style="font-size: 1.5rem; font-weight: 700; color: #4285f4;"></div>
+        <div style="font-size: 0.72rem; color: #888; margin-top: 2px;">tokens per session</div>
+        <div id="mcp-mcp-detail" style="font-size: 0.72rem; color: #888; margin-top: 6px;"></div>
+      </div>
+      <div style="flex: 1; min-width: 180px; padding: 14px; border-radius: 10px; border: 2px solid #9333ea; background: #9333ea08;">
+        <div style="font-size: 0.78rem; color: #666; margin-bottom: 4px;">Verdict</div>
+        <div id="mcp-verdict" style="font-size: 1rem; font-weight: 700; color: #9333ea;"></div>
+        <div id="mcp-verdict-detail" style="font-size: 0.72rem; color: #888; margin-top: 6px;"></div>
+      </div>
+    </div>
+    <!-- Visual bar comparison -->
+    <div style="margin-top: 16px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <span style="font-size: 0.72rem; width: 40px; color: #34a853; font-weight: 600;">CLI</span>
+        <div style="flex: 1; background: #e0e0e0; border-radius: 6px; height: 18px; overflow: hidden;">
+          <div id="mcp-cli-bar" style="height: 100%; background: #34a853; border-radius: 6px; transition: width 0.5s; min-width: 2px;"></div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 0.72rem; width: 40px; color: #4285f4; font-weight: 600;">MCP</span>
+        <div style="flex: 1; background: #e0e0e0; border-radius: 6px; height: 18px; overflow: hidden;">
+          <div id="mcp-mcp-bar" style="height: 100%; background: #4285f4; border-radius: 6px; transition: width 0.5s; min-width: 2px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  let transport = 'stdio';
+
+  const layers = [
+    { id: 'host', label: 'Host App', sub: 'Claude / VS Code', icon: '🖥️', color: '#4285f4', x: 10 },
+    { id: 'client', label: 'MCP Client', sub: 'Protocol handler', icon: '🔌', color: '#9333ea', x: 175 },
+    { id: 'transport', label: 'stdio', sub: 'stdin/stdout', icon: '📡', color: '#fbbc04', x: 340 },
+    { id: 'server', label: 'MCP Server', sub: 'Tool provider', icon: '⚙️', color: '#34a853', x: 505 },
+    { id: 'external', label: 'External API', sub: 'DB / Service', icon: '🗄️', color: '#ea4335', x: 670 }
+  ];
+
+  function drawArch() {
+    const svg = document.getElementById('mcp-arch-svg');
+    layers[2].label = transport === 'stdio' ? 'stdio' : 'HTTP/SSE';
+    layers[2].sub = transport === 'stdio' ? 'stdin/stdout' : 'Streamable HTTP';
+    let h = `<defs><marker id="mdm-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#ccc"/></marker></defs>`;
+    layers.forEach((l, i) => {
+      h += `<rect x="${l.x}" y="40" width="140" height="70" rx="12" fill="${l.color}11" stroke="${l.color}" stroke-width="2"/>`;
+      h += `<text x="${l.x+70}" y="65" text-anchor="middle" font-size="16">${l.icon}</text>`;
+      h += `<text x="${l.x+70}" y="82" text-anchor="middle" font-size="11" font-weight="600" fill="${l.color}">${l.label}</text>`;
+      h += `<text x="${l.x+70}" y="98" text-anchor="middle" font-size="9" fill="#888">${l.sub}</text>`;
+      if (i < layers.length - 1) {
+        h += `<line x1="${l.x+140}" y1="75" x2="${layers[i+1].x}" y2="75" stroke="#ccc" stroke-width="2" marker-end="url(#mdm-arrow)"/>`;
+      }
+    });
+    // Animated packet
+    h += `<circle id="mcp-deep-pkt" cx="${layers[0].x+70}" cy="75" r="7" fill="#4285f4" opacity="0"><animate id="mcp-pkt-anim" attributeName="opacity" values="0" dur="0.1s" fill="freeze"/></circle>`;
+    // Stage labels
+    h += `<text x="${layers[0].x+70}" y="140" text-anchor="middle" font-size="8" fill="#aaa">1. User request</text>`;
+    h += `<text x="${layers[1].x+70}" y="140" text-anchor="middle" font-size="8" fill="#aaa">2. Route to server</text>`;
+    h += `<text x="${layers[2].x+70}" y="140" text-anchor="middle" font-size="8" fill="#aaa">3. ${transport === 'stdio' ? 'stdin/stdout' : 'HTTP POST'}</text>`;
+    h += `<text x="${layers[3].x+70}" y="140" text-anchor="middle" font-size="8" fill="#aaa">4. Execute tool</text>`;
+    h += `<text x="${layers[4].x+70}" y="140" text-anchor="middle" font-size="8" fill="#aaa">5. Return data</text>`;
+    svg.innerHTML = h;
+  }
+
+  function animateRequest() {
+    const pkt = document.getElementById('mcp-deep-pkt');
+    const msgPanel = document.getElementById('mcp-messages');
+    const msgContent = document.getElementById('mcp-msg-content');
+    pkt.setAttribute('opacity', '1');
+    msgPanel.style.display = 'block';
+    msgContent.innerHTML = '';
+
+    const positions = layers.map(l => l.x + 70);
+    const returnPositions = [...positions].reverse();
+    const allPositions = [...positions, ...returnPositions];
+    const messages = [
+      { stage: 'Host → Client', json: '{"method": "tools/call",\n "params": {"name": "query_db",\n  "arguments": {"sql": "SELECT..."}}}', color: '#4285f4' },
+      { stage: 'Client → Transport', json: '{"jsonrpc": "2.0",\n "id": 1,\n "method": "tools/call",\n "params": {...}}', color: '#9333ea' },
+      { stage: 'Transport → Server', json: transport === 'stdio' ? '> stdin: JSON-RPC message\n> Process: tool handler' : '> POST /mcp HTTP/1.1\n> Content-Type: application/json', color: '#fbbc04' },
+      { stage: 'Server → External', json: 'SELECT * FROM users\n WHERE id = 42;', color: '#34a853' },
+      { stage: 'External → Server', json: '{"id": 42, "name": "Alice",\n "role": "engineer"}', color: '#ea4335' },
+      null, null, null,
+      { stage: 'Client → Host', json: '{"jsonrpc": "2.0",\n "id": 1,\n "result": {\n  "content": [{"type": "text",\n   "text": "Found user Alice"}]}}', color: '#4285f4' },
+      { stage: 'Response complete', json: 'Agent receives structured\nresult and continues\nreasoning...', color: '#34a853' }
+    ];
+
+    let step = 0;
+    const interval = setInterval(() => {
+      if (step >= allPositions.length) {
+        pkt.setAttribute('opacity', '0');
+        clearInterval(interval);
+        return;
+      }
+      pkt.setAttribute('cx', allPositions[step]);
+      pkt.setAttribute('fill', step < positions.length ? '#4285f4' : '#34a853');
+      if (messages[step]) {
+        const m = messages[step];
+        msgContent.innerHTML += `<div style="flex: 1; min-width: 160px; background: ${m.color}08; border: 1px solid ${m.color}33; border-radius: 8px; padding: 8px;">
+          <div style="font-size: 0.72rem; font-weight: 600; color: ${m.color}; margin-bottom: 4px;">${m.stage}</div>
+          <pre style="font-size: 0.65rem; color: #444; margin: 0; white-space: pre-wrap; line-height: 1.4;">${m.json}</pre>
+        </div>`;
+      }
+      step++;
+    }, 500);
+  }
+
+  function updateCost() {
+    const toolCount = parseInt(document.getElementById('mcp-tool-count').value);
+    const callCount = parseInt(document.getElementById('mcp-calls').value);
+    document.getElementById('mcp-tool-count-val').textContent = toolCount;
+    document.getElementById('mcp-calls-val').textContent = callCount;
+
+    // CLI: ~140 tokens per tool call (command + output parsing)
+    const cliPerCall = 140;
+    const cliTotal = callCount * cliPerCall;
+
+    // MCP: schema loading (300 tokens per tool) + 80 tokens per call
+    const mcpSchemaLoad = toolCount * 300;
+    const mcpPerCall = 80;
+    const mcpTotal = mcpSchemaLoad + callCount * mcpPerCall;
+
+    document.getElementById('mcp-cli-tokens').textContent = cliTotal.toLocaleString();
+    document.getElementById('mcp-mcp-tokens').textContent = mcpTotal.toLocaleString();
+    document.getElementById('mcp-cli-detail').textContent = `${callCount} calls x ~${cliPerCall} tokens each`;
+    document.getElementById('mcp-mcp-detail').textContent = `${toolCount} tools x 300 schema + ${callCount} x ${mcpPerCall}/call`;
+
+    const maxVal = Math.max(cliTotal, mcpTotal);
+    document.getElementById('mcp-cli-bar').style.width = (cliTotal / maxVal * 100) + '%';
+    document.getElementById('mcp-mcp-bar').style.width = (mcpTotal / maxVal * 100) + '%';
+
+    const ratio = (mcpTotal / cliTotal).toFixed(1);
+    const verdict = document.getElementById('mcp-verdict');
+    const detail = document.getElementById('mcp-verdict-detail');
+
+    if (mcpTotal < cliTotal) {
+      verdict.textContent = 'MCP wins!';
+      verdict.style.color = '#4285f4';
+      detail.textContent = `MCP is ${(cliTotal/mcpTotal).toFixed(1)}x cheaper. High call volume amortizes schema cost.`;
+    } else if (ratio > 5) {
+      verdict.textContent = 'CLI much cheaper';
+      verdict.style.color = '#34a853';
+      detail.textContent = `CLI is ${ratio}x cheaper. Schema loading cost dominates with few calls.`;
+    } else {
+      verdict.textContent = 'CLI cheaper';
+      verdict.style.color = '#34a853';
+      detail.textContent = `CLI is ${ratio}x cheaper. Increase calls/session for MCP to break even.`;
+    }
+
+    // Highlight winner
+    const cliBox = document.getElementById('mcp-cli-cost-box');
+    const mcpBox = document.getElementById('mcp-mcp-cost-box');
+    if (mcpTotal < cliTotal) {
+      mcpBox.style.borderColor = '#4285f4'; mcpBox.style.background = '#4285f40d';
+      cliBox.style.borderColor = '#e0e0e0'; cliBox.style.background = '#f8f9fa';
+    } else {
+      cliBox.style.borderColor = '#34a853'; cliBox.style.background = '#34a8530d';
+      mcpBox.style.borderColor = '#e0e0e0'; mcpBox.style.background = '#f8f9fa';
+    }
+  }
+
+  // Transport toggle
+  document.getElementById('mcp-transport-stdio').addEventListener('click', function() {
+    transport = 'stdio';
+    this.style.background = '#4285f4'; this.style.color = 'white'; this.style.borderColor = '#4285f4';
+    const other = document.getElementById('mcp-transport-http');
+    other.style.background = 'white'; other.style.color = '#666'; other.style.borderColor = '#e0e0e0';
+    drawArch();
+  });
+  document.getElementById('mcp-transport-http').addEventListener('click', function() {
+    transport = 'http';
+    this.style.background = '#4285f4'; this.style.color = 'white'; this.style.borderColor = '#4285f4';
+    const other = document.getElementById('mcp-transport-stdio');
+    other.style.background = 'white'; other.style.color = '#666'; other.style.borderColor = '#e0e0e0';
+    drawArch();
+  });
+
+  document.getElementById('mcp-send-btn').addEventListener('click', animateRequest);
+  document.getElementById('mcp-tool-count').addEventListener('input', updateCost);
+  document.getElementById('mcp-calls').addEventListener('input', updateCost);
+
+  drawArch();
+  updateCost();
+})();
+</script>
 
 ---
 
@@ -55,7 +289,7 @@ MCP servers can expose three types of capabilities:
 | **Resources** | Data the agent can read | The application or user selects them | Database schemas, file contents, API documentation |
 | **Prompts** | Reusable prompt templates | The user invokes them | "Summarize this codebase", "Review this PR" |
 
-In practice, Tools are by far the most widely used primitive. As of late 2025, 99% of MCP clients support Tools, while Resources and Prompts have around 30-35% adoption.
+In practice, Tools are by far the most widely used primitive. The vast majority of MCP clients support Tools, while Resources and Prompts have significantly lower adoption rates.
 
 ---
 
@@ -175,7 +409,7 @@ Google Cloud provides several integration points for MCP:
 
 Google's Agent Development Kit (ADK) has built-in support for MCP tools. You can connect to any MCP server and use its tools within your ADK agent.
 
-For details on configuring MCP tools in ADK, see the [ADK MCP Tools documentation](https://google.github.io/adk-docs/tools/mcp-tools/).
+For details on configuring MCP tools in ADK, see the [ADK MCP Tools documentation](https://adk.dev/tools/mcp-tools/).
 
 ### Apigee as an MCP gateway
 
@@ -285,7 +519,7 @@ Do you need to connect to an external service?
 ## Further reading
 
 - [MCP Specification](https://modelcontextprotocol.io/)
-- [ADK MCP Tools](https://google.github.io/adk-docs/tools/mcp-tools/)
+- [ADK MCP Tools](https://adk.dev/tools/mcp-tools/)
 - [OWASP MCP Top 10](https://owasp.org/www-project-mcp-top-10/)
 - [Agentic AI Foundation (AAIF)](https://www.linuxfoundation.org/press/linux-foundation-announces-the-formation-of-the-agentic-ai-foundation)
 - [mcp2cli - Bridge MCP to CLI](https://github.com/knowsuchagency/mcp2cli)
@@ -293,4 +527,4 @@ Do you need to connect to an external service?
 
 ---
 
-[Previous Lesson: AGENTS.md](../16-agents-md/README.md) | [Next Lesson: Agent Skills ->](../18-agent-skills/README.md)
+[Previous Lesson: AGENTS.md](../15-agents-md/) | [Next Lesson: Agent Skills ->](../17-agent-skills/)

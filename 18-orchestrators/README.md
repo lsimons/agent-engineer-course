@@ -1,4 +1,4 @@
-# Lesson 19: orchestrators - managing agent control flow
+# Lesson 18: orchestrators - managing agent control flow
 
 ## Introduction
 
@@ -209,7 +209,7 @@ refiner = LoopAgent(
 )
 ```
 
-See the [ADK LoopAgent documentation](https://adk.dev/agents/workflow-agents/loop-agents/) for implementation details.
+See the [ADK LoopAgent documentation](https://adk.dev/agents/workflow-agents/loop-agent/) for implementation details.
 
 ### Routing (handoff / dispatch)
 
@@ -325,6 +325,307 @@ Does the task benefit from multiple perspectives and debate?
   Yes --> Group Chat
 ```
 
+<div id="orch-playground" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+  <h3 style="margin: 0 0 4px 0; font-size: 1.2rem; color: #1a1a2e;">Orchestration Pattern Playground</h3>
+  <p style="margin: 0 0 16px 0; font-size: 0.85rem; color: #666;">Click a pattern to see it animate. Select two patterns to see how they compose.</p>
+
+  <!-- Pattern Tabs -->
+  <div id="orch-tabs" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;"></div>
+
+  <!-- Main Display Area -->
+  <div style="display: grid; grid-template-columns: 1fr 260px; gap: 16px; align-items: start;">
+    <!-- Canvas -->
+    <div style="background: white; border-radius: 12px; border: 1px solid #e0e0e0; overflow: hidden;">
+      <canvas id="orch-canvas" width="560" height="340" style="width: 100%; height: auto; display: block;"></canvas>
+    </div>
+    <!-- Info Panel -->
+    <div id="orch-info" style="background: white; border-radius: 12px; border: 1px solid #e0e0e0; padding: 16px;">
+      <div id="orch-title" style="font-weight: 700; font-size: 1rem; color: #1a1a2e; margin-bottom: 8px;">Select a Pattern</div>
+      <div id="orch-desc" style="font-size: 0.8rem; color: #555; line-height: 1.5; margin-bottom: 12px;">Click any pattern above to see its flow diagram and details.</div>
+      <div id="orch-meta" style="font-size: 0.78rem; color: #666;"></div>
+    </div>
+  </div>
+
+  <!-- Compose Section -->
+  <div id="orch-compose-section" style="margin-top: 16px; background: white; border-radius: 10px; border: 1px solid #e0e0e0; padding: 14px;">
+    <div style="font-weight: 600; font-size: 0.85rem; color: #333; margin-bottom: 6px;">&#128268; Compose Patterns</div>
+    <p style="font-size: 0.78rem; color: #666; margin: 0 0 8px 0;">Select two patterns above to see how they combine. <span id="orch-sel-count" style="color: #4285f4; font-weight: 600;">0 / 2 selected</span></p>
+    <div id="orch-compose-result" style="display: none; background: #f0f7ff; border-radius: 8px; padding: 12px; font-size: 0.82rem; color: #333; line-height: 1.5;"></div>
+  </div>
+</div>
+
+<style>
+  @media (max-width: 700px) {
+    #orch-playground > div:nth-child(3) {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+
+<script>
+(function() {
+  const patterns = [
+    { id: 'sequential', name: 'Sequential', color: '#4285f4', icon: '&#10132;',
+      desc: 'Agents execute one after another in a defined order. Each agent\'s output becomes the next agent\'s input.',
+      when: 'Tasks with clear stages that build on each other, like draft-review-edit pipelines.',
+      complexity: 1, type: 'Deterministic' },
+    { id: 'parallel', name: 'Parallel', color: '#34a853', icon: '&#9881;',
+      desc: 'Multiple agents execute simultaneously on the same input. Results are collected and combined.',
+      when: 'Independent analysis from multiple perspectives, latency-sensitive tasks.',
+      complexity: 2, type: 'Deterministic' },
+    { id: 'loop', name: 'Loop', color: '#fbbc04', icon: '&#128260;',
+      desc: 'An agent executes repeatedly until a condition is met. Includes generator-critic patterns.',
+      when: 'Quality-sensitive tasks where iterative refinement is needed.',
+      complexity: 2, type: 'Deterministic' },
+    { id: 'router', name: 'Router', color: '#ea4335', icon: '&#128268;',
+      desc: 'Input is classified and directed to a specialized agent. Only one agent handles each request.',
+      when: 'Multi-domain systems where different inputs need different expertise.',
+      complexity: 2, type: 'Hybrid' },
+    { id: 'hierarchical', name: 'Hierarchical', color: '#9333ea', icon: '&#128101;',
+      desc: 'A coordinator agent breaks goals into subtasks and delegates to specialist sub-agents.',
+      when: 'Complex tasks requiring planning, delegation, and result synthesis.',
+      complexity: 4, type: 'Dynamic' },
+    { id: 'groupchat', name: 'Group Chat', color: '#e91e8c', icon: '&#128172;',
+      desc: 'Multiple agents participate in a shared conversation, coordinated by a chat manager.',
+      when: 'Consensus building, brainstorming, iterative multi-expert validation.',
+      complexity: 5, type: 'Dynamic' }
+  ];
+
+  const compositions = {
+    'sequential+parallel': { name: 'Pipeline with Parallel Stages', desc: 'A sequential pipeline where individual stages fan out to parallel agents. Example: research stage runs 3 search agents in parallel, then writing stage runs sequentially.' },
+    'sequential+loop': { name: 'Pipeline with Refinement', desc: 'Sequential stages where one or more stages include a refinement loop. Example: draft stage, then a loop of edit-and-review until approved, then publish.' },
+    'sequential+router': { name: 'Adaptive Pipeline', desc: 'A sequential pipeline that routes to different next-steps based on intermediate results. Example: classify input, then route to the appropriate processing pipeline.' },
+    'sequential+hierarchical': { name: 'Orchestrated Pipeline', desc: 'A coordinator plans the pipeline stages dynamically rather than having them hardcoded. Stages still execute sequentially but the plan adapts.' },
+    'sequential+groupchat': { name: 'Pipeline with Deliberation', desc: 'Sequential stages where one stage is a group discussion. Example: gather data, then debate findings, then write report.' },
+    'parallel+loop': { name: 'Competitive Refinement', desc: 'Multiple agents work in parallel, each refining iteratively. Best result is selected. Example: 3 writers draft simultaneously with self-editing loops.' },
+    'parallel+router': { name: 'Classified Fan-out', desc: 'Input is classified, then relevant parallel agents are dispatched based on classification. Not all agents run every time.' },
+    'parallel+hierarchical': { name: 'Delegated Parallel Work', desc: 'A coordinator assigns independent subtasks to parallel workers. Example: research lead assigns 5 topics to 5 research agents simultaneously.' },
+    'parallel+groupchat': { name: 'Parallel Brainstorm', desc: 'Multiple groups brainstorm in parallel, then results are merged. Useful for exploring a problem space from multiple angles simultaneously.' },
+    'loop+router': { name: 'Iterative Routing', desc: 'Each iteration routes to a different specialist based on what needs improvement. Example: code review loop routes to security, perf, or style expert each round.' },
+    'loop+hierarchical': { name: 'Managed Refinement', desc: 'A coordinator oversees the refinement loop, deciding when to delegate to specialists and when quality is sufficient.' },
+    'loop+groupchat': { name: 'Debate Until Consensus', desc: 'Agents discuss in rounds until they reach agreement. Each round builds on the previous discussion. Has a maximum round limit.' },
+    'router+hierarchical': { name: 'Hierarchical Dispatch', desc: 'Input is routed to a coordinator who then delegates to its own team of specialists. Multi-level routing.' },
+    'router+groupchat': { name: 'Routed Collaboration', desc: 'Input type determines which group of agents collaborates. Different teams handle different request types.' },
+    'hierarchical+groupchat': { name: 'Managed Discussion', desc: 'A coordinator sets the agenda and manages a group discussion, synthesizing results and directing conversation flow.' }
+  };
+
+  let selected = [];
+  let activePattern = null;
+  let animFrame = null;
+  let animTime = 0;
+
+  // Render tabs
+  const tabsEl = document.getElementById('orch-tabs');
+  patterns.forEach(p => {
+    const tab = document.createElement('button');
+    tab.id = 'orch-tab-' + p.id;
+    tab.innerHTML = `${p.icon} ${p.name}`;
+    tab.style.cssText = `padding: 8px 14px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #555; transition: all 0.2s; white-space: nowrap;`;
+    tab.addEventListener('mouseenter', () => { if (!selected.includes(p.id) && activePattern !== p.id) tab.style.borderColor = p.color; });
+    tab.addEventListener('mouseleave', () => { if (!selected.includes(p.id) && activePattern !== p.id) tab.style.borderColor = '#e0e0e0'; });
+    tab.addEventListener('click', () => handleTabClick(p));
+    tabsEl.appendChild(tab);
+  });
+
+  function handleTabClick(p) {
+    activePattern = p.id;
+    // Toggle selection for compose
+    const idx = selected.indexOf(p.id);
+    if (idx >= 0) { selected.splice(idx, 1); }
+    else { if (selected.length >= 2) selected.shift(); selected.push(p.id); }
+    // Update tab styles
+    patterns.forEach(pp => {
+      const t = document.getElementById('orch-tab-' + pp.id);
+      if (selected.includes(pp.id)) {
+        t.style.borderColor = pp.color; t.style.background = pp.color + '15'; t.style.color = pp.color;
+      } else {
+        t.style.borderColor = '#e0e0e0'; t.style.background = 'white'; t.style.color = '#555';
+      }
+    });
+    // Update info
+    document.getElementById('orch-title').textContent = p.name + ' Pattern';
+    document.getElementById('orch-desc').textContent = p.desc;
+    const stars = '&#9733;'.repeat(p.complexity) + '&#9734;'.repeat(5 - p.complexity);
+    const typeColor = p.type === 'Deterministic' ? '#34a853' : p.type === 'Dynamic' ? '#ea4335' : '#fbbc04';
+    document.getElementById('orch-meta').innerHTML = `
+      <div style="margin-bottom:8px;"><strong>When to use:</strong> ${p.when}</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div><span style="font-size:0.7rem;color:#999;">Complexity</span><br><span style="color:#fbbc04;font-size:0.9rem;">${stars}</span></div>
+        <div><span style="font-size:0.7rem;color:#999;">Type</span><br><span style="padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:600;color:white;background:${typeColor};">${p.type}</span></div>
+      </div>`;
+    // Update compose
+    document.getElementById('orch-sel-count').textContent = selected.length + ' / 2 selected';
+    const compResult = document.getElementById('orch-compose-result');
+    if (selected.length === 2) {
+      const key = [selected[0], selected[1]].sort().join('+');
+      const comp = compositions[key];
+      if (comp) {
+        compResult.style.display = 'block';
+        compResult.innerHTML = `<strong>${comp.name}</strong><br>${comp.desc}`;
+      }
+    } else {
+      compResult.style.display = 'none';
+    }
+    // Animate
+    startAnimation(p.id);
+  }
+
+  const canvas = document.getElementById('orch-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = 560, H = 340;
+
+  function startAnimation(patternId) {
+    if (animFrame) cancelAnimationFrame(animFrame);
+    animTime = 0;
+    function loop() {
+      animTime += 0.02;
+      ctx.clearRect(0, 0, W, H);
+      drawPattern(patternId, animTime);
+      animFrame = requestAnimationFrame(loop);
+    }
+    loop();
+  }
+
+  function drawNode(x, y, label, color, pulse) {
+    const r = 24;
+    ctx.save();
+    if (pulse) {
+      const s = 1 + Math.sin(animTime * 4) * 0.08;
+      ctx.translate(x, y); ctx.scale(s, s); ctx.translate(-x, -y);
+    }
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = color + '22'; ctx.fill();
+    ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.fillStyle = color; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(label, x, y);
+    ctx.restore();
+  }
+
+  function drawArrow(x1, y1, x2, y2, color) {
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    const r = 24;
+    const sx = x1 + Math.cos(angle) * r, sy = y1 + Math.sin(angle) * r;
+    const ex = x2 - Math.cos(angle) * r, ey = y2 - Math.sin(angle) * r;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey);
+    ctx.strokeStyle = color + '88'; ctx.lineWidth = 2; ctx.stroke();
+    // arrowhead
+    ctx.beginPath(); ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - 8 * Math.cos(angle - 0.4), ey - 8 * Math.sin(angle - 0.4));
+    ctx.lineTo(ex - 8 * Math.cos(angle + 0.4), ey - 8 * Math.sin(angle + 0.4));
+    ctx.closePath(); ctx.fillStyle = color + '88'; ctx.fill();
+  }
+
+  function drawDot(x1, y1, x2, y2, t, color) {
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    const r = 24;
+    const sx = x1 + Math.cos(angle) * r, sy = y1 + Math.sin(angle) * r;
+    const ex = x2 - Math.cos(angle) * r, ey = y2 - Math.sin(angle) * r;
+    const p = (t % 1);
+    const dx = sx + (ex - sx) * p, dy = sy + (ey - sy) * p;
+    ctx.beginPath(); ctx.arc(dx, dy, 5, 0, Math.PI * 2);
+    ctx.fillStyle = color; ctx.fill();
+  }
+
+  function drawLabel(x, y, text) {
+    ctx.fillStyle = '#999'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(text, x, y);
+  }
+
+  function drawPattern(id, t) {
+    const c = patterns.find(p => p.id === id).color;
+    switch(id) {
+      case 'sequential': {
+        const nodes = [{x:80,y:170,l:'Agent A'},{x:230,y:170,l:'Agent B'},{x:380,y:170,l:'Agent C'},{x:500,y:170,l:'Output'}];
+        drawLabel(80, 130, 'Step 1'); drawLabel(230, 130, 'Step 2'); drawLabel(380, 130, 'Step 3');
+        for(let i=0;i<nodes.length-1;i++){drawArrow(nodes[i].x,nodes[i].y,nodes[i+1].x,nodes[i+1].y,c);}
+        for(let i=0;i<nodes.length-1;i++){drawDot(nodes[i].x,nodes[i].y,nodes[i+1].x,nodes[i+1].y,t*0.6+i*0.33,c);}
+        nodes.forEach((n,i)=>drawNode(n.x,n.y,n.l,i===3?'#666':c,i===Math.floor(t*0.6)%3));
+        drawLabel(280, 260, 'Output of each agent feeds into the next');
+        break;
+      }
+      case 'parallel': {
+        const input={x:80,y:170}, agents=[{x:280,y:70,l:'Agent A'},{x:280,y:170,l:'Agent B'},{x:280,y:270,l:'Agent C'}], out={x:480,y:170};
+        agents.forEach(a=>{drawArrow(input.x,input.y,a.x,a.y,c);drawArrow(a.x,a.y,out.x,out.y,c);});
+        agents.forEach(a=>{drawDot(input.x,input.y,a.x,a.y,t*0.7,c);drawDot(a.x,a.y,out.x,out.y,t*0.7+0.5,c);});
+        drawNode(input.x,input.y,'Input','#666',false);
+        agents.forEach(a=>drawNode(a.x,a.y,a.l,c,true));
+        drawNode(out.x,out.y,'Combine','#666',false);
+        drawLabel(280, 320, 'Fan out, then gather results');
+        break;
+      }
+      case 'loop': {
+        const gen={x:180,y:170,l:'Generator'}, crit={x:380,y:170,l:'Critic'};
+        drawArrow(gen.x,gen.y,crit.x,crit.y,c);
+        // loop back arrow (curved)
+        ctx.beginPath();ctx.moveTo(crit.x,crit.y-26);ctx.quadraticCurveTo(280,60,gen.x,gen.y-26);
+        ctx.strokeStyle=c+'88';ctx.lineWidth=2;ctx.stroke();
+        ctx.beginPath();ctx.moveTo(gen.x,gen.y-26);ctx.lineTo(gen.x+6,gen.y-34);ctx.lineTo(gen.x-6,gen.y-34);ctx.closePath();ctx.fillStyle=c+'88';ctx.fill();
+        drawDot(gen.x,gen.y,crit.x,crit.y,t*0.5,c);
+        // iteration counter
+        const iter = Math.floor(t * 0.8) % 5 + 1;
+        ctx.fillStyle=c;ctx.font='bold 13px sans-serif';ctx.textAlign='center';
+        ctx.fillText('Iteration: ' + iter + ' / 5', 280, 100);
+        drawNode(gen.x,gen.y,gen.l,c,true);drawNode(crit.x,crit.y,crit.l,c,false);
+        // output arrow
+        drawArrow(crit.x,crit.y,crit.x+100,crit.y,'#666');
+        drawNode(crit.x+100,crit.y,'Output','#666',iter>=5);
+        drawLabel(280, 280, iter >= 5 ? 'Quality approved - output ready' : 'Not good enough - refining...');
+        break;
+      }
+      case 'router': {
+        const router={x:160,y:170,l:'Router'};
+        const agents=[{x:380,y:70,l:'Billing'},{x:380,y:170,l:'Tech Support'},{x:380,y:270,l:'General'}];
+        const activeIdx = Math.floor(t*0.3) % 3;
+        drawArrow(50,170,router.x,router.y,'#666');
+        agents.forEach((a,i)=>{drawArrow(router.x,router.y,a.x,a.y,i===activeIdx?c:'#e0e0e0');});
+        drawDot(50,170,router.x,router.y,t*0.5,'#666');
+        drawDot(router.x,router.y,agents[activeIdx].x,agents[activeIdx].y,t*0.5+0.3,c);
+        drawNode(50,170,'Input','#666',false);
+        drawNode(router.x,router.y,router.l,c,true);
+        agents.forEach((a,i)=>drawNode(a.x,a.y,a.l,i===activeIdx?c:'#ccc',i===activeIdx));
+        drawLabel(280, 320, 'Routes to: ' + agents[activeIdx].l);
+        break;
+      }
+      case 'hierarchical': {
+        const coord={x:280,y:80,l:'Coordinator'};
+        const workers=[{x:120,y:220,l:'Research'},{x:280,y:220,l:'Analysis'},{x:440,y:220,l:'Writing'}];
+        const activeW = Math.floor(t*0.4) % 3;
+        workers.forEach((w,i)=>{drawArrow(coord.x,coord.y,w.x,w.y,i===activeW?c:'#ddd');drawArrow(w.x,w.y,coord.x,coord.y,i===activeW?c+'66':'#ddd');});
+        if(activeW>=0) drawDot(coord.x,coord.y,workers[activeW].x,workers[activeW].y,t*0.6,c);
+        drawNode(coord.x,coord.y,coord.l,c,true);
+        workers.forEach((w,i)=>drawNode(w.x,w.y,w.l,i===activeW?c:'#bbb',i===activeW));
+        drawLabel(280, 310, 'Coordinator delegates to: ' + workers[activeW].l);
+        break;
+      }
+      case 'groupchat': {
+        const mgr={x:280,y:80,l:'Manager'};
+        const agents=[{x:130,y:200,l:'Agent A'},{x:280,y:260,l:'Agent B'},{x:430,y:200,l:'Agent C'}];
+        const speaker = Math.floor(t*0.4) % 3;
+        // lines between all
+        for(let i=0;i<agents.length;i++)for(let j=i+1;j<agents.length;j++){
+          ctx.beginPath();ctx.moveTo(agents[i].x,agents[i].y);ctx.lineTo(agents[j].x,agents[j].y);
+          ctx.strokeStyle='#e0e0e0';ctx.lineWidth=1;ctx.stroke();
+        }
+        agents.forEach(a=>{drawArrow(mgr.x,mgr.y,a.x,a.y,'#ddd');});
+        // speech bubble
+        const sp = agents[speaker];
+        ctx.beginPath();ctx.roundRect(sp.x-40,sp.y-60,80,26,6);ctx.fillStyle=c+'22';ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=1;ctx.stroke();
+        ctx.fillStyle=c;ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText('Speaking...',sp.x,sp.y-43);
+        drawNode(mgr.x,mgr.y,mgr.l,'#666',false);
+        agents.forEach((a,i)=>drawNode(a.x,a.y,a.l,c,i===speaker));
+        const turns = ['A: "I think we should..."', 'B: "Building on that..."', 'C: "I disagree because..."'];
+        drawLabel(280, 320, turns[speaker]);
+        break;
+      }
+    }
+  }
+
+  // Initial state
+  ctx.fillStyle = '#bbb'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('Select a pattern to see its animation', W/2, H/2);
+})();
+</script>
+
 ---
 
 ## Composing patterns
@@ -379,8 +680,8 @@ For orchestration logic that does not fit the built-in types, you can extend `Ba
 ADK lets you wrap any agent as a tool using `AgentTool`. This allows a coordinator agent to call sub-agents as if they were function calls, receiving structured results back.
 
 For full implementation details, see:
-- [ADK Workflow Agents](https://google.github.io/adk-docs/agents/workflow-agents/)
-- [ADK Multi-Agent Systems](https://google.github.io/adk-docs/agents/)
+- [ADK Workflow Agents](https://adk.dev/agents/workflow-agents/)
+- [ADK Multi-Agent Systems](https://adk.dev/agents/)
 - [Multi-Agent Patterns in ADK - Google Developers Blog](https://developers.googleblog.com/developers-guide-to-multi-agent-patterns-in-adk/)
 
 ---
@@ -445,7 +746,7 @@ Track performance per agent and per orchestration run:
 
 Use distributed tracing (e.g., OpenTelemetry) to follow a request through multiple agents. This is essential for debugging when things go wrong.
 
-See [ADK Tracing documentation](https://google.github.io/adk-docs/) and [Google Cloud Trace](https://cloud.google.com/trace) for implementation guidance.
+See [ADK Tracing documentation](https://adk.dev/) and [Google Cloud Trace](https://cloud.google.com/trace) for implementation guidance.
 
 ### Design for failure
 
@@ -487,7 +788,7 @@ Agents fail. Tools return errors. LLMs hallucinate. Your orchestrator needs to h
 
 ## Further reading
 
-- [ADK Workflow Agents](https://google.github.io/adk-docs/agents/workflow-agents/)
+- [ADK Workflow Agents](https://adk.dev/agents/workflow-agents/)
 - [Multi-Agent Patterns in ADK](https://developers.googleblog.com/developers-guide-to-multi-agent-patterns-in-adk/)
 - [Anthropic - Building Effective AI Agents](https://www.anthropic.com/research/building-effective-agents)
 - [Microsoft Azure - AI Agent Orchestration Patterns](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns)
@@ -496,4 +797,4 @@ Agents fail. Tools return errors. LLMs hallucinate. Your orchestrator needs to h
 
 ---
 
-[Previous Lesson: Agent Skills](../18-agent-skills/README.md) | [Back to Course Overview](../README.md)
+[Previous Lesson: Agent Skills](../17-agent-skills/) | [Next Lesson: Where to Go From Here ->](../19-where-to-go-from-here/)

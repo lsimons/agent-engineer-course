@@ -111,6 +111,208 @@ Your eval suite for deployment should cover:
 
 Safety evals should have a hard gate - any failure blocks deployment. Other categories might have softer thresholds where you accept small regressions if overall quality improves.
 
+<div id="pipeline-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
+  <div style="background: linear-gradient(135deg, #34a853, #2d9249); padding: 20px 24px; color: white;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <div style="font-size: 1.25rem; font-weight: 700;">Deployment Pipeline Simulator</div>
+        <div style="font-size: 0.85rem; opacity: 0.9;">Simulate a commit flowing through CI/CD gates</div>
+      </div>
+      <button id="pipe-deploy-btn" onclick="simulateDeploy()" style="background: white; color: #34a853; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">Simulate Deploy</button>
+    </div>
+  </div>
+  <div style="padding: 16px 24px;">
+    <div style="display: flex; gap: 6px; margin-bottom: 16px;">
+      <button onclick="switchStrategy('canary')" id="pipe-strat-canary" style="padding: 6px 14px; border: 2px solid #34a853; background: #34a853; color: white; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">Canary</button>
+      <button onclick="switchStrategy('bluegreen')" id="pipe-strat-bluegreen" style="padding: 6px 14px; border: 2px solid #4285f4; background: white; color: #4285f4; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">Blue-Green</button>
+      <button onclick="switchStrategy('abtesting')" id="pipe-strat-abtesting" style="padding: 6px 14px; border: 2px solid #9333ea; background: white; color: #9333ea; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">A/B Testing</button>
+    </div>
+    <div id="pipe-strategy-desc" style="font-size: 0.8rem; color: #5f6368; margin-bottom: 16px; padding: 10px 14px; background: white; border-radius: 8px;">
+      <strong>Canary:</strong> Route 5% of traffic to the new version. Monitor metrics. Gradually increase to 100% if healthy.
+    </div>
+  </div>
+  <div style="padding: 0 24px 24px; overflow-x: auto;">
+    <div style="display: flex; align-items: flex-start; gap: 0; min-width: 700px;">
+      <!-- Stage 1: Code Commit -->
+      <div style="flex: 1; text-align: center;">
+        <div id="pipe-stage-0" class="pipe-stage" style="background: white; border-radius: 12px; padding: 14px 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 2px solid #e8eaed; transition: all 0.5s; min-height: 140px; cursor: pointer;" onclick="showStageDetails(0)">
+          <div style="font-size: 1.5rem; margin-bottom: 6px;">📦</div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: #202124;">Code Commit</div>
+          <div style="font-size: 0.7rem; color: #5f6368; margin-top: 4px;">Push to repo</div>
+          <div id="pipe-check-0" style="margin-top: 8px; font-size: 1.2rem; opacity: 0;">⏳</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; padding-top: 50px;"><svg width="30" height="20"><polygon points="0,0 30,10 0,20" fill="#e8eaed" id="pipe-arrow-0"/></svg></div>
+      <!-- Stage 2: Pre-merge -->
+      <div style="flex: 1; text-align: center;">
+        <div id="pipe-stage-1" class="pipe-stage" style="background: white; border-radius: 12px; padding: 14px 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 2px solid #e8eaed; transition: all 0.5s; min-height: 140px; cursor: pointer;" onclick="showStageDetails(1)">
+          <div style="font-size: 1.5rem; margin-bottom: 6px;">🔍</div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: #202124;">Pre-merge</div>
+          <div style="font-size: 0.65rem; color: #5f6368; margin-top: 4px;">Unit tests, lint, evals</div>
+          <div style="font-size: 0.65rem; color: #9333ea; margin-top: 2px;">~5 min</div>
+          <div id="pipe-check-1" style="margin-top: 8px; font-size: 1.2rem; opacity: 0;">⏳</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; padding-top: 50px;"><svg width="30" height="20"><polygon points="0,0 30,10 0,20" fill="#e8eaed" id="pipe-arrow-1"/></svg></div>
+      <!-- Stage 3: Post-merge -->
+      <div style="flex: 1; text-align: center;">
+        <div id="pipe-stage-2" class="pipe-stage" style="background: white; border-radius: 12px; padding: 14px 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 2px solid #e8eaed; transition: all 0.5s; min-height: 140px; cursor: pointer;" onclick="showStageDetails(2)">
+          <div style="font-size: 1.5rem; margin-bottom: 6px;">🧪</div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: #202124;">Post-merge</div>
+          <div style="font-size: 0.65rem; color: #5f6368; margin-top: 4px;">Integration tests, staging</div>
+          <div style="font-size: 0.65rem; color: #9333ea; margin-top: 2px;">~30 min</div>
+          <div id="pipe-check-2" style="margin-top: 8px; font-size: 1.2rem; opacity: 0;">⏳</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; padding-top: 50px;"><svg width="30" height="20"><polygon points="0,0 30,10 0,20" fill="#e8eaed" id="pipe-arrow-2"/></svg></div>
+      <!-- Stage 4: Canary -->
+      <div style="flex: 1; text-align: center;">
+        <div id="pipe-stage-3" class="pipe-stage" style="background: white; border-radius: 12px; padding: 14px 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 2px solid #e8eaed; transition: all 0.5s; min-height: 140px; cursor: pointer;" onclick="showStageDetails(3)">
+          <div style="font-size: 1.5rem; margin-bottom: 6px;" id="pipe-stage3-icon">🐤</div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: #202124;" id="pipe-stage3-title">Canary</div>
+          <div style="font-size: 0.65rem; color: #5f6368; margin-top: 4px;" id="pipe-stage3-desc">5% traffic rollout</div>
+          <div style="font-size: 0.65rem; color: #9333ea; margin-top: 2px;">~1 hour</div>
+          <div id="pipe-check-3" style="margin-top: 8px; font-size: 1.2rem; opacity: 0;">⏳</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; padding-top: 50px;"><svg width="30" height="20"><polygon points="0,0 30,10 0,20" fill="#e8eaed" id="pipe-arrow-3"/></svg></div>
+      <!-- Stage 5: Production -->
+      <div style="flex: 1; text-align: center;">
+        <div id="pipe-stage-4" class="pipe-stage" style="background: white; border-radius: 12px; padding: 14px 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 2px solid #e8eaed; transition: all 0.5s; min-height: 140px; cursor: pointer;" onclick="showStageDetails(4)">
+          <div style="font-size: 1.5rem; margin-bottom: 6px;">🚀</div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: #202124;">Production</div>
+          <div style="font-size: 0.65rem; color: #5f6368; margin-top: 4px;">Full deployment</div>
+          <div style="font-size: 0.65rem; color: #9333ea; margin-top: 2px;">100% traffic</div>
+          <div id="pipe-check-4" style="margin-top: 8px; font-size: 1.2rem; opacity: 0;">⏳</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="pipe-detail" style="padding: 0 24px 16px; display: none;">
+    <div id="pipe-detail-content" style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); font-size: 0.85rem;"></div>
+  </div>
+  <div id="pipe-status" style="padding: 12px 24px; background: #e8eaed; text-align: center; font-size: 0.8rem; color: #5f6368;">Click "Simulate Deploy" to watch a commit flow through the pipeline</div>
+</div>
+
+<script>
+(function() {
+  var pipeStrategy = 'canary';
+  var pipeAnimating = false;
+
+  var strategies = {
+    canary: {label:'Canary', color:'#34a853', desc:'<strong>Canary:</strong> Route 5% of traffic to the new version. Monitor metrics. Gradually increase to 100% if healthy.', icon:'🐤', title:'Canary', stageDesc:'5% traffic rollout'},
+    bluegreen: {label:'Blue-Green', color:'#4285f4', desc:'<strong>Blue-Green:</strong> Deploy to idle environment. Switch all traffic at once. Instant rollback by switching back.', icon:'🔄', title:'Blue-Green', stageDesc:'Switch environments'},
+    abtesting: {label:'A/B Testing', color:'#9333ea', desc:'<strong>A/B Testing:</strong> Split traffic 50/50 between versions. Compare metrics. Promote the winner.', icon:'⚖️', title:'A/B Test', stageDesc:'50/50 traffic split'}
+  };
+
+  var stageDetails = [
+    {title:'Code Commit', checks:['Source code pushed to repository', 'Pull request created', 'Automated CI triggered'], criteria:'Valid commit with description'},
+    {title:'Pre-merge Gate', checks:['Lint and format checks', 'Unit tests for tools and guardrails', 'Fast eval suite (50-100 cases)', 'Prompt syntax validation'], criteria:'All checks green, no regressions'},
+    {title:'Post-merge Gate', checks:['Full eval suite (500+ cases)', 'Safety evals (100% pass required)', 'Integration tests with real tools', 'Latency and cost benchmarks', 'Deploy to staging'], criteria:'Eval scores above thresholds, safety 100%'},
+    {title:'Rollout Gate', checks:['Gradual traffic shift', 'Monitor error rates and latency', 'Watch safety incident rate', 'Compare user satisfaction A vs B'], criteria:'Metrics stable for observation window'},
+    {title:'Production', checks:['Full traffic on new version', 'Continuous monitoring active', 'Rollback ready if needed', 'Alerting configured'], criteria:'All dashboards green, on-call notified'}
+  ];
+
+  window.switchStrategy = function(strat) {
+    if (pipeAnimating) return;
+    pipeStrategy = strat;
+    var s = strategies[strat];
+    document.getElementById('pipe-strategy-desc').innerHTML = s.desc;
+    document.getElementById('pipe-stage3-icon').textContent = s.icon;
+    document.getElementById('pipe-stage3-title').textContent = s.title;
+    document.getElementById('pipe-stage3-desc').textContent = s.stageDesc;
+    ['canary','bluegreen','abtesting'].forEach(function(k) {
+      var btn = document.getElementById('pipe-strat-' + k);
+      if (k === strat) {
+        btn.style.background = strategies[k].color;
+        btn.style.color = 'white';
+      } else {
+        btn.style.background = 'white';
+        btn.style.color = strategies[k].color;
+      }
+    });
+  };
+
+  window.showStageDetails = function(idx) {
+    var d = stageDetails[idx];
+    var el = document.getElementById('pipe-detail');
+    var content = document.getElementById('pipe-detail-content');
+    el.style.display = 'block';
+    content.innerHTML = '<div style="font-weight:700;margin-bottom:8px;color:#202124;">' + d.title + '</div>' +
+      '<div style="margin-bottom:8px;">' + d.checks.map(function(c){return '<div style="display:flex;align-items:center;gap:6px;margin:4px 0;"><span style="color:#34a853;">&#10003;</span> ' + c + '</div>';}).join('') + '</div>' +
+      '<div style="padding:8px 12px;background:#f0f4ff;border-radius:6px;font-size:0.8rem;"><strong>Pass criteria:</strong> ' + d.criteria + '</div>';
+  };
+
+  window.simulateDeploy = function() {
+    if (pipeAnimating) return;
+    pipeAnimating = true;
+    var btn = document.getElementById('pipe-deploy-btn');
+    btn.textContent = 'Deploying...';
+    btn.style.opacity = '0.6';
+
+    // Reset
+    for (var i = 0; i < 5; i++) {
+      document.getElementById('pipe-stage-' + i).style.borderColor = '#e8eaed';
+      document.getElementById('pipe-stage-' + i).style.background = 'white';
+      document.getElementById('pipe-check-' + i).style.opacity = '0';
+      document.getElementById('pipe-check-' + i).textContent = '⏳';
+      if (i < 4) document.getElementById('pipe-arrow-' + i).setAttribute('fill', '#e8eaed');
+    }
+    document.getElementById('pipe-detail').style.display = 'none';
+
+    var failStage = Math.random() < 0.3 ? Math.floor(Math.random() * 4) + 1 : -1;
+    var currentStage = 0;
+
+    function processStage() {
+      if (currentStage >= 5) {
+        document.getElementById('pipe-status').textContent = 'Deployment successful! All gates passed.';
+        document.getElementById('pipe-status').style.background = '#e6f4ea';
+        document.getElementById('pipe-status').style.color = '#137333';
+        btn.textContent = 'Simulate Deploy';
+        btn.style.opacity = '1';
+        pipeAnimating = false;
+        return;
+      }
+
+      var stage = document.getElementById('pipe-stage-' + currentStage);
+      var check = document.getElementById('pipe-check-' + currentStage);
+      stage.style.borderColor = '#4285f4';
+      stage.style.background = '#e8f0fe';
+      check.style.opacity = '1';
+      check.textContent = '⏳';
+      document.getElementById('pipe-status').textContent = 'Running ' + stageDetails[currentStage].title + '...';
+      document.getElementById('pipe-status').style.background = '#e3f2fd';
+      document.getElementById('pipe-status').style.color = '#1565c0';
+
+      setTimeout(function() {
+        if (currentStage === failStage) {
+          stage.style.borderColor = '#ea4335';
+          stage.style.background = '#fce8e6';
+          check.textContent = '❌';
+          document.getElementById('pipe-status').textContent = 'FAILED at ' + stageDetails[currentStage].title + '! Pipeline stopped. Fix and retry.';
+          document.getElementById('pipe-status').style.background = '#fce8e6';
+          document.getElementById('pipe-status').style.color = '#c5221f';
+          btn.textContent = 'Simulate Deploy';
+          btn.style.opacity = '1';
+          pipeAnimating = false;
+        } else {
+          stage.style.borderColor = '#34a853';
+          stage.style.background = '#e6f4ea';
+          check.textContent = '✅';
+          if (currentStage < 4) {
+            document.getElementById('pipe-arrow-' + currentStage).setAttribute('fill', '#34a853');
+          }
+          currentStage++;
+          setTimeout(processStage, 400);
+        }
+      }, 800 + Math.random() * 600);
+    }
+
+    processStage();
+  };
+})();
+</script>
+
 ---
 
 ## CI/CD for agents
@@ -310,7 +512,7 @@ Traces show the full journey of a single request through your agent, including a
 [User Request] "Help me return my order"
     |
     +-- [LLM Call 1] Understand intent (150ms)
-    |       Model: gemini-2.0-flash, Tokens: 800 in / 120 out
+    |       Model: gemini-3.5-flash, Tokens: 800 in / 120 out
     |
     +-- [Tool Call] lookup_order(order_id="12345") (340ms)
     |       Status: success
@@ -319,7 +521,7 @@ Traces show the full journey of a single request through your agent, including a
     |       Status: success, eligible=true
     |
     +-- [LLM Call 2] Generate response (200ms)
-    |       Model: gemini-2.0-flash, Tokens: 1200 in / 250 out
+    |       Model: gemini-3.5-flash, Tokens: 1200 in / 250 out
     |
     +-- [Output Guardrail] PII check (15ms)
     |       Status: pass
@@ -570,11 +772,11 @@ Before launching your agent to production users, walk through this checklist:
 
 ## Further reading
 
-- [Deploy Agents on Vertex AI Agent Engine](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/deploy) - Official guide for deploying agents on Google Cloud
+- [Deploy Agents on Vertex AI Agent Engine](https://docs.cloud.google.com/agent-builder/agent-engine/deploy) - Official guide for deploying agents on Google Cloud
 - [Agent Starter Pack](https://github.com/GoogleCloudPlatform/agent-starter-pack) - Production-ready templates for deploying agents on Google Cloud with CI/CD, observability, and evaluation
-- [Vertex AI Model Monitoring](https://cloud.google.com/vertex-ai/docs/model-monitoring/overview) - Monitor model performance in production
+- [Vertex AI Model Monitoring](https://docs.cloud.google.com/vertex-ai/docs/model-monitoring/overview) - Monitor model performance in production
 - [OpenTelemetry](https://opentelemetry.io/) - The industry standard for distributed tracing and observability
 
 ---
 
-Next lesson: [Getting Started with Vertex AI and ADK](../12-getting-started-with-vertex-and-adk/README.md)
+Next lesson: [Getting Started with Vertex AI and ADK](../12-getting-started-with-vertex-and-adk/)

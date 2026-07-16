@@ -20,6 +20,235 @@ Our goal is a practical agent that can:
 
 Think of this as a "hello world" for agents - simple enough to understand in one sitting, but real enough to show how everything connects.
 
+<div id="agent-builder-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+  <div style="text-align: center; margin-bottom: 20px;">
+    <h3 style="margin: 0 0 4px 0; color: #1a1a2e; font-size: 1.3rem;">Interactive Agent Architecture Builder</h3>
+    <p style="margin: 0; color: #666; font-size: 0.9rem;">Configure an agent by selecting components and see the architecture update live</p>
+  </div>
+  <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+    <!-- Left: Controls -->
+    <div style="flex: 1; min-width: 280px;">
+      <!-- Model Selection -->
+      <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="font-weight: 600; color: #1a1a2e; margin-bottom: 10px; font-size: 0.95rem;">🧠 Model Selection</div>
+        <div id="ab-models" style="display: flex; flex-direction: column; gap: 6px;"></div>
+      </div>
+      <!-- Agent Type -->
+      <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="font-weight: 600; color: #1a1a2e; margin-bottom: 10px; font-size: 0.95rem;">🏗️ Agent Type</div>
+        <div id="ab-types" style="display: flex; flex-direction: column; gap: 6px;"></div>
+      </div>
+      <!-- Tools -->
+      <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="font-weight: 600; color: #1a1a2e; margin-bottom: 10px; font-size: 0.95rem;">🔧 Tools</div>
+        <div id="ab-tools" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+      </div>
+      <!-- Buttons -->
+      <div style="display: flex; gap: 8px;">
+        <button id="ab-reset" style="flex:1; padding: 10px; border: 2px solid #ea4335; background: white; color: #ea4335; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">Reset</button>
+        <button id="ab-example" style="flex:1; padding: 10px; border: 2px solid #4285f4; background: #4285f4; color: white; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">Example Config</button>
+      </div>
+    </div>
+    <!-- Right: Architecture Diagram + Metrics -->
+    <div style="flex: 1; min-width: 280px;">
+      <!-- Metrics -->
+      <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+        <div style="flex:1; background: white; border-radius: 12px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+          <div style="font-size: 0.75rem; color: #666; margin-bottom: 4px;">Est. Cost/Call</div>
+          <div id="ab-cost" style="font-size: 1.3rem; font-weight: 700; color: #34a853;">$0.001</div>
+        </div>
+        <div style="flex:1; background: white; border-radius: 12px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+          <div style="font-size: 0.75rem; color: #666; margin-bottom: 4px;">Est. Latency</div>
+          <div id="ab-latency" style="font-size: 1.3rem; font-weight: 700; color: #4285f4;">~1s</div>
+        </div>
+        <div style="flex:1; background: white; border-radius: 12px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+          <div style="font-size: 0.75rem; color: #666; margin-bottom: 4px;">Capability</div>
+          <div id="ab-capability" style="font-size: 1.3rem; font-weight: 700; color: #9333ea;">★★★</div>
+        </div>
+      </div>
+      <!-- Architecture Diagram -->
+      <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 12px;">
+        <div style="font-weight: 600; color: #1a1a2e; margin-bottom: 10px; font-size: 0.95rem;">Architecture Diagram</div>
+        <svg id="ab-diagram" viewBox="0 0 360 320" style="width: 100%; height: auto;"></svg>
+      </div>
+      <!-- System Prompt Preview -->
+      <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <div style="font-weight: 600; color: #1a1a2e; margin-bottom: 8px; font-size: 0.95rem;">Generated System Prompt</div>
+        <pre id="ab-prompt" style="background: #1a1a2e; color: #a5d6a7; padding: 12px; border-radius: 8px; font-size: 0.75rem; line-height: 1.5; overflow-x: auto; white-space: pre-wrap; margin: 0; max-height: 150px; overflow-y: auto;"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const models = [
+    { id: 'pro', name: 'Gemini 3.1 Pro', cost: 0.007, latency: 3, cap: 5, color: '#9333ea', desc: 'Best reasoning, highest cost' },
+    { id: 'flash', name: 'Gemini 3.5 Flash', cost: 0.002, latency: 1.2, cap: 4, color: '#4285f4', desc: 'Fast & capable, great default' },
+    { id: 'lite', name: 'Gemini 3.1 Flash-Lite', cost: 0.0005, latency: 0.5, cap: 2, color: '#34a853', desc: 'Cheapest, simple tasks only' }
+  ];
+  const agentTypes = [
+    { id: 'llm', name: 'LlmAgent', desc: 'Flexible reasoning, default choice', icon: '🤖' },
+    { id: 'sequential', name: 'SequentialAgent', desc: 'Pipeline of ordered steps', icon: '➡️' },
+    { id: 'parallel', name: 'ParallelAgent', desc: 'Concurrent independent tasks', icon: '⚡' },
+    { id: 'loop', name: 'LoopAgent', desc: 'Iterative refinement cycle', icon: '🔄' }
+  ];
+  const tools = [
+    { id: 'search', name: 'Google Search', cost: 0.001, icon: '🔍' },
+    { id: 'code', name: 'Code Exec', cost: 0.0005, icon: '💻' },
+    { id: 'database', name: 'Database', cost: 0.001, icon: '🗄️' },
+    { id: 'api', name: 'API Call', cost: 0.0008, icon: '🌐' },
+    { id: 'fileio', name: 'File I/O', cost: 0.0003, icon: '📁' }
+  ];
+
+  let state = { model: 'flash', type: 'llm', tools: [] };
+
+  function el(id) { return document.getElementById(id); }
+
+  function renderModels() {
+    el('ab-models').innerHTML = models.map(m => `
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;cursor:pointer;border:2px solid ${state.model===m.id?m.color:'#e0e0e0'};background:${state.model===m.id?m.color+'11':'white'};transition:all 0.2s;" onclick="document.dispatchEvent(new CustomEvent('ab-model',{detail:'${m.id}'}))">
+        <div style="width:16px;height:16px;border-radius:50%;border:2px solid ${m.color};background:${state.model===m.id?m.color:'white'};transition:all 0.2s;flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:0.85rem;color:#1a1a2e;">${m.name}</div>
+          <div style="font-size:0.72rem;color:#888;">${m.desc}</div>
+        </div>
+        <div style="font-size:0.7rem;color:${m.color};font-weight:600;">$${m.cost.toFixed(4)}</div>
+      </label>
+    `).join('');
+  }
+
+  function renderTypes() {
+    el('ab-types').innerHTML = agentTypes.map(t => `
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;cursor:pointer;border:2px solid ${state.type===t.id?'#4285f4':'#e0e0e0'};background:${state.type===t.id?'#4285f411':'white'};transition:all 0.2s;" onclick="document.dispatchEvent(new CustomEvent('ab-type',{detail:'${t.id}'}))">
+        <span style="font-size:1.1rem;">${t.icon}</span>
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:0.85rem;color:#1a1a2e;">${t.name}</div>
+          <div style="font-size:0.72rem;color:#888;">${t.desc}</div>
+        </div>
+      </label>
+    `).join('');
+  }
+
+  function renderTools() {
+    el('ab-tools').innerHTML = tools.map(t => {
+      const active = state.tools.includes(t.id);
+      return `<button style="padding:6px 12px;border-radius:8px;border:2px solid ${active?'#34a853':'#e0e0e0'};background:${active?'#34a85311':'white'};cursor:pointer;font-size:0.8rem;font-weight:${active?'600':'400'};color:${active?'#34a853':'#666'};transition:all 0.2s;display:flex;align-items:center;gap:4px;" onclick="document.dispatchEvent(new CustomEvent('ab-tool',{detail:'${t.id}'}))">${t.icon} ${t.name}</button>`;
+    }).join('');
+  }
+
+  function updateMetrics() {
+    const m = models.find(x => x.id === state.model);
+    const toolCost = state.tools.reduce((s, tid) => s + (tools.find(t=>t.id===tid)?.cost||0), 0);
+    const totalCost = m.cost + toolCost;
+    const latencyMult = state.type === 'parallel' ? 0.6 : state.type === 'sequential' ? 1.3 : state.type === 'loop' ? 2.0 : 1.0;
+    const latency = (m.latency * latencyMult + state.tools.length * 0.3).toFixed(1);
+    const stars = '★'.repeat(m.cap) + '☆'.repeat(5 - m.cap);
+    el('ab-cost').textContent = '$' + totalCost.toFixed(4);
+    el('ab-cost').style.color = totalCost > 0.005 ? '#ea4335' : totalCost > 0.002 ? '#fbbc04' : '#34a853';
+    el('ab-latency').textContent = '~' + latency + 's';
+    el('ab-latency').style.color = parseFloat(latency) > 3 ? '#ea4335' : parseFloat(latency) > 1.5 ? '#fbbc04' : '#4285f4';
+    el('ab-capability').textContent = stars;
+  }
+
+  function drawDiagram() {
+    const svg = el('ab-diagram');
+    const m = models.find(x => x.id === state.model);
+    const at = agentTypes.find(x => x.id === state.type);
+    const selTools = state.tools.map(tid => tools.find(t=>t.id===tid));
+    let html = '';
+
+    // Model box at top
+    html += `<rect x="110" y="10" width="140" height="44" rx="10" fill="${m.color}22" stroke="${m.color}" stroke-width="2"/>`;
+    html += `<text x="180" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="${m.color}">🧠 ${m.name}</text>`;
+    html += `<text x="180" y="44" text-anchor="middle" font-size="9" fill="#888">Model</text>`;
+
+    // Arrow down
+    html += `<line x1="180" y1="54" x2="180" y2="80" stroke="#ccc" stroke-width="2" marker-end="url(#ab-arrow)"/>`;
+
+    // Agent type box
+    html += `<rect x="100" y="80" width="160" height="44" rx="10" fill="#4285f422" stroke="#4285f4" stroke-width="2"/>`;
+    html += `<text x="180" y="98" text-anchor="middle" font-size="10" font-weight="600" fill="#4285f4">${at.icon} ${at.name}</text>`;
+    html += `<text x="180" y="114" text-anchor="middle" font-size="9" fill="#888">Agent Type</text>`;
+
+    // Instructions box
+    html += `<line x1="180" y1="124" x2="180" y2="150" stroke="#ccc" stroke-width="2" marker-end="url(#ab-arrow)"/>`;
+    html += `<rect x="80" y="150" width="200" height="34" rx="8" fill="#fbbc0422" stroke="#fbbc04" stroke-width="2"/>`;
+    html += `<text x="180" y="172" text-anchor="middle" font-size="10" font-weight="600" fill="#e6a800">📋 System Instructions</text>`;
+
+    // Tools
+    if (selTools.length > 0) {
+      html += `<line x1="180" y1="184" x2="180" y2="210" stroke="#ccc" stroke-width="2" marker-end="url(#ab-arrow)"/>`;
+      const toolWidth = 64;
+      const gap = 8;
+      const totalW = selTools.length * toolWidth + (selTools.length - 1) * gap;
+      const startX = 180 - totalW / 2;
+      selTools.forEach((t, i) => {
+        const tx = startX + i * (toolWidth + gap);
+        html += `<rect x="${tx}" y="215" width="${toolWidth}" height="50" rx="8" fill="#34a85322" stroke="#34a853" stroke-width="1.5"/>`;
+        html += `<text x="${tx + toolWidth/2}" y="237" text-anchor="middle" font-size="14">${t.icon}</text>`;
+        html += `<text x="${tx + toolWidth/2}" y="254" text-anchor="middle" font-size="8" fill="#34a853" font-weight="600">${t.name}</text>`;
+      });
+    } else {
+      html += `<text x="180" y="230" text-anchor="middle" font-size="11" fill="#ccc" font-style="italic">Select tools below</text>`;
+    }
+
+    // Sub-agents for non-LlmAgent
+    if (state.type !== 'llm') {
+      const labels = state.type === 'sequential' ? ['Step 1', 'Step 2', 'Step 3'] :
+                     state.type === 'parallel' ? ['Worker A', 'Worker B', 'Worker C'] :
+                     ['Draft', 'Evaluate', 'Revise'];
+      html += `<text x="180" y="290" text-anchor="middle" font-size="9" fill="#888">Sub-agents:</text>`;
+      const connector = state.type === 'sequential' ? '→' : state.type === 'parallel' ? '|' : '↻';
+      labels.forEach((l, i) => {
+        const bx = 60 + i * 100;
+        html += `<rect x="${bx}" y="296" width="80" height="22" rx="6" fill="#9333ea18" stroke="#9333ea" stroke-width="1"/>`;
+        html += `<text x="${bx+40}" y="311" text-anchor="middle" font-size="9" fill="#9333ea" font-weight="500">${l}</text>`;
+        if (i < labels.length - 1) {
+          html += `<text x="${bx+90}" y="311" text-anchor="middle" font-size="12" fill="#9333ea">${connector}</text>`;
+        }
+      });
+    }
+
+    // Arrow marker
+    html = `<defs><marker id="ab-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#ccc"/></marker></defs>` + html;
+    svg.innerHTML = html;
+  }
+
+  function updatePrompt() {
+    const m = models.find(x => x.id === state.model);
+    const at = agentTypes.find(x => x.id === state.type);
+    const selTools = state.tools.map(tid => tools.find(t=>t.id===tid));
+    let prompt = `# Agent: my_${state.type}_agent\n# Model: ${m.name}\n\n`;
+    prompt += `You are a helpful assistant`;
+    if (selTools.length > 0) {
+      prompt += ` with access to:\n`;
+      selTools.forEach(t => { prompt += `- ${t.name}: Use for ${t.id}-related tasks\n`; });
+    } else {
+      prompt += `.\n`;
+    }
+    if (state.type === 'sequential') prompt += `\nProcess tasks in order. Each step builds on the previous.\n`;
+    if (state.type === 'parallel') prompt += `\nDelegate independent subtasks to workers concurrently.\n`;
+    if (state.type === 'loop') prompt += `\nIteratively refine output until quality threshold is met.\nMax iterations: 5\n`;
+    prompt += `\nAlways be concise and accurate.\nAsk for clarification when the request is ambiguous.`;
+    el('ab-prompt').textContent = prompt;
+  }
+
+  function render() { renderModels(); renderTypes(); renderTools(); updateMetrics(); drawDiagram(); updatePrompt(); }
+
+  document.addEventListener('ab-model', e => { state.model = e.detail; render(); });
+  document.addEventListener('ab-type', e => { state.type = e.detail; render(); });
+  document.addEventListener('ab-tool', e => {
+    const tid = e.detail;
+    state.tools = state.tools.includes(tid) ? state.tools.filter(t=>t!==tid) : [...state.tools, tid];
+    render();
+  });
+  el('ab-reset').addEventListener('click', () => { state = { model: 'flash', type: 'llm', tools: [] }; render(); });
+  el('ab-example').addEventListener('click', () => { state = { model: 'pro', type: 'sequential', tools: ['search', 'code', 'database'] }; render(); });
+  render();
+})();
+</script>
+
 ### Prerequisites
 
 Before you start, make sure you have:
@@ -29,7 +258,7 @@ Before you start, make sure you have:
 - **A Google Cloud project** with the Gemini API enabled
 - **An API key** or application default credentials configured
 
-> **Get set up:** Follow the official setup guide at [ADK Getting Started](https://google.github.io/adk-docs/get-started/) for detailed installation instructions.
+> **Get set up:** Follow the official setup guide at [ADK Getting Started](https://adk.dev/get-started/) for detailed installation instructions.
 
 ---
 
@@ -78,12 +307,12 @@ from google.adk.agents import Agent
 
 my_agent = Agent(
     name="my_first_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="You are a helpful assistant that answers questions clearly and concisely.",
 )
 ```
 
-The `model` parameter determines which Gemini model handles the reasoning. For learning and prototyping, `gemini-2.5-flash` is a great choice - it is fast and cost-effective. For more complex reasoning tasks, you might upgrade to `gemini-2.5-pro`.
+The `model` parameter determines which Gemini model handles the reasoning. For learning and prototyping, `gemini-3.5-flash` is a great choice - it is fast, capable, and cost-effective. For more complex reasoning tasks, you might upgrade to `gemini-3.1-pro`. (You can also use a rolling alias like `gemini-flash-latest` to always get the newest Flash model.)
 
 The `instruction` parameter is your agent's system prompt. This is where you define its personality, capabilities, and boundaries. We will cover how to write good instructions later in this lesson.
 
@@ -123,7 +352,7 @@ You then attach the tool to your agent:
 ```python
 my_agent = Agent(
     name="my_first_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="You are a helpful assistant. Use the get_weather tool when asked about weather.",
     tools=[get_weather],
 )
@@ -138,7 +367,7 @@ from google.adk.tools import google_search
 
 my_agent = Agent(
     name="my_first_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="You are a helpful assistant. Use search for current events and get_weather for weather.",
     tools=[get_weather, google_search],
 )
@@ -181,7 +410,7 @@ Evaluation lets you define test cases - pairs of inputs and expected behaviors -
 
 We covered evaluation concepts in depth in Lesson 9. The key idea here is to start writing eval cases early, even for your first agent. It saves you from regressions later.
 
-> **Full quickstart:** Follow along with the complete code at [ADK Quickstart](https://google.github.io/adk-docs/get-started/quickstart/)
+> **Full quickstart:** Follow along with the complete code at [ADK Quickstart](https://adk.dev/get-started/quickstart/)
 
 ---
 
@@ -205,7 +434,7 @@ from google.adk.agents import Agent
 
 researcher = Agent(
     name="researcher",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="You research topics thoroughly using search.",
     tools=[google_search],
 )
@@ -289,7 +518,7 @@ refiner = LoopAgent(
 
 You can also combine these types. A SequentialAgent might have an LlmAgent as one of its steps. A LoopAgent might contain a ParallelAgent inside it. This composability is one of ADK's strengths.
 
-> **Learn more:** [ADK Agent Types](https://google.github.io/adk-docs/agents/)
+> **Learn more:** [ADK Agent Types](https://adk.dev/agents/)
 
 ---
 
@@ -329,7 +558,7 @@ def calculate_discount(price: float, discount_percent: float) -> float:
 
 shopping_agent = Agent(
     name="shopping_assistant",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="""You are a shopping assistant. You can:
     - Search the web for product reviews and comparisons
     - Look up specific products in our catalog by ID
@@ -370,20 +599,20 @@ from google.adk.agents import Agent
 # Specialist agents
 researcher = Agent(
     name="researcher",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="You research topics using web search. Return factual findings.",
     tools=[google_search],
 )
 
 writer = Agent(
     name="writer",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="You write clear, engaging content based on research findings.",
 )
 
 fact_checker = Agent(
     name="fact_checker",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="You verify claims by searching for supporting evidence.",
     tools=[google_search],
 )
@@ -391,7 +620,7 @@ fact_checker = Agent(
 # Root agent that orchestrates
 coordinator = Agent(
     name="content_team",
-    model="gemini-2.5-pro",
+    model="gemini-3.1-pro",
     instruction="""You coordinate a content creation team. For any content request:
     1. Ask the researcher to gather information
     2. Ask the writer to create content based on the research
@@ -573,16 +802,16 @@ Each step feeds the next. And steps 6-8 are a loop - you will go around multiple
 | `adk web` | Start the local dev server with web UI |
 | `adk run <agent>` | Run an agent from the command line |
 | `adk eval <agent> <data>` | Run evaluation cases against your agent |
-| `adk deploy` | Deploy your agent to Agent Engine |
+| `adk deploy agent_engine` | Deploy your agent to Agent Engine |
 
 ---
 
 ## Where to learn more
 
-- **Getting started with ADK:** [https://google.github.io/adk-docs/get-started/](https://google.github.io/adk-docs/get-started/)
-- **Full quickstart tutorial:** [https://google.github.io/adk-docs/get-started/quickstart/](https://google.github.io/adk-docs/get-started/quickstart/)
-- **Agent types in depth:** [https://google.github.io/adk-docs/agents/](https://google.github.io/adk-docs/agents/)
-- **Tools reference:** [https://google.github.io/adk-docs/tools/](https://google.github.io/adk-docs/tools/)
+- **Getting started with ADK:** [https://adk.dev/get-started/](https://adk.dev/get-started/)
+- **Full quickstart tutorial:** [https://adk.dev/get-started/quickstart/](https://adk.dev/get-started/quickstart/)
+- **Agent types in depth:** [https://adk.dev/agents/](https://adk.dev/agents/)
+- **Tools reference:** [https://adk.dev/tools/](https://adk.dev/tools/)
 
 ---
 
@@ -604,4 +833,4 @@ Each step feeds the next. And steps 6-8 are a loop - you will go around multiple
 
 Now that you can build an agent, you need to understand how agents communicate with the wider world. In the next lesson, we will explore two important protocols - MCP and A2A - that let agents talk to tools and to each other using open standards.
 
-[Next: Lesson 14 - Agent Protocols: MCP and A2A -->](../14-agent-protocols-mcp-and-a2a/README.md)
+[Next: Lesson 14 - Agent Protocols: MCP and A2A -->](../14-agent-protocols-mcp-and-a2a/)

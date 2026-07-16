@@ -234,6 +234,145 @@ Not all agents are created equal. It is helpful to think about agent systems on 
 
 Most production agent systems today operate at Level 1 or Level 2. Levels 3 and 4 are active areas of research and are becoming more practical, but they add significant complexity. Start simple and move up only when you have a clear reason to.
 
+<div id="agent-levels-explorer" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 32px auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; box-sizing: border-box;">
+  <h3 style="margin: 0 0 4px 0; font-size: 20px; color: #1a1a2e;">Interactive Agent Levels Explorer</h3>
+  <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280;">Click on a level to explore its capabilities, architecture, and examples.</p>
+
+  <div id="ale-tabs" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;"></div>
+
+  <div id="ale-detail" style="display: flex; gap: 24px; flex-wrap: wrap;">
+    <div id="ale-diagram" style="flex: 1; min-width: 280px; background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);"></div>
+    <div id="ale-info" style="flex: 1; min-width: 280px;">
+      <div id="ale-autonomy" style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
+        <div style="font-size: 13px; font-weight: 600; color: #6b7280; margin-bottom: 8px;">AUTONOMY LEVEL</div>
+        <div style="background: #e5e7eb; border-radius: 8px; height: 24px; overflow: hidden; position: relative;">
+          <div id="ale-bar" style="height: 100%; border-radius: 8px; transition: width 0.5s ease, background 0.5s ease; width: 10%;"></div>
+          <span id="ale-bar-label" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 12px; font-weight: 600; color: #374151;"></span>
+        </div>
+      </div>
+      <div id="ale-capabilities" style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);"></div>
+      <div id="ale-examples" style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);"></div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    var levels = [
+      {
+        id: 0, name: "Basic Reasoning", color: "#6b7280", autonomy: 10,
+        components: ["User Input", "LLM", "Text Output"],
+        connections: [[0,1],[1,2]],
+        capabilities: ["Text generation", "Question answering", "Summarization", "Translation"],
+        examples: ["Simple chatbot", "Q&A assistant", "Text summarizer"],
+        features: ["No tools or external access", "Single request/response", "Stateless interaction"]
+      },
+      {
+        id: 1, name: "Connected Problem-Solver", color: "#4285f4", autonomy: 30,
+        components: ["User Input", "LLM", "Tools / APIs", "Response"],
+        connections: [[0,1],[1,2],[2,1],[1,3]],
+        capabilities: ["API calls", "Database queries", "RAG retrieval", "Code execution"],
+        examples: ["Order lookup bot", "RAG assistant", "Weather agent"],
+        features: ["Single tool use per turn", "Function calling", "Grounded responses"]
+      },
+      {
+        id: 2, name: "Strategic Agent", color: "#34a853", autonomy: 55,
+        components: ["User Input", "Planner", "LLM", "Tools", "Memory", "Response"],
+        connections: [[0,1],[1,2],[2,3],[3,2],[2,4],[4,2],[2,5]],
+        capabilities: ["Multi-step planning", "Context management", "Error recovery", "Re-planning"],
+        examples: ["Research assistant", "DevOps agent", "Data analyst"],
+        features: ["Agentic loop (ReAct)", "Maintains context across steps", "Adapts plan on failure"]
+      },
+      {
+        id: 3, name: "Collaborative Multi-Agent", color: "#fbbc04", autonomy: 78,
+        components: ["Orchestrator", "Agent A", "Agent B", "Agent C", "Shared Memory", "Output"],
+        connections: [[0,1],[0,2],[0,3],[1,4],[2,4],[3,4],[4,0],[0,5]],
+        capabilities: ["Agent delegation", "Parallel execution", "Specialized roles", "Team coordination"],
+        examples: ["Dev team simulation", "Research team", "Content pipeline"],
+        features: ["Multiple specialized agents", "Inter-agent communication", "Parallel task execution"]
+      },
+      {
+        id: 4, name: "Self-Evolving", color: "#ea4335", autonomy: 95,
+        components: ["Goal", "Meta-Learner", "Agent Core", "Tools", "Long-term Memory", "Feedback Loop"],
+        connections: [[0,1],[1,2],[2,3],[3,2],[2,4],[4,2],[2,5],[5,1]],
+        capabilities: ["Self-improvement", "Strategy learning", "Long-term memory", "Goal decomposition"],
+        examples: ["Adaptive ops agent", "Self-improving coder", "Autonomous researcher"],
+        features: ["Learns from past runs", "Updates own strategies", "Persistent memory across sessions"]
+      }
+    ];
+
+    var tabsEl = document.getElementById("ale-tabs");
+    var diagramEl = document.getElementById("ale-diagram");
+    var barEl = document.getElementById("ale-bar");
+    var barLabelEl = document.getElementById("ale-bar-label");
+    var capEl = document.getElementById("ale-capabilities");
+    var exEl = document.getElementById("ale-examples");
+    var selected = 0;
+
+    function render(idx) {
+      selected = idx;
+      var lv = levels[idx];
+      // Tabs
+      tabsEl.innerHTML = "";
+      levels.forEach(function(l, i) {
+        var btn = document.createElement("button");
+        btn.textContent = "L" + l.id + ": " + l.name;
+        btn.style.cssText = "padding:10px 16px;border-radius:8px;border:2px solid " + (i === idx ? l.color : "#e5e7eb") + ";background:" + (i === idx ? l.color : "white") + ";color:" + (i === idx ? "white" : "#374151") + ";font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;";
+        btn.onmouseover = function() { if (i !== selected) { btn.style.borderColor = l.color; btn.style.background = l.color + "18"; }};
+        btn.onmouseout = function() { if (i !== selected) { btn.style.borderColor = "#e5e7eb"; btn.style.background = "white"; }};
+        btn.onclick = function() { render(i); };
+        tabsEl.appendChild(btn);
+      });
+      // Autonomy bar
+      barEl.style.width = lv.autonomy + "%";
+      barEl.style.background = "linear-gradient(90deg, " + lv.color + "88, " + lv.color + ")";
+      barLabelEl.textContent = lv.autonomy + "%";
+      // Diagram
+      var svg = '<svg viewBox="0 0 400 220" style="width:100%;height:auto;">';
+      var nc = lv.components.length;
+      var positions = [];
+      if (nc <= 3) {
+        for (var i=0;i<nc;i++) positions.push({x: 60 + i * 140, y: 110});
+      } else if (nc <= 4) {
+        positions = [{x:200,y:40},{x:60,y:130},{x:200,y:130},{x:340,y:130}];
+      } else if (nc <= 6) {
+        positions = [{x:200,y:35},{x:70,y:100},{x:200,y:100},{x:330,y:100},{x:130,y:180},{x:270,y:180}];
+      }
+      // Draw connections
+      lv.connections.forEach(function(c) {
+        var from = positions[c[0]], to = positions[c[1]];
+        if (from && to) {
+          var dx = to.x - from.x, dy = to.y - from.y;
+          var len = Math.sqrt(dx*dx + dy*dy);
+          var ux = dx/len, uy = dy/len;
+          var x1 = from.x + ux*32, y1 = from.y + uy*20;
+          var x2 = to.x - ux*32, y2 = to.y - uy*20;
+          svg += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+lv.color+'" stroke-width="2" stroke-opacity="0.5" marker-end="url(#ah'+idx+')"/>';
+        }
+      });
+      svg += '<defs><marker id="ah'+idx+'" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="'+lv.color+'" opacity="0.5"/></marker></defs>';
+      // Draw nodes
+      positions.forEach(function(p, i) {
+        if (i < nc) {
+          svg += '<rect x="'+(p.x-45)+'" y="'+(p.y-22)+'" width="90" height="44" rx="10" fill="white" stroke="'+lv.color+'" stroke-width="2"/>';
+          svg += '<text x="'+p.x+'" y="'+(p.y+1)+'" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="600" fill="#374151">'+lv.components[i]+'</text>';
+        }
+      });
+      svg += '</svg>';
+      diagramEl.innerHTML = '<div style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:8px;">ARCHITECTURE</div>' + svg;
+      // Capabilities
+      capEl.innerHTML = '<div style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:8px;">KEY CAPABILITIES</div>' +
+        lv.capabilities.map(function(c){ return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:14px;color:#374151;"><span style="width:8px;height:8px;border-radius:50%;background:'+lv.color+';flex-shrink:0;"></span>'+c+'</div>'; }).join("") +
+        '<div style="margin-top:12px;font-size:13px;font-weight:600;color:#6b7280;margin-bottom:6px;">KEY FEATURES</div>' +
+        lv.features.map(function(f){ return '<div style="font-size:13px;color:#6b7280;padding:2px 0;">- '+f+'</div>'; }).join("");
+      // Examples
+      exEl.innerHTML = '<div style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:8px;">EXAMPLES</div>' +
+        lv.examples.map(function(e){ return '<span style="display:inline-block;background:'+lv.color+'18;color:'+lv.color+';border-radius:6px;padding:4px 10px;font-size:13px;font-weight:500;margin:2px 4px 2px 0;">'+e+'</span>'; }).join("");
+    }
+    render(0);
+  })();
+  </script>
+</div>
+
 ---
 
 ## When to use agents vs. when a simple prompt is enough
@@ -380,7 +519,7 @@ The intern still makes mistakes sometimes - they are new, after all. But they ca
 
 Google Cloud provides infrastructure for building and deploying agents through several services:
 
-- **Vertex AI Agent Engine** - A managed platform for building, deploying, and managing AI agents in production. It handles orchestration, tool management, session state, and scaling so you can focus on agent logic rather than infrastructure.
+- **Vertex AI Agent Engine** (rebranded in 2026 as **Agent Runtime**, part of the Gemini Enterprise Agent Platform) - A managed platform for building, deploying, and managing AI agents in production. It handles orchestration, tool management, session state, and scaling so you can focus on agent logic rather than infrastructure.
 
 - **Gemini Models** - The language models that serve as the "brain" of your agents, available in different sizes for different use cases.
 
@@ -388,7 +527,7 @@ Google Cloud provides infrastructure for building and deploying agents through s
 
 We will use these tools throughout the course. For now, just know they exist.
 
-> **Learn more:** [Vertex AI Agent Engine Overview](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview)
+> **Learn more:** [Vertex AI Agent Engine Overview](https://docs.cloud.google.com/agent-builder/agent-engine/overview)
 
 ---
 
@@ -410,4 +549,4 @@ We will use these tools throughout the course. For now, just know they exist.
 
 In the next lesson, we will look under the hood at the "brain" of the agent - the language model. You will learn how LLMs process information, how different reasoning strategies affect agent performance, and how to pick the right model for the job.
 
-[Next: Lesson 2 - How Agents Think: LLMs as the Reasoning Engine -->](../02-how-agents-think/README.md)
+[Next: Lesson 2 - How Agents Think: LLMs as the Reasoning Engine -->](../02-how-agents-think/)

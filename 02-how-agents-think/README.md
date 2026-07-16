@@ -80,10 +80,10 @@ The **context window** is the total number of tokens a model can consider at onc
 
 | Model | Context Window |
 |---|---|
-| Gemini 2.5 Pro | 1,000,000 tokens |
-| Gemini 2.0 Flash | 1,000,000 tokens |
-| GPT-4o | 128,000 tokens |
-| Claude 3.5 Sonnet | 200,000 tokens |
+| Gemini 3.1 Pro | 1,000,000 tokens |
+| Gemini 3.5 Flash | 1,000,000 tokens |
+| GPT-5.6 | 1,050,000 tokens |
+| Claude Sonnet 5 | 1,000,000 tokens |
 
 **What goes into the context window during an agent call:**
 
@@ -113,6 +113,136 @@ Strategies to manage this:
 - **Truncate** long tool outputs to the relevant parts
 - **Use models with large context windows** for complex multi-step tasks
 - **Implement a sliding window** that drops older, less relevant context
+
+<div id="context-window-explorer" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 32px auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; box-sizing: border-box;">
+  <h3 style="margin: 0 0 4px 0; font-size: 20px; color: #1a1a2e;">Context Window Explorer</h3>
+  <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280;">Adjust the sliders to see how different components fill up the context window.</p>
+
+  <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+    <div style="flex: 1.2; min-width: 300px;">
+      <div id="cwe-sliders"></div>
+      <div id="cwe-model-select" style="margin-top: 16px; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
+        <div style="font-size: 13px; font-weight: 600; color: #6b7280; margin-bottom: 8px;">SELECT MODEL</div>
+        <div id="cwe-models" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+      </div>
+    </div>
+    <div style="flex: 0.8; min-width: 250px;">
+      <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 16px;">
+        <div style="font-size: 13px; font-weight: 600; color: #6b7280; margin-bottom: 8px;">CONTEXT WINDOW USAGE</div>
+        <div id="cwe-container" style="width: 100%; height: 320px; background: #f3f4f6; border-radius: 10px; border: 2px solid #e5e7eb; position: relative; overflow: hidden;"></div>
+        <div id="cwe-remaining" style="text-align: center; margin-top: 10px; font-size: 14px; font-weight: 600;"></div>
+      </div>
+      <div id="cwe-bar-chart" style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
+        <div style="font-size: 13px; font-weight: 600; color: #6b7280; margin-bottom: 8px;">TOKEN ALLOCATION</div>
+        <div id="cwe-bars"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    var components = [
+      { name: "System Prompt", color: "#4285f4", min: 100, max: 2000, value: 400, icon: "S" },
+      { name: "Tool Definitions", color: "#9333ea", min: 0, max: 5000, value: 1200, icon: "T" },
+      { name: "Conversation History", color: "#34a853", min: 0, max: 50000, value: 8000, icon: "C" },
+      { name: "Current Task", color: "#fbbc04", min: 50, max: 10000, value: 500, icon: "K" },
+      { name: "Retrieved Context (RAG)", color: "#ea4335", min: 0, max: 30000, value: 4000, icon: "R" }
+    ];
+    var models = [
+      { name: "GPT-5.6", tokens: 1050000 },
+      { name: "Claude Sonnet 5", tokens: 1000000 },
+      { name: "Gemini 3.5 Flash", tokens: 1000000 },
+      { name: "Gemini 3.1 Pro", tokens: 1000000 }
+    ];
+    var selectedModel = 0;
+
+    function getTotal() {
+      return components.reduce(function(s, c) { return s + c.value; }, 0);
+    }
+
+    function formatK(n) {
+      return n >= 1000 ? (n/1000).toFixed(n >= 10000 ? 0 : 1) + "K" : n.toString();
+    }
+
+    function renderSliders() {
+      var el = document.getElementById("cwe-sliders");
+      el.innerHTML = "";
+      components.forEach(function(c, i) {
+        var div = document.createElement("div");
+        div.style.cssText = "background:white;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);";
+        div.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+          '<span style="font-size:14px;font-weight:600;color:#374151;display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:3px;background:'+c.color+';display:inline-block;"></span>'+c.name+'</span>' +
+          '<span id="cwe-val-'+i+'" style="font-size:13px;font-weight:600;color:'+c.color+';">'+formatK(c.value)+' tokens</span></div>' +
+          '<input type="range" id="cwe-slider-'+i+'" min="'+c.min+'" max="'+c.max+'" value="'+c.value+'" style="width:100%;accent-color:'+c.color+';height:6px;cursor:pointer;">';
+        el.appendChild(div);
+        document.getElementById("cwe-slider-" + i).addEventListener("input", function(e) {
+          components[i].value = parseInt(e.target.value);
+          document.getElementById("cwe-val-" + i).textContent = formatK(components[i].value) + " tokens";
+          renderVisual();
+        });
+      });
+    }
+
+    function renderModels() {
+      var el = document.getElementById("cwe-models");
+      el.innerHTML = "";
+      models.forEach(function(m, i) {
+        var btn = document.createElement("button");
+        btn.textContent = m.name + " (" + formatK(m.tokens) + ")";
+        btn.style.cssText = "padding:6px 12px;border-radius:6px;border:2px solid " + (i === selectedModel ? "#4285f4" : "#e5e7eb") + ";background:" + (i === selectedModel ? "#4285f4" : "white") + ";color:" + (i === selectedModel ? "white" : "#374151") + ";font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;";
+        btn.onclick = function() { selectedModel = i; renderModels(); renderVisual(); };
+        el.appendChild(btn);
+      });
+    }
+
+    function renderVisual() {
+      var total = getTotal();
+      var maxTokens = models[selectedModel].tokens;
+      var pct = Math.min(total / maxTokens, 1);
+      var containerEl = document.getElementById("cwe-container");
+      var html = "";
+      var yPct = 0;
+      components.forEach(function(c) {
+        var h = (c.value / maxTokens) * 100;
+        if (h > 0.1) {
+          html += '<div style="position:absolute;left:0;right:0;top:'+yPct+'%;height:'+h+'%;background:'+c.color+';opacity:0.75;transition:all 0.3s;display:flex;align-items:center;justify-content:center;">' +
+            (h > 3 ? '<span style="color:white;font-size:11px;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,0.3);">'+c.name+' ('+formatK(c.value)+')</span>' : '') + '</div>';
+          yPct += h;
+        }
+      });
+      if (yPct < 100) {
+        html += '<div style="position:absolute;left:0;right:0;top:'+yPct+'%;bottom:0;background:repeating-linear-gradient(45deg,transparent,transparent 8px,#e5e7eb 8px,#e5e7eb 9px);display:flex;align-items:center;justify-content:center;">' +
+          '<span style="font-size:12px;color:#9ca3af;font-weight:500;">Available: '+formatK(maxTokens - total)+'</span></div>';
+      }
+      containerEl.innerHTML = html;
+      var remaining = maxTokens - total;
+      var remEl = document.getElementById("cwe-remaining");
+      if (remaining < 0) {
+        remEl.innerHTML = '<span style="color:#ea4335;">Over limit by ' + formatK(Math.abs(remaining)) + ' tokens!</span>';
+      } else if (remaining < maxTokens * 0.1) {
+        remEl.innerHTML = '<span style="color:#fbbc04;">Warning: Only ' + formatK(remaining) + ' tokens remaining (' + ((remaining/maxTokens)*100).toFixed(1) + '%)</span>';
+      } else {
+        remEl.innerHTML = '<span style="color:#34a853;">' + formatK(remaining) + ' tokens remaining (' + ((remaining/maxTokens)*100).toFixed(1) + '%)</span>';
+      }
+      // Bar chart
+      var barsEl = document.getElementById("cwe-bars");
+      barsEl.innerHTML = "";
+      components.forEach(function(c) {
+        var barPct = Math.min((c.value / total) * 100, 100);
+        barsEl.innerHTML += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
+          '<span style="font-size:11px;color:#6b7280;width:80px;text-align:right;flex-shrink:0;">'+c.name.split(" ")[0]+'</span>' +
+          '<div style="flex:1;background:#f3f4f6;border-radius:4px;height:16px;overflow:hidden;">' +
+          '<div style="width:'+barPct+'%;height:100%;background:'+c.color+';border-radius:4px;transition:width 0.3s;"></div></div>' +
+          '<span style="font-size:11px;color:#374151;font-weight:600;width:40px;">'+barPct.toFixed(0)+'%</span></div>';
+      });
+    }
+
+    renderSliders();
+    renderModels();
+    renderVisual();
+  })();
+  </script>
+</div>
 
 ### Attention: how the model focuses
 
@@ -233,7 +363,7 @@ Not all tasks need the most powerful model. Choosing the right model is an engin
 ```
 Lighter / Faster / Cheaper                  Heavier / Smarter / More Expensive
 |----------------------------------------------------------|
-Gemini Flash          Gemini Pro          Gemini 2.5 Pro
+Gemini Flash-Lite     Gemini Flash        Gemini Pro
 (simple tasks)        (balanced)          (complex reasoning)
 ```
 
@@ -245,7 +375,7 @@ Gemini Flash          Gemini Pro          Gemini 2.5 Pro
 | Data extraction ("Pull the date from this email") | Light (Flash) | Pattern matching, well-defined output |
 | Summarization | Light to Medium | Depends on length and complexity of source |
 | Multi-step reasoning | Medium to Heavy (Pro) | Requires sustained logical chains |
-| Complex code generation | Heavy (2.5 Pro) | Needs deep understanding of patterns and edge cases |
+| Complex code generation | Heavy (Pro) | Needs deep understanding of patterns and edge cases |
 | Agentic tool use | Medium to Heavy | Tool selection and result interpretation need strong reasoning |
 | Creative writing | Medium | Good results without the heaviest models |
 
@@ -292,11 +422,13 @@ This task needs deep reasoning, so it warrants a more capable model.
 
 Google Cloud provides access to Gemini models through Vertex AI:
 
-- **Gemini 2.0 Flash** - Fast and efficient for most agent tasks. Large context window (1M tokens). Good balance of capability and speed.
-- **Gemini 2.5 Pro** - Top-tier reasoning for complex tasks. Use when the task requires deep analysis, complex multi-step logic, or nuanced understanding.
-- **Gemini 2.0 Flash Lite** - Fastest and cheapest option for simple tasks like classification and extraction.
+- **Gemini 3.5 Flash** - Google's current default workhorse. Fast and efficient for most agent tasks, with strong agentic and coding performance and a large context window (1M tokens).
+- **Gemini 3.1 Pro** - Top-tier reasoning for complex tasks. Use when the task requires deep analysis, complex multi-step logic, or nuanced understanding.
+- **Gemini 3.1 Flash-Lite** - Fastest and cheapest option for simple tasks like classification and extraction.
 
-> **Learn more:** [Vertex AI Model Documentation](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models)
+> **Note:** Model names move quickly. The Gemini 2.5 family (2.5 Flash, 2.5 Pro, 2.5 Flash-Lite) is still available but is scheduled to retire on October 16, 2026, and Gemini 2.0 models were shut down on June 1, 2026. Always check the docs for the current model IDs.
+
+> **Learn more:** [Vertex AI Model Documentation](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/models)
 
 > **Learn more:** [Gemini API Documentation](https://ai.google.dev/gemini-api/docs)
 
@@ -587,4 +719,4 @@ LLMs will confidently generate plausible but incorrect information. For any fact
 
 The brain is important, but an agent that can only think is just a chatbot. In the next lesson, we give our agent hands - tools that let it interact with the world, call APIs, search the web, and execute code.
 
-[Next: Lesson 3 - Tools: Giving Agents Hands -->](../03-tools-giving-agents-hands/README.md)
+[Next: Lesson 3 - Tools: Giving Agents Hands -->](../03-tools-giving-agents-hands/)

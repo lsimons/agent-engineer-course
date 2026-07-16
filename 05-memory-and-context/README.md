@@ -13,8 +13,8 @@
 
 ## Prerequisites
 
-- [Lesson 2: How Agents Think](../02-how-agents-think/README.md)
-- [Lesson 4: Agentic Design Patterns](../04-agentic-design-patterns/README.md)
+- [Lesson 2: How Agents Think](../02-how-agents-think/)
+- [Lesson 4: Agentic Design Patterns](../04-agentic-design-patterns/)
 
 ---
 
@@ -57,10 +57,10 @@ Context windows have grown dramatically:
 
 | Model | Context window |
 |-------|---------------|
-| GPT-3 (2020) | 4K tokens |
-| GPT-4 (2023) | 128K tokens |
-| Gemini 1.5 Pro | 1M tokens |
-| Gemini 2.0 | 1M+ tokens |
+| GPT-3 (2020) | 2K tokens |
+| GPT-4 Turbo (2023) | 128K tokens |
+| Gemini 1.5 Pro (2024) | 1M tokens |
+| Gemini 3.1 Pro (2026) | 1M tokens |
 
 A token is roughly 3/4 of a word in English. So 1 million tokens is approximately 750,000 words - that is about 10 novels worth of text.
 
@@ -208,6 +208,223 @@ Procedural memory: "When a user reports a bug:
 | **Procedural** | Permanent | System prompt / config | By developers | Workflow instructions |
 | **Declarative** | Varies | Knowledge bases / RAG | By data pipelines | Product documentation |
 
+<div id="memory-explorer" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+  <h3 style="margin: 0 0 4px 0; font-size: 1.3rem; color: #1a1a2e;">Memory Architecture Explorer</h3>
+  <p style="margin: 0 0 16px 0; font-size: 0.9rem; color: #666;">Click each memory layer to explore what it stores, how it works, and see example data.</p>
+
+  <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+    <button onclick="setMemView('layers')" id="mem-btn-layers" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #4285f4; background: #4285f4; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Layer View</button>
+    <button onclick="setMemView('vector')" id="mem-btn-vector" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #4285f4; background: #fff; color: #4285f4; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Vector Store</button>
+    <button onclick="setMemView('graph')" id="mem-btn-graph" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #4285f4; background: #fff; color: #4285f4; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Knowledge Graph</button>
+  </div>
+
+  <div id="mem-layers-view">
+    <div id="mem-layers-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
+    <div id="mem-detail" style="margin-top: 16px; padding: 16px; background: #fff; border-radius: 12px; border: 2px solid #e0e0e0; min-height: 120px; display: none;">
+      <div id="mem-detail-content"></div>
+    </div>
+    <div id="mem-flow-section" style="margin-top: 16px;">
+      <button onclick="runMemoryFlow()" style="padding: 10px 20px; border-radius: 8px; border: none; background: #34a853; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">&#9654; Simulate Data Flow</button>
+      <div id="mem-flow-log" style="margin-top: 12px; font-size: 0.82rem; color: #444; line-height: 1.7;"></div>
+    </div>
+  </div>
+
+  <div id="mem-vector-view" style="display: none;">
+    <div style="background: #fff; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0;">
+      <h4 style="margin: 0 0 12px 0; color: #4285f4;">Vector Store Approach</h4>
+      <p style="margin: 0 0 16px 0; font-size: 0.85rem; color: #555;">Memories are converted to numerical vectors (embeddings) and stored for similarity search.</p>
+      <div style="display: flex; flex-direction: column; gap: 10px;" id="vector-entries"></div>
+      <div style="margin-top: 16px; padding: 12px; background: #f0f7ff; border-radius: 8px;">
+        <strong style="font-size: 0.85rem; color: #333;">Try a query:</strong>
+        <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+          <button onclick="vectorQuery('deployment')" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #4285f4; background: #fff; color: #4285f4; font-size: 0.8rem; cursor: pointer;">deployment issues</button>
+          <button onclick="vectorQuery('preferences')" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #4285f4; background: #fff; color: #4285f4; font-size: 0.8rem; cursor: pointer;">user preferences</button>
+          <button onclick="vectorQuery('api')" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #4285f4; background: #fff; color: #4285f4; font-size: 0.8rem; cursor: pointer;">API errors</button>
+        </div>
+        <div id="vector-results" style="margin-top: 10px; font-size: 0.82rem; color: #444;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="mem-graph-view" style="display: none;">
+    <div style="background: #fff; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0;">
+      <h4 style="margin: 0 0 12px 0; color: #9333ea;">Knowledge Graph Approach</h4>
+      <p style="margin: 0 0 16px 0; font-size: 0.85rem; color: #555;">Memories are stored as entities and relationships, enabling structured queries.</p>
+      <canvas id="kg-canvas" width="760" height="300" style="width: 100%; border-radius: 8px; background: #faf8ff;"></canvas>
+      <div style="margin-top: 16px; padding: 12px; background: #f8f0ff; border-radius: 8px;">
+        <strong style="font-size: 0.85rem; color: #333;">Query the graph:</strong>
+        <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+          <button onclick="graphQuery('team')" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #9333ea; background: #fff; color: #9333ea; font-size: 0.8rem; cursor: pointer;">Alex's team</button>
+          <button onclick="graphQuery('deploys')" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #9333ea; background: #fff; color: #9333ea; font-size: 0.8rem; cursor: pointer;">What deploys where?</button>
+          <button onclick="graphQuery('prefs')" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #9333ea; background: #fff; color: #9333ea; font-size: 0.8rem; cursor: pointer;">User preferences</button>
+        </div>
+        <div id="graph-results" style="margin-top: 10px; font-size: 0.82rem; color: #444;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var memLayers = [
+    { id: 'short', name: 'Short-term (Working) Memory', color: '#4285f4', icon: '💬',
+      stores: 'Current conversation messages, session variables, tool results in progress',
+      storage: 'In-memory (context window)', scope: 'Single session', persistence: 'Ephemeral — lost when session ends',
+      example: '{"role": "user", "content": "My name is Alex and I prefer dark mode"}' },
+    { id: 'long', name: 'Long-term Memory', color: '#34a853', icon: '🧠',
+      stores: 'User preferences, past interaction summaries, learned facts about the user',
+      storage: 'Vector database / Key-value store', scope: 'Per user, cross-session', persistence: 'Permanent — survives across sessions',
+      example: '{"user": "Alex", "preferences": {"theme": "dark", "language": "TypeScript"}, "last_topic": "Cloud Run deployment"}' },
+    { id: 'procedural', name: 'Procedural Memory', color: '#fbbc04', icon: '⚙️',
+      stores: 'Workflow instructions, tool usage patterns, standard operating procedures',
+      storage: 'System prompt / Configuration files', scope: 'Organization-wide', persistence: 'Permanent — updated by developers',
+      example: '"When user reports a bug: 1) Ask for repro steps, 2) Check logs, 3) Search similar issues, 4) Propose fix"' },
+    { id: 'declarative', name: 'Declarative / Semantic Memory', color: '#9333ea', icon: '📚',
+      stores: 'Facts, documentation, knowledge base entries, embeddings of reference material',
+      storage: 'Vector DB / Knowledge graph', scope: 'Shared across agents', persistence: 'Permanent — updated by data pipelines',
+      example: '{"fact": "API rate limit is 100 req/min", "source": "docs/api-limits.md", "embedding": [0.12, -0.34, ...]}' }
+  ];
+
+  var container = document.getElementById('mem-layers-container');
+  memLayers.forEach(function(layer, i) {
+    var div = document.createElement('div');
+    div.id = 'mem-layer-' + layer.id;
+    div.onclick = function() { showMemDetail(i); };
+    div.style.cssText = 'padding: 14px 18px; background: #fff; border-radius: 10px; border-left: 5px solid ' + layer.color + '; cursor: pointer; transition: all 0.25s; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);';
+    div.onmouseenter = function() { this.style.transform = 'translateX(6px)'; this.style.boxShadow = '0 3px 12px rgba(0,0,0,0.1)'; };
+    div.onmouseleave = function() { this.style.transform = 'translateX(0)'; this.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)'; };
+    div.innerHTML = '<span style="font-size: 1.4rem;">' + layer.icon + '</span><div><strong style="color: ' + layer.color + '; font-size: 0.95rem;">' + layer.name + '</strong><div style="font-size: 0.8rem; color: #888; margin-top: 2px;">Scope: ' + layer.scope + ' · ' + layer.persistence.split('—')[0].trim() + '</div></div>';
+    container.appendChild(div);
+  });
+
+  window.showMemDetail = function(i) {
+    var layer = memLayers[i];
+    var detail = document.getElementById('mem-detail');
+    detail.style.display = 'block';
+    detail.style.borderColor = layer.color;
+    document.getElementById('mem-detail-content').innerHTML =
+      '<h4 style="margin:0 0 10px 0;color:' + layer.color + ';">' + layer.icon + ' ' + layer.name + '</h4>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:0.85rem;margin-bottom:12px;">' +
+        '<div><strong style="color:#666;">Stores:</strong><br>' + layer.stores + '</div>' +
+        '<div><strong style="color:#666;">How stored:</strong><br>' + layer.storage + '</div>' +
+        '<div><strong style="color:#666;">Scope:</strong><br>' + layer.scope + '</div>' +
+        '<div><strong style="color:#666;">Persistence:</strong><br>' + layer.persistence + '</div>' +
+      '</div>' +
+      '<div style="background:#f4f4f4;padding:10px 14px;border-radius:8px;font-family:monospace;font-size:0.78rem;overflow-x:auto;white-space:pre-wrap;color:#333;">' + layer.example + '</div>';
+  };
+
+  window.setMemView = function(view) {
+    ['layers','vector','graph'].forEach(function(v) {
+      document.getElementById('mem-' + v + '-view').style.display = v === view ? 'block' : 'none';
+      var btn = document.getElementById('mem-btn-' + v);
+      btn.style.background = v === view ? '#4285f4' : '#fff';
+      btn.style.color = v === view ? '#fff' : '#4285f4';
+    });
+    if (view === 'graph') drawKnowledgeGraph();
+    if (view === 'vector') renderVectorEntries();
+  };
+
+  var vectorData = [
+    { text: 'Alex prefers dark mode and uses TypeScript', embedding: '[0.82, -0.15, 0.43, ...]', tags: ['preferences'] },
+    { text: 'Cloud Run deployment failed on Jan 3 due to service account', embedding: '[0.11, 0.67, -0.29, ...]', tags: ['deployment'] },
+    { text: 'API rate limit is 100 requests per minute', embedding: '[-0.34, 0.52, 0.18, ...]', tags: ['api'] },
+    { text: 'Production database is on us-central1', embedding: '[0.22, -0.41, 0.63, ...]', tags: ['deployment'] },
+    { text: 'User asked about Python async patterns last week', embedding: '[0.55, 0.08, -0.72, ...]', tags: ['preferences'] },
+    { text: 'Payment service threw 503 errors during peak hours', embedding: '[-0.19, 0.77, 0.31, ...]', tags: ['api'] }
+  ];
+
+  window.renderVectorEntries = function() {
+    var el = document.getElementById('vector-entries');
+    el.innerHTML = vectorData.map(function(d, i) {
+      return '<div style="display:flex;gap:12px;align-items:center;padding:10px 14px;background:#f8f9fa;border-radius:8px;font-size:0.82rem;">' +
+        '<div style="min-width:28px;height:28px;border-radius:50%;background:#4285f4;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;">' + (i+1) + '</div>' +
+        '<div style="flex:1;"><div style="color:#333;">' + d.text + '</div><div style="color:#999;font-family:monospace;font-size:0.72rem;margin-top:2px;">embedding: ' + d.embedding + '</div></div></div>';
+    }).join('');
+  };
+
+  window.vectorQuery = function(tag) {
+    var results = vectorData.filter(function(d) { return d.tags.indexOf(tag) !== -1; });
+    var el = document.getElementById('vector-results');
+    el.innerHTML = '<div style="color:#4285f4;font-weight:600;margin-bottom:4px;">Top matches (similarity search):</div>' +
+      results.map(function(r, i) {
+        return '<div style="padding:4px 0;">🔍 <strong>' + (0.95 - i * 0.08).toFixed(2) + '</strong> — ' + r.text + '</div>';
+      }).join('');
+  };
+
+  window.drawKnowledgeGraph = function() {
+    var canvas = document.getElementById('kg-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    var nodes = [
+      { x: 380, y: 60, label: 'Alex', color: '#4285f4', r: 28 },
+      { x: 160, y: 150, label: 'Payments API', color: '#34a853', r: 24 },
+      { x: 600, y: 150, label: 'Cloud Run', color: '#ea4335', r: 24 },
+      { x: 160, y: 260, label: 'Platform Team', color: '#fbbc04', r: 24 },
+      { x: 600, y: 260, label: 'Dark Mode', color: '#9333ea', r: 22 },
+      { x: 380, y: 260, label: 'TypeScript', color: '#9333ea', r: 22 }
+    ];
+    var edges = [
+      { from: 0, to: 1, label: 'works_on' },
+      { from: 1, to: 2, label: 'deployed_on' },
+      { from: 0, to: 3, label: 'member_of' },
+      { from: 0, to: 4, label: 'prefers' },
+      { from: 0, to: 5, label: 'uses' },
+      { from: 3, to: 1, label: 'owns' }
+    ];
+    edges.forEach(function(e) {
+      var f = nodes[e.from], t = nodes[e.to];
+      ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(t.x, t.y);
+      ctx.strokeStyle = '#ccc'; ctx.lineWidth = 2; ctx.stroke();
+      var mx = (f.x + t.x) / 2, my = (f.y + t.y) / 2;
+      ctx.fillStyle = '#888'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(e.label, mx, my - 4);
+    });
+    nodes.forEach(function(n) {
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = n.color; ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(n.label, n.x, n.y);
+    });
+  };
+
+  window.graphQuery = function(q) {
+    var results = {
+      team: 'Alex --member_of--> Platform Team --owns--> Payments API',
+      deploys: 'Payments API --deployed_on--> Cloud Run',
+      prefs: 'Alex --prefers--> Dark Mode, Alex --uses--> TypeScript'
+    };
+    document.getElementById('graph-results').innerHTML =
+      '<div style="color:#9333ea;font-weight:600;margin-bottom:4px;">Graph traversal result:</div>' +
+      '<div style="font-family:monospace;padding:8px;background:#faf8ff;border-radius:6px;">' + results[q] + '</div>';
+  };
+
+  var flowSteps = [
+    { text: '📩 User says: "What deployment issues did we have last month?"', color: '#4285f4' },
+    { text: '💬 Short-term memory: stores the current message in context window', color: '#4285f4' },
+    { text: '⚙️ Procedural memory: retrieves workflow — "For history questions: check long-term memory first"', color: '#fbbc04' },
+    { text: '🧠 Long-term memory: recalls "Alex had Cloud Run deployment failure on Jan 3"', color: '#34a853' },
+    { text: '📚 Declarative memory: RAG search finds incident report with full details', color: '#9333ea' },
+    { text: '✅ Agent combines all memory types into a grounded response', color: '#34a853' }
+  ];
+
+  window.runMemoryFlow = function() {
+    var log = document.getElementById('mem-flow-log');
+    log.innerHTML = '';
+    flowSteps.forEach(function(step, i) {
+      setTimeout(function() {
+        var div = document.createElement('div');
+        div.style.cssText = 'padding: 8px 12px; margin-bottom: 6px; border-left: 3px solid ' + step.color + '; background: #fff; border-radius: 0 6px 6px 0; opacity: 0; transition: opacity 0.4s;';
+        div.textContent = step.text;
+        log.appendChild(div);
+        requestAnimationFrame(function() { div.style.opacity = '1'; });
+      }, i * 800);
+    });
+  };
+})();
+</script>
+
 ---
 
 ## Sessions: containers for conversations
@@ -249,8 +466,8 @@ State is useful because it gives the agent quick access to important facts witho
 
 Google Cloud provides session management through the Agent Development Kit (ADK) and Vertex AI:
 
-- **ADK Sessions:** The [ADK session system](https://google.github.io/adk-docs/sessions/) provides built-in session management with event tracking and state.
-- **Vertex AI Sessions:** [Vertex AI Agent Engine sessions](https://cloud.google.com/agent-builder/agent-engine/sessions/overview) offer managed session storage with automatic scaling.
+- **ADK Sessions:** The [ADK session system](https://adk.dev/sessions/) provides built-in session management with event tracking and state.
+- **Vertex AI Sessions:** [Vertex AI Agent Engine sessions](https://docs.cloud.google.com/agent-builder/agent-engine/manage/sessions) offer managed session storage with automatic scaling.
 
 These handle the infrastructure of storing and retrieving sessions, so you can focus on the agent logic.
 
@@ -296,7 +513,7 @@ Agent:
 
 Memory tells the agent *what to look for*. RAG provides the *detailed information*.
 
-We will cover RAG in depth in [Lesson 8: Agentic RAG](../08-agentic-rag/README.md).
+We will cover RAG in depth in [Lesson 8: Agentic RAG](../08-agentic-rag/).
 
 ---
 
@@ -588,11 +805,11 @@ The context engineering layer assembles the right context *before* the LLM sees 
 
 ## Further reading
 
-- [ADK Sessions documentation](https://google.github.io/adk-docs/sessions/)
-- [Vertex AI Agent Engine - Manage Sessions](https://cloud.google.com/agent-builder/agent-engine/sessions/overview)
-- [Vertex AI Vector Search](https://cloud.google.com/vertex-ai/docs/vector-search/overview)
+- [ADK Sessions documentation](https://adk.dev/sessions/)
+- [Vertex AI Agent Engine - Manage Sessions](https://docs.cloud.google.com/agent-builder/agent-engine/manage/sessions)
+- [Vertex AI Vector Search](https://docs.cloud.google.com/vertex-ai/docs/vector-search/overview)
 - [Google Cloud AI codelabs](https://codelabs.developers.google.com/?cat=AI)
 
 ---
 
-**Next lesson:** [Planning and Reasoning - How Agents Tackle Complex Tasks](../06-planning-and-reasoning/README.md)
+**Next lesson:** [Planning and Reasoning - How Agents Tackle Complex Tasks](../06-planning-and-reasoning/)

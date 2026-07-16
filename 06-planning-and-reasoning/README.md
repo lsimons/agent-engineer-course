@@ -13,9 +13,9 @@
 
 ## Prerequisites
 
-- [Lesson 2: How Agents Think](../02-how-agents-think/README.md)
-- [Lesson 4: Agentic Design Patterns](../04-agentic-design-patterns/README.md)
-- [Lesson 5: Memory and Context](../05-memory-and-context/README.md)
+- [Lesson 2: How Agents Think](../02-how-agents-think/)
+- [Lesson 4: Agentic Design Patterns](../04-agentic-design-patterns/)
+- [Lesson 5: Memory and Context](../05-memory-and-context/)
 
 ---
 
@@ -178,7 +178,7 @@ Execution phase:
 
 ### Reactive approach
 
-**How it works:** The agent takes things one step at a time. It looks at the current situation, decides the best next action, takes it, and reassesses. This is essentially the ReAct pattern from [Lesson 4](../04-agentic-design-patterns/README.md).
+**How it works:** The agent takes things one step at a time. It looks at the current situation, decides the best next action, takes it, and reassesses. This is essentially the ReAct pattern from [Lesson 4](../04-agentic-design-patterns/).
 
 ```
 User: "Migrate our application from Python 2 to Python 3."
@@ -247,6 +247,160 @@ This gives you the structure of planning with the adaptability of reactive execu
 | Speed matters more than thoroughness | | Yes |
 | Failure is costly | Yes | |
 | Task is simple (fewer than 3 steps) | | Yes |
+
+<div id="planning-sim" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+  <h3 style="margin: 0 0 4px 0; font-size: 1.3rem; color: #1a1a2e;">Planning Strategy Simulator</h3>
+  <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: #666;">Task: <em>"Research and compare the top 3 JavaScript frameworks"</em></p>
+
+  <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+    <button onclick="setPlanTab('linear')" id="plan-btn-linear" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #4285f4; background: #4285f4; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Linear Plan</button>
+    <button onclick="setPlanTab('hierarchical')" id="plan-btn-hierarchical" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #34a853; background: #fff; color: #34a853; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Hierarchical Plan</button>
+    <button onclick="setPlanTab('adaptive')" id="plan-btn-adaptive" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #9333ea; background: #fff; color: #9333ea; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Adaptive / Reactive</button>
+  </div>
+
+  <div id="plan-content" style="background: #fff; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0; min-height: 300px;">
+    <div id="plan-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+      <div id="plan-title" style="font-weight: 700; font-size: 1rem;"></div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button onclick="planPlay()" id="plan-play-btn" style="padding: 6px 16px; border-radius: 6px; border: none; background: #4285f4; color: #fff; font-size: 0.82rem; font-weight: 600; cursor: pointer;">&#9654; Play</button>
+        <button onclick="planReset()" style="padding: 6px 16px; border-radius: 6px; border: 1px solid #ccc; background: #fff; color: #666; font-size: 0.82rem; cursor: pointer;">Reset</button>
+      </div>
+    </div>
+    <div id="plan-steps" style="display: flex; flex-direction: column; gap: 6px;"></div>
+    <div id="plan-meters" style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var plans = {
+    linear: {
+      title: 'Linear Plan',
+      titleColor: '#4285f4',
+      desc: 'Simple sequential steps, no adaptation. Each step executes in fixed order.',
+      steps: [
+        { text: 'Search for "top JavaScript frameworks 2025"', type: 'action' },
+        { text: 'Read first 5 results', type: 'action' },
+        { text: 'List frameworks: React, Vue, Angular', type: 'action' },
+        { text: 'Research React features and performance', type: 'action' },
+        { text: 'Research Vue features and performance', type: 'action' },
+        { text: 'Research Angular features and performance', type: 'action' },
+        { text: 'Write comparison table', type: 'action' },
+        { text: 'Write recommendation', type: 'action' }
+      ],
+      meters: { complexity: 20, robustness: 30, adaptability: 10 }
+    },
+    hierarchical: {
+      title: 'Hierarchical Plan',
+      titleColor: '#34a853',
+      desc: 'Break into sub-goals, each with sub-steps. Structured decomposition.',
+      steps: [
+        { text: 'GOAL: Compare top 3 JS frameworks', type: 'goal' },
+        { text: '  SUB-GOAL 1: Identify frameworks', type: 'subgoal' },
+        { text: '    Search multiple sources for rankings', type: 'action' },
+        { text: '    Cross-reference to pick top 3', type: 'action' },
+        { text: '  SUB-GOAL 2: Research each framework', type: 'subgoal' },
+        { text: '    Research React (features, perf, ecosystem)', type: 'action' },
+        { text: '    Research Vue (features, perf, ecosystem)', type: 'action' },
+        { text: '    Research Angular (features, perf, ecosystem)', type: 'action' },
+        { text: '  SUB-GOAL 3: Compare and recommend', type: 'subgoal' },
+        { text: '    Build comparison matrix', type: 'action' },
+        { text: '    Score each framework on criteria', type: 'action' },
+        { text: '    Write recommendation with rationale', type: 'action' }
+      ],
+      meters: { complexity: 55, robustness: 70, adaptability: 45 }
+    },
+    adaptive: {
+      title: 'Adaptive / Reactive',
+      titleColor: '#9333ea',
+      desc: 'Start, observe, replan as needed. Adjusts based on what it discovers.',
+      steps: [
+        { text: 'Search for JS framework comparisons', type: 'action' },
+        { text: 'OBSERVE: Results are outdated (2023 data)', type: 'observe' },
+        { text: 'REPLAN: Search specifically for 2025 data', type: 'replan' },
+        { text: 'Search for "JavaScript frameworks 2025 benchmarks"', type: 'action' },
+        { text: 'OBSERVE: Found React, Vue, Svelte trending (not Angular)', type: 'observe' },
+        { text: 'REPLAN: Adjust framework list to include Svelte', type: 'replan' },
+        { text: 'Research React 19 new features', type: 'action' },
+        { text: 'Research Vue 3.5 improvements', type: 'action' },
+        { text: 'Research Svelte 5 runes system', type: 'action' },
+        { text: 'OBSERVE: Need performance benchmarks for fair comparison', type: 'observe' },
+        { text: 'REPLAN: Add benchmark research step', type: 'replan' },
+        { text: 'Find and analyze JS framework benchmarks', type: 'action' },
+        { text: 'Synthesize comparison with current data', type: 'action' },
+        { text: 'Write recommendation noting Svelte as rising contender', type: 'action' }
+      ],
+      meters: { complexity: 75, robustness: 90, adaptability: 95 }
+    }
+  };
+
+  var currentPlan = 'linear';
+  var currentStep = -1;
+  var playInterval = null;
+
+  window.setPlanTab = function(tab) {
+    currentPlan = tab;
+    currentStep = -1;
+    if (playInterval) { clearInterval(playInterval); playInterval = null; }
+    var colors = { linear: '#4285f4', hierarchical: '#34a853', adaptive: '#9333ea' };
+    ['linear','hierarchical','adaptive'].forEach(function(t) {
+      var btn = document.getElementById('plan-btn-' + t);
+      btn.style.background = t === tab ? colors[t] : '#fff';
+      btn.style.color = t === tab ? '#fff' : colors[t];
+      btn.style.borderColor = colors[t];
+    });
+    renderPlan();
+  };
+
+  function renderPlan() {
+    var plan = plans[currentPlan];
+    document.getElementById('plan-title').innerHTML = '<span style="color:' + plan.titleColor + ';">' + plan.title + '</span> <span style="font-weight:400;font-size:0.82rem;color:#888;">— ' + plan.desc + '</span>';
+    var stepsEl = document.getElementById('plan-steps');
+    stepsEl.innerHTML = plan.steps.map(function(s, i) {
+      var typeColors = { action: '#4285f4', goal: '#1a1a2e', subgoal: '#34a853', observe: '#fbbc04', replan: '#ea4335' };
+      var typeBg = { action: '#f0f7ff', goal: '#f0f0f0', subgoal: '#f0faf0', observe: '#fffbf0', replan: '#fff0f0' };
+      var typeIcons = { action: '▸', goal: '◆', subgoal: '◇', observe: '👁', replan: '🔄' };
+      var active = i <= currentStep;
+      return '<div style="padding:8px 14px;border-radius:8px;background:' + (active ? typeBg[s.type] : '#fafafa') + ';border-left:4px solid ' + (active ? typeColors[s.type] : '#e0e0e0') + ';opacity:' + (active ? '1' : '0.5') + ';transition:all 0.3s;font-size:0.85rem;display:flex;align-items:center;gap:8px;">' +
+        '<span style="font-size:0.9rem;">' + typeIcons[s.type] + '</span>' +
+        '<span style="color:' + (active ? '#333' : '#999') + ';">' + s.text + '</span>' +
+        (i === currentStep ? '<span style="margin-left:auto;font-size:0.7rem;background:' + typeColors[s.type] + ';color:#fff;padding:2px 8px;border-radius:10px;">current</span>' : '') +
+        '</div>';
+    }).join('');
+
+    var m = plan.meters;
+    document.getElementById('plan-meters').innerHTML =
+      renderMeter('Complexity', m.complexity, '#fbbc04') +
+      renderMeter('Robustness', m.robustness, '#34a853') +
+      renderMeter('Adaptability', m.adaptability, '#9333ea');
+  }
+
+  function renderMeter(label, value, color) {
+    return '<div style="text-align:center;"><div style="font-size:0.75rem;font-weight:600;color:#666;margin-bottom:6px;">' + label + '</div>' +
+      '<div style="height:8px;background:#e8e8e8;border-radius:4px;overflow:hidden;"><div style="height:100%;width:' + value + '%;background:' + color + ';border-radius:4px;transition:width 0.6s;"></div></div>' +
+      '<div style="font-size:0.72rem;color:#888;margin-top:3px;">' + value + '%</div></div>';
+  }
+
+  window.planPlay = function() {
+    if (playInterval) { clearInterval(playInterval); playInterval = null; }
+    var plan = plans[currentPlan];
+    if (currentStep >= plan.steps.length - 1) currentStep = -1;
+    playInterval = setInterval(function() {
+      currentStep++;
+      renderPlan();
+      if (currentStep >= plan.steps.length - 1) clearInterval(playInterval);
+    }, 600);
+  };
+
+  window.planReset = function() {
+    if (playInterval) { clearInterval(playInterval); playInterval = null; }
+    currentStep = -1;
+    renderPlan();
+  };
+
+  renderPlan();
+})();
+</script>
 
 ---
 
@@ -517,7 +671,7 @@ The orchestration layer is the control system that manages how an agent plans, r
 
 ### Orchestration in practice
 
-In Google Cloud's [Vertex AI Agent Engine](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview), the orchestration layer handles:
+In Google Cloud's [Vertex AI Agent Engine](https://docs.cloud.google.com/agent-builder/agent-engine/overview), the orchestration layer handles:
 
 - **Routing:** Directing user requests to the right agent or tool
 - **State management:** Tracking where the agent is in its plan
@@ -525,7 +679,7 @@ In Google Cloud's [Vertex AI Agent Engine](https://cloud.google.com/vertex-ai/ge
 - **Error handling:** Catching failures and deciding how to recover
 - **Context management:** Keeping the context window organized
 
-The [Agent Development Kit (ADK)](https://google.github.io/adk-docs/) gives you building blocks for customizing orchestration behavior. You define the agent's tools, instructions, and behavior - the framework handles the execution loop.
+The [Agent Development Kit (ADK)](https://adk.dev/) gives you building blocks for customizing orchestration behavior. You define the agent's tools, instructions, and behavior - the framework handles the execution loop.
 
 ### Key orchestration decisions
 
@@ -636,7 +790,7 @@ Agent: "I was unable to complete the task due to formatting errors."
 - Summarize completed steps instead of keeping full details
 - Store intermediate results externally and reference them by ID
 - Budget context space: reserve a fixed amount for reasoning about the current step
-- See [Lesson 5: Memory and Context](../05-memory-and-context/README.md) for detailed strategies
+- See [Lesson 5: Memory and Context](../05-memory-and-context/) for detailed strategies
 
 ### Failure mode summary
 
@@ -707,10 +861,10 @@ Notice how the agent uses hierarchical planning upfront, ReAct-style execution w
 
 ## Further reading
 
-- [Vertex AI Agent Engine overview](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview)
-- [Agent Development Kit (ADK) documentation](https://google.github.io/adk-docs/)
+- [Vertex AI Agent Engine overview](https://docs.cloud.google.com/agent-builder/agent-engine/overview)
+- [Agent Development Kit (ADK) documentation](https://adk.dev/)
 - [Google Cloud AI codelabs](https://codelabs.developers.google.com/?cat=AI)
 
 ---
 
-**Next lesson:** [Multi-Agent Systems](../07-multi-agent-systems/README.md)
+**Next lesson:** [Multi-Agent Systems](../07-multi-agent-systems/)

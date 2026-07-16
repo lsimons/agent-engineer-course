@@ -1,8 +1,8 @@
-# Lesson 15: where to go from here
+# Lesson 19: where to go from here
 
 ## Introduction
 
-You made it. Fifteen lessons covering everything from "what is an agent?" to building multi-agent systems with protocols and production infrastructure. That is a solid foundation.
+You made it. Nineteen lessons covering everything from "what is an agent?" to building multi-agent systems with protocols and production infrastructure. That is a solid foundation.
 
 But foundations are meant to be built on. This final lesson is your launching pad - a curated map of where to go next depending on your goals, the best resources to bookmark, and the emerging areas that will shape the future of agent development.
 
@@ -59,7 +59,7 @@ Not everyone has the same next step. Here are four paths based on common goals.
 You have read the theory and you want to get your hands dirty.
 
 **Start here:**
-1. Follow the [ADK Quickstart](https://google.github.io/adk-docs/get-started/quickstart/) end to end. Build the sample agent, run it locally, and make sure everything works.
+1. Follow the [ADK Quickstart](https://adk.dev/get-started/quickstart/) end to end. Build the sample agent, run it locally, and make sure everything works.
 2. Modify the quickstart agent. Change the system instructions. Add a custom tool. Break it, fix it, and learn how the pieces fit.
 3. Clone the [Agent Starter Pack](https://github.com/GoogleCloudPlatform/agent-starter-pack) for a production-ready template with CI/CD, monitoring, and deployment already configured.
 4. Pick a small, real problem and build an agent to solve it. Keep it scoped - one agent, two to three tools, a clear success metric.
@@ -85,7 +85,7 @@ You have a working agent and you need to run it in production.
 
 **Start here:**
 1. Re-read Lesson 11 (From Prototype to Production) with a focus on the operational concerns: monitoring, logging, error handling, and rollback.
-2. Explore [Vertex AI Agent Engine](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview) for managed deployment that handles scaling, session management, and infrastructure.
+2. Explore [Vertex AI Agent Engine](https://docs.cloud.google.com/agent-builder/agent-engine/overview) for managed deployment that handles scaling, session management, and infrastructure.
 3. Study the Google Cloud whitepaper on "From Prototype to Production" for a detailed treatment of the deployment lifecycle.
 4. Set up CI/CD for your agent. Treat prompt changes with the same rigor as code changes - version them, review them, test them.
 5. Implement comprehensive observability. You need to see what your agent is doing in production, not just whether it returned a response.
@@ -104,6 +104,219 @@ You want the research-level understanding.
 
 **Revisit:** Lessons 2 (How Agents Think), 6 (Planning), 7 (Multi-Agent Systems)
 
+<div id="learning-path" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+  <h3 style="margin: 0 0 4px 0; font-size: 1.2rem; color: #1a1a2e;">Learning Path Recommender</h3>
+  <p style="margin: 0 0 16px 0; font-size: 0.85rem; color: #666;">Answer two questions or pick a path directly to get a personalized roadmap.</p>
+
+  <!-- Quick Pick Paths -->
+  <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+    <button class="lp-quick" data-path="builder" style="padding: 8px 16px; border: 2px solid #4285f4; border-radius: 8px; background: white; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #4285f4; transition: all 0.2s;">&#128736; Builder</button>
+    <button class="lp-quick" data-path="improver" style="padding: 8px 16px; border: 2px solid #34a853; border-radius: 8px; background: white; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #34a853; transition: all 0.2s;">&#128295; Improver</button>
+    <button class="lp-quick" data-path="deployer" style="padding: 8px 16px; border: 2px solid #fbbc04; border-radius: 8px; background: white; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #9a7400; transition: all 0.2s;">&#128640; Deployer</button>
+    <button class="lp-quick" data-path="theorist" style="padding: 8px 16px; border: 2px solid #9333ea; border-radius: 8px; background: white; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #9333ea; transition: all 0.2s;">&#128218; Theorist</button>
+  </div>
+
+  <!-- Quiz Area -->
+  <div id="lp-quiz" style="background: white; border-radius: 12px; border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 16px;">
+    <!-- Step 1 -->
+    <div id="lp-step1">
+      <div style="font-weight: 700; font-size: 0.95rem; color: #1a1a2e; margin-bottom: 4px;">Step 1 of 2</div>
+      <div style="font-size: 0.88rem; color: #555; margin-bottom: 14px;">What is your primary goal?</div>
+      <div id="lp-q1-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"></div>
+    </div>
+    <!-- Step 2 -->
+    <div id="lp-step2" style="display: none;">
+      <div style="font-weight: 700; font-size: 0.95rem; color: #1a1a2e; margin-bottom: 4px;">Step 2 of 2</div>
+      <div style="font-size: 0.88rem; color: #555; margin-bottom: 14px;">What is your experience level?</div>
+      <div id="lp-q2-options" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;"></div>
+    </div>
+  </div>
+
+  <!-- Roadmap -->
+  <div id="lp-roadmap" style="display: none;"></div>
+
+  <!-- Reset -->
+  <div style="text-align: center; margin-top: 12px;">
+    <button id="lp-reset" style="padding: 6px 16px; background: #e8eaed; color: #555; border: none; border-radius: 6px; cursor: pointer; font-size: 0.82rem; display: none;">Start Over</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  const goals = [
+    { id: 'build', label: 'Build agents from scratch', icon: '&#128736;' },
+    { id: 'improve', label: 'Improve existing agents', icon: '&#128295;' },
+    { id: 'deploy', label: 'Deploy agents to production', icon: '&#128640;' },
+    { id: 'theory', label: 'Understand agent theory', icon: '&#128218;' }
+  ];
+  const levels = [
+    { id: 'new', label: 'New to AI/ML' },
+    { id: 'some', label: 'Some ML experience' },
+    { id: 'experienced', label: 'Experienced ML engineer' }
+  ];
+
+  const pathData = {
+    builder: {
+      name: 'The Builder Path', color: '#4285f4',
+      stages: [
+        { type: 'learn', title: 'Foundations', items: ['Lesson 1: What Are AI Agents?', 'Lesson 2: How Agents Think', 'Lesson 3: Tools - Giving Agents Hands'] },
+        { type: 'learn', title: 'Patterns & Memory', items: ['Lesson 4: Agentic Design Patterns', 'Lesson 5: Memory and Context'] },
+        { type: 'build', title: 'Build Your First Agent', items: ['ADK Quickstart Tutorial', 'Lesson 13: Building Your First Agent', 'Modify quickstart: add custom tool'] },
+        { type: 'build', title: 'Add Capabilities', items: ['Add MCP integration (Lesson 14)', 'Implement agent skills (Lesson 17)', 'Build a multi-tool agent'] },
+        { type: 'deploy', title: 'Ship It', items: ['Clone Agent Starter Pack', 'Deploy to Vertex AI Agent Engine', 'Set up basic monitoring'] }
+      ],
+      project: 'Build an internal knowledge agent that answers questions about your team docs using RAG + 2-3 tools.',
+      resources: ['ADK Quickstart', 'Agent Starter Pack on GitHub', 'Gemini API function calling docs']
+    },
+    improver: {
+      name: 'The Improver Path', color: '#34a853',
+      stages: [
+        { type: 'learn', title: 'Evaluation Fundamentals', items: ['Lesson 9: Evaluating and Testing Agents', 'Build 10+ eval test cases for your agent'] },
+        { type: 'learn', title: 'Quality Frameworks', items: ['Google Cloud "Agent Quality" whitepaper', 'Lesson 4: Design Patterns (review)'] },
+        { type: 'build', title: 'Audit & Fix', items: ['Audit system instructions (Lesson 13)', 'Review tool designs for clarity', 'Add missing error handling'] },
+        { type: 'build', title: 'Add Guardrails', items: ['Lesson 10: Guardrails and Safety', 'Implement input validation', 'Add output filtering and scope limits'] },
+        { type: 'deploy', title: 'Measure & Iterate', items: ['Set up A/B evaluation pipeline', 'Track success rate metrics', 'Iterate based on production data'] }
+      ],
+      project: 'Take your worst-performing agent and improve its eval pass rate from current to 90%+ through systematic instruction and tool refinement.',
+      resources: ['Agent Quality whitepaper', 'ADK eval documentation', 'Vertex AI evaluation tools']
+    },
+    deployer: {
+      name: 'The Deployer Path', color: '#d89700',
+      stages: [
+        { type: 'learn', title: 'Production Concepts', items: ['Lesson 11: From Prototype to Production', 'Google Cloud "Prototype to Production" whitepaper'] },
+        { type: 'learn', title: 'Infrastructure', items: ['Lesson 12: Vertex AI and ADK', 'Vertex AI Agent Engine docs', 'Understand session management'] },
+        { type: 'build', title: 'CI/CD & Monitoring', items: ['Set up CI/CD for agent changes', 'Version control prompts like code', 'Configure logging and tracing'] },
+        { type: 'build', title: 'Reliability', items: ['Implement graceful degradation', 'Add circuit breakers', 'Set up human escalation paths'] },
+        { type: 'deploy', title: 'Scale & Observe', items: ['Deploy to Agent Engine', 'Set up observability dashboards', 'Run load testing, tune scaling'] }
+      ],
+      project: 'Take an existing agent and deploy it with full CI/CD, monitoring, rollback, and alerting on Vertex AI.',
+      resources: ['Vertex AI Agent Engine docs', 'Agent Starter Pack (has CI/CD built in)', 'Google Cloud Trace for observability']
+    },
+    theorist: {
+      name: 'The Theorist Path', color: '#9333ea',
+      stages: [
+        { type: 'learn', title: 'Core Theory', items: ['Lesson 2: How Agents Think (deep dive)', 'Lesson 6: Planning and Reasoning', 'Read ReAct, CoT, and ToT papers'] },
+        { type: 'learn', title: 'Advanced Patterns', items: ['Lesson 7: Multi-Agent Systems', 'Lesson 8: Agentic RAG', 'Lesson 18: Orchestration patterns'] },
+        { type: 'learn', title: 'Protocols & Standards', items: ['Lesson 14: MCP and A2A specs', 'Read protocol specifications directly', 'Lesson 17: Agent Skills specification'] },
+        { type: 'build', title: 'Experiment', items: ['Build a multi-agent orchestration', 'Implement loop-based refinement', 'Compare model performance with evals'] },
+        { type: 'deploy', title: 'Contribute', items: ['Write up findings', 'Contribute to open-source agent frameworks', 'Share learnings with community'] }
+      ],
+      project: 'Implement and compare 3 different orchestration patterns (sequential, parallel, hierarchical) on the same task, measuring quality, cost, and latency.',
+      resources: ['All 6 Google Cloud agent whitepapers', 'MCP specification at modelcontextprotocol.io', 'A2A spec at a2a-protocol.org/latest/']
+    }
+  };
+
+  // Goal -> path mapping
+  const goalToPath = { build: 'builder', improve: 'improver', deploy: 'deployer', theory: 'theorist' };
+  let selectedGoal = null;
+
+  // Render Q1 options
+  const q1 = document.getElementById('lp-q1-options');
+  goals.forEach(g => {
+    const btn = document.createElement('button');
+    btn.innerHTML = `${g.icon} ${g.label}`;
+    btn.style.cssText = 'padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 0.85rem; color: #333; text-align: left; transition: all 0.2s;';
+    btn.addEventListener('mouseenter', () => btn.style.borderColor = '#4285f4');
+    btn.addEventListener('mouseleave', () => { if (selectedGoal !== g.id) btn.style.borderColor = '#e0e0e0'; });
+    btn.addEventListener('click', () => {
+      selectedGoal = g.id;
+      document.getElementById('lp-step1').style.display = 'none';
+      document.getElementById('lp-step2').style.display = 'block';
+    });
+    q1.appendChild(btn);
+  });
+
+  // Render Q2 options
+  const q2 = document.getElementById('lp-q2-options');
+  levels.forEach(l => {
+    const btn = document.createElement('button');
+    btn.textContent = l.label;
+    btn.style.cssText = 'padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 0.85rem; color: #333; transition: all 0.2s;';
+    btn.addEventListener('mouseenter', () => btn.style.borderColor = '#4285f4');
+    btn.addEventListener('mouseleave', () => btn.style.borderColor = '#e0e0e0');
+    btn.addEventListener('click', () => {
+      showPath(goalToPath[selectedGoal], l.id);
+    });
+    q2.appendChild(btn);
+  });
+
+  // Quick picks
+  document.querySelectorAll('.lp-quick').forEach(btn => {
+    btn.addEventListener('click', () => showPath(btn.dataset.path, 'some'));
+    btn.addEventListener('mouseenter', () => { btn.style.background = btn.style.borderColor + '15'; });
+    btn.addEventListener('mouseleave', () => { btn.style.background = 'white'; });
+  });
+
+  function showPath(pathId, level) {
+    const path = pathData[pathId];
+    const roadmap = document.getElementById('lp-roadmap');
+    document.getElementById('lp-quiz').style.display = 'none';
+    document.getElementById('lp-reset').style.display = 'inline-block';
+    roadmap.style.display = 'block';
+
+    const typeColors = { learn: '#4285f4', build: '#34a853', deploy: '#d89700' };
+    const typeLabels = { learn: 'LEARN', build: 'BUILD', deploy: 'DEPLOY' };
+
+    let levelNote = '';
+    if (level === 'new') levelNote = '<div style="background:#fff3cd;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.8rem;color:#856404;">Tip: As someone new to AI/ML, spend extra time on the Learn stages. Consider taking an intro to ML course alongside this path.</div>';
+    if (level === 'experienced') levelNote = '<div style="background:#d4edda;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.8rem;color:#155724;">With your ML experience, you can move quickly through foundations. Focus on the Build and Deploy stages.</div>';
+
+    let html = `<div style="background:white;border-radius:12px;border:1px solid #e0e0e0;padding:20px;">`;
+    html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;"><div style="width:10px;height:10px;border-radius:50%;background:${path.color};"></div><span style="font-weight:700;font-size:1.1rem;color:#1a1a2e;">${path.name}</span></div>`;
+    html += `<p style="font-size:0.8rem;color:#666;margin:0 0 14px 0;">Your personalized roadmap based on your goals and experience level.</p>`;
+    html += levelNote;
+
+    // Roadmap nodes
+    html += `<div style="position:relative;padding-left:28px;">`;
+    // Vertical line
+    html += `<div style="position:absolute;left:12px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,${typeColors.learn},${typeColors.build},${typeColors.deploy});border-radius:1px;"></div>`;
+
+    path.stages.forEach((stage, i) => {
+      const tc = typeColors[stage.type];
+      html += `<div style="position:relative;margin-bottom:${i < path.stages.length - 1 ? '20px' : '0'};">`;
+      // Dot
+      html += `<div style="position:absolute;left:-22px;top:4px;width:12px;height:12px;border-radius:50%;background:${tc};border:2px solid white;box-shadow:0 0 0 2px ${tc};"></div>`;
+      // Content
+      html += `<div style="background:${tc}08;border-radius:8px;padding:12px 14px;border-left:3px solid ${tc};">`;
+      html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="font-size:0.65rem;font-weight:700;color:white;background:${tc};padding:1px 8px;border-radius:10px;">${typeLabels[stage.type]}</span><span style="font-weight:600;font-size:0.9rem;color:#1a1a2e;">${stage.title}</span></div>`;
+      html += `<ul style="margin:0;padding-left:18px;">`;
+      stage.items.forEach(item => {
+        html += `<li style="font-size:0.8rem;color:#444;margin-bottom:3px;line-height:1.4;">${item}</li>`;
+      });
+      html += `</ul></div></div>`;
+    });
+    html += `</div>`;
+
+    // Project suggestion
+    html += `<div style="margin-top:20px;background:#f0f7ff;border-radius:8px;padding:14px;border:1px solid #d0e3ff;">`;
+    html += `<div style="font-weight:700;font-size:0.85rem;color:#1a1a2e;margin-bottom:4px;">&#127919; Suggested First Project</div>`;
+    html += `<p style="font-size:0.82rem;color:#444;margin:0;line-height:1.5;">${path.project}</p>`;
+    html += `</div>`;
+
+    // Resources
+    html += `<div style="margin-top:14px;background:#f8f9fa;border-radius:8px;padding:14px;border:1px solid #e0e0e0;">`;
+    html += `<div style="font-weight:700;font-size:0.85rem;color:#1a1a2e;margin-bottom:6px;">&#128218; Key Resources</div>`;
+    html += `<ul style="margin:0;padding-left:18px;">`;
+    path.resources.forEach(r => {
+      html += `<li style="font-size:0.8rem;color:#444;margin-bottom:3px;">${r}</li>`;
+    });
+    html += `</ul></div>`;
+
+    html += `</div>`;
+    roadmap.innerHTML = html;
+  }
+
+  document.getElementById('lp-reset').addEventListener('click', () => {
+    selectedGoal = null;
+    document.getElementById('lp-quiz').style.display = 'block';
+    document.getElementById('lp-step1').style.display = 'block';
+    document.getElementById('lp-step2').style.display = 'none';
+    document.getElementById('lp-roadmap').style.display = 'none';
+    document.getElementById('lp-reset').style.display = 'none';
+  });
+})();
+</script>
+
 ---
 
 ## Google Cloud Resources
@@ -120,9 +333,9 @@ Your primary reference when building:
 
 | Resource | What It Covers | Link |
 |---|---|---|
-| Vertex AI Docs | Agent Engine, model serving, evaluation, and the full Vertex AI platform | [cloud.google.com/vertex-ai/docs](https://cloud.google.com/vertex-ai/docs) |
-| ADK Docs | Agent Development Kit - building, testing, and deploying agents | [google.github.io/adk-docs](https://google.github.io/adk-docs/) |
-| Gemini API Docs | Model capabilities, function calling, context caching, and API reference | [ai.google.dev/docs](https://ai.google.dev/docs) |
+| Vertex AI Docs | Agent Engine, model serving, evaluation, and the full Vertex AI platform | [docs.cloud.google.com/vertex-ai/docs](https://docs.cloud.google.com/vertex-ai/docs) |
+| ADK Docs | Agent Development Kit - building, testing, and deploying agents | [adk.dev](https://adk.dev/) |
+| Gemini API Docs | Model capabilities, function calling, context caching, and API reference | [ai.google.dev/gemini-api/docs](https://ai.google.dev/gemini-api/docs) |
 | Google Cloud AI | Overview of all AI services on Google Cloud | [cloud.google.com/ai](https://cloud.google.com/ai) |
 
 ### Templates and starter projects
@@ -195,7 +408,7 @@ Each framework makes different trade-offs. ADK emphasizes Google Cloud integrati
 ### Protocol implementations
 
 - **MCP Specification:** [modelcontextprotocol.io](https://modelcontextprotocol.io) - The protocol spec and reference implementations
-- **A2A Protocol:** [a2a-protocol.org](https://a2a-protocol.org/latest/) - Specification and documentation
+- **A2A Protocol:** [a2a-protocol.org/latest/](https://a2a-protocol.org/latest/) - Specification and documentation
 
 ---
 
@@ -334,20 +547,20 @@ Use this as a planning tool when you start your next build:
 Keep these links handy. They are the primary references you will come back to:
 
 **Learning and Building:**
-- ADK Documentation: [https://google.github.io/adk-docs/](https://google.github.io/adk-docs/)
-- ADK Quickstart: [https://google.github.io/adk-docs/get-started/quickstart/](https://google.github.io/adk-docs/get-started/quickstart/)
+- ADK Documentation: [https://adk.dev/](https://adk.dev/)
+- ADK Quickstart: [https://adk.dev/get-started/quickstart/](https://adk.dev/get-started/quickstart/)
 - Agent Starter Pack: [https://github.com/GoogleCloudPlatform/agent-starter-pack](https://github.com/GoogleCloudPlatform/agent-starter-pack)
-- Gemini API Docs: [https://ai.google.dev/docs](https://ai.google.dev/docs)
+- Gemini API Docs: [https://ai.google.dev/gemini-api/docs](https://ai.google.dev/gemini-api/docs)
 
 **Google Cloud Platform:**
-- Vertex AI Docs: [https://cloud.google.com/vertex-ai/docs](https://cloud.google.com/vertex-ai/docs)
-- Agent Engine: [https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview)
+- Vertex AI Docs: [https://docs.cloud.google.com/vertex-ai/docs](https://docs.cloud.google.com/vertex-ai/docs)
+- Agent Engine: [https://docs.cloud.google.com/agent-builder/agent-engine/overview](https://docs.cloud.google.com/agent-builder/agent-engine/overview)
 - AI/ML Codelabs: [https://codelabs.developers.google.com/?cat=AI](https://codelabs.developers.google.com/?cat=AI)
 
 **Protocols:**
 - MCP Specification: [https://modelcontextprotocol.io](https://modelcontextprotocol.io)
 - A2A Protocol: [https://a2a-protocol.org/latest/](https://a2a-protocol.org/latest/)
-- MCP Tools in ADK: [https://google.github.io/adk-docs/tools/mcp-tools/](https://google.github.io/adk-docs/tools/mcp-tools/)
+- MCP Tools in ADK: [https://adk.dev/tools/mcp-tools/](https://adk.dev/tools/mcp-tools/)
 
 **Open Source:**
 - ADK Python: [https://github.com/google/adk-python](https://github.com/google/adk-python)
@@ -398,4 +611,4 @@ Good luck building.
 
 Congratulations on finishing AI Agents 101. You have gone from understanding what agents are to knowing how to build, test, deploy, and connect them using industry-standard tools and protocols.
 
-[Back to Course Overview](../README.md)
+[Back to Course Overview](/agents/)

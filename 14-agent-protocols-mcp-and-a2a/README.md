@@ -53,6 +53,238 @@ Agents need to communicate in two fundamentally different ways:
 
 Understanding this distinction is key to understanding why we need two protocols, not one.
 
+<div id="mcp-a2a-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 920px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+  <div style="text-align: center; margin-bottom: 16px;">
+    <h3 style="margin: 0 0 4px 0; color: #1a1a2e; font-size: 1.3rem;">MCP vs A2A Protocol Comparison</h3>
+    <p style="margin: 0; color: #666; font-size: 0.9rem;">Click components to learn more. Use tabs to explore scenarios.</p>
+  </div>
+
+  <!-- Split screen diagrams -->
+  <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
+    <!-- MCP Side -->
+    <div style="flex: 1; min-width: 280px; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+      <div style="text-align: center; margin-bottom: 8px;">
+        <span style="background: #4285f4; color: white; padding: 4px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem;">MCP</span>
+        <div style="font-size: 0.75rem; color: #888; margin-top: 4px;">Model Context Protocol — App to Tool</div>
+      </div>
+      <svg id="mcp-diagram" viewBox="0 0 380 220" style="width: 100%; height: auto;"></svg>
+      <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 8px;">
+        <span style="font-size: 0.7rem; background: #4285f411; color: #4285f4; padding: 3px 8px; border-radius: 6px; font-weight: 600;">Tools</span>
+        <span style="font-size: 0.7rem; background: #34a85311; color: #34a853; padding: 3px 8px; border-radius: 6px; font-weight: 600;">Resources</span>
+        <span style="font-size: 0.7rem; background: #9333ea11; color: #9333ea; padding: 3px 8px; border-radius: 6px; font-weight: 600;">Prompts</span>
+      </div>
+      <button id="mcp-animate-btn" style="display:block; margin: 10px auto 0; padding: 8px 20px; background: #4285f4; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.8rem; transition: all 0.2s;">▶ Animate Tool Call</button>
+    </div>
+    <!-- A2A Side -->
+    <div style="flex: 1; min-width: 280px; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+      <div style="text-align: center; margin-bottom: 8px;">
+        <span style="background: #9333ea; color: white; padding: 4px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem;">A2A</span>
+        <div style="font-size: 0.75rem; color: #888; margin-top: 4px;">Agent-to-Agent Protocol — Agent to Agent</div>
+      </div>
+      <svg id="a2a-diagram" viewBox="0 0 380 220" style="width: 100%; height: auto;"></svg>
+      <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 8px;">
+        <span style="font-size: 0.7rem; background: #9333ea11; color: #9333ea; padding: 3px 8px; border-radius: 6px; font-weight: 600;">Agent Cards</span>
+        <span style="font-size: 0.7rem; background: #ea433511; color: #ea4335; padding: 3px 8px; border-radius: 6px; font-weight: 600;">Tasks</span>
+        <span style="font-size: 0.7rem; background: #fbbc0422; color: #b8860b; padding: 3px 8px; border-radius: 6px; font-weight: 600;">Artifacts</span>
+      </div>
+      <button id="a2a-animate-btn" style="display:block; margin: 10px auto 0; padding: 8px 20px; background: #9333ea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.8rem; transition: all 0.2s;">▶ Animate Task Delegation</button>
+    </div>
+  </div>
+
+  <!-- Tooltip -->
+  <div id="proto-tooltip" style="display:none; background: #1a1a2e; color: white; padding: 12px 16px; border-radius: 10px; font-size: 0.82rem; line-height: 1.5; margin-bottom: 12px; transition: all 0.3s;"></div>
+
+  <!-- When to use which -->
+  <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 12px;">
+    <div style="font-weight: 600; color: #1a1a2e; margin-bottom: 10px; font-size: 0.95rem;">When to use which?</div>
+    <div id="scenario-tabs" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;"></div>
+    <div id="scenario-result" style="padding: 12px; border-radius: 8px; font-size: 0.85rem; line-height: 1.6; min-height: 40px;"></div>
+  </div>
+
+  <!-- Comparison Table -->
+  <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); overflow-x: auto;">
+    <div style="font-weight: 600; color: #1a1a2e; margin-bottom: 10px; font-size: 0.95rem;">Side-by-Side Comparison</div>
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem;">
+      <thead>
+        <tr style="border-bottom: 2px solid #e0e0e0;">
+          <th style="text-align: left; padding: 8px; color: #666;">Aspect</th>
+          <th style="text-align: left; padding: 8px; color: #4285f4;">MCP</th>
+          <th style="text-align: left; padding: 8px; color: #9333ea;">A2A</th>
+        </tr>
+      </thead>
+      <tbody id="compare-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+(function() {
+  const tooltips = {
+    'mcp-host': '<strong>Host Application</strong> — The AI app the user interacts with (Claude, VS Code, your agent). Contains one or more MCP clients.',
+    'mcp-client': '<strong>MCP Client</strong> — Lives inside the host. Manages connections to MCP servers, handles protocol negotiation and message routing.',
+    'mcp-server': '<strong>MCP Server</strong> — Wraps a tool or data source. Exposes Tools, Resources, and Prompts via JSON-RPC. Anyone can build one.',
+    'mcp-tool': '<strong>External Tool/Data</strong> — The actual capability: a database, API, file system, or service the server connects to.',
+    'a2a-agentA': '<strong>Client Agent</strong> — The agent that needs help. Discovers remote agents via Agent Cards and delegates tasks.',
+    'a2a-protocol': '<strong>A2A Protocol</strong> — Standardized communication layer. Handles discovery, task lifecycle, streaming updates, and authentication.',
+    'a2a-agentB': '<strong>Remote Agent</strong> — An independent agent with its own tools and reasoning. Receives tasks, works on them, returns artifacts.',
+    'a2a-card': '<strong>Agent Card</strong> — JSON metadata describing what an agent can do, hosted at /.well-known/agent-card.json. Enables discovery.'
+  };
+
+  const scenarios = [
+    { label: 'Query a database', protocol: 'mcp', color: '#4285f4', text: 'Use <strong>MCP</strong>. This is a specific function call with known parameters. The database doesn\'t need reasoning — it just executes the query and returns results.' },
+    { label: 'Research a topic', protocol: 'a2a', color: '#9333ea', text: 'Use <strong>A2A</strong>. This requires another agent\'s judgment — deciding what to search, evaluating sources, synthesizing findings. It\'s a goal, not a function call.' },
+    { label: 'Read a file', protocol: 'mcp', color: '#4285f4', text: 'Use <strong>MCP</strong>. File access is a deterministic operation. An MCP server exposes it as a Resource or Tool — no reasoning needed on the other side.' },
+    { label: 'Book travel', protocol: 'a2a', color: '#9333ea', text: 'Use <strong>A2A</strong>. A travel booking agent needs to understand preferences, compare options, handle constraints. This requires another agent\'s expertise.' },
+    { label: 'Send an email', protocol: 'mcp', color: '#4285f4', text: 'Use <strong>MCP</strong>. Sending email is a structured action: recipient, subject, body. An MCP tool handles this perfectly.' },
+    { label: 'Code review', protocol: 'a2a', color: '#9333ea', text: 'Use <strong>A2A</strong>. Code review requires understanding context, evaluating patterns, and providing nuanced feedback. Delegate to a specialist review agent.' }
+  ];
+
+  const comparisons = [
+    ['What talks', 'Agent → Tool', 'Agent → Agent'],
+    ['Communication', '"Do this specific thing"', '"Achieve this goal"'],
+    ['Other side has', 'No reasoning (deterministic)', 'Full reasoning (autonomous)'],
+    ['Request type', 'Function call with params', 'Open-ended task description'],
+    ['Response', 'Structured data', 'Artifacts + status updates'],
+    ['Discovery', 'Tool schemas at connect time', 'Agent Cards at well-known URLs'],
+    ['Analogy', 'Using a calculator', 'Hiring a consultant']
+  ];
+
+  function drawMCP() {
+    const svg = document.getElementById('mcp-diagram');
+    let h = `<defs><marker id="ma1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#4285f4"/></marker></defs>`;
+    const boxes = [
+      { id: 'mcp-host', x: 20, y: 20, w: 100, h: 50, label: '🖥️ Host App', sub: 'Claude / IDE', color: '#4285f4' },
+      { id: 'mcp-client', x: 140, y: 20, w: 100, h: 50, label: '🔌 MCP Client', sub: 'Protocol handler', color: '#4285f4' },
+      { id: 'mcp-server', x: 140, y: 120, w: 100, h: 50, label: '⚙️ MCP Server', sub: 'Tool provider', color: '#34a853' },
+      { id: 'mcp-tool', x: 260, y: 120, w: 100, h: 50, label: '🗄️ Tool/Data', sub: 'DB, API, Files', color: '#ea4335' }
+    ];
+    boxes.forEach(b => {
+      h += `<rect class="mcp-box" data-tooltip="${b.id}" x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="10" fill="${b.color}11" stroke="${b.color}" stroke-width="2" style="cursor:pointer;transition:all 0.2s;"/>`;
+      h += `<text data-tooltip="${b.id}" x="${b.x+b.w/2}" y="${b.y+22}" text-anchor="middle" font-size="10" font-weight="600" fill="${b.color}" style="cursor:pointer;pointer-events:all;">${b.label}</text>`;
+      h += `<text data-tooltip="${b.id}" x="${b.x+b.w/2}" y="${b.y+38}" text-anchor="middle" font-size="8" fill="#888" style="cursor:pointer;pointer-events:all;">${b.sub}</text>`;
+    });
+    // Arrows
+    h += `<line x1="120" y1="45" x2="138" y2="45" stroke="#4285f4" stroke-width="2" marker-end="url(#ma1)"/>`;
+    h += `<line x1="190" y1="70" x2="190" y2="118" stroke="#4285f4" stroke-width="2" marker-end="url(#ma1)"/>`;
+    h += `<text x="198" y="98" font-size="8" fill="#4285f4" font-weight="600">JSON-RPC</text>`;
+    h += `<line x1="240" y1="145" x2="258" y2="145" stroke="#34a853" stroke-width="2" marker-end="url(#ma1)"/>`;
+    // MCP packet animation placeholder
+    h += `<circle id="mcp-packet" cx="120" cy="45" r="5" fill="#4285f4" opacity="0"/>`;
+    svg.innerHTML = h;
+    svg.querySelectorAll('[data-tooltip]').forEach(el => {
+      el.addEventListener('click', () => showTooltip(el.getAttribute('data-tooltip')));
+    });
+  }
+
+  function drawA2A() {
+    const svg = document.getElementById('a2a-diagram');
+    let h = `<defs><marker id="ma2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#9333ea"/></marker></defs>`;
+    const boxes = [
+      { id: 'a2a-agentA', x: 20, y: 50, w: 100, h: 55, label: '🤖 Client Agent', sub: 'Your agent', color: '#9333ea' },
+      { id: 'a2a-protocol', x: 140, y: 50, w: 100, h: 55, label: '🔗 A2A Protocol', sub: 'Task lifecycle', color: '#ea4335' },
+      { id: 'a2a-agentB', x: 260, y: 50, w: 100, h: 55, label: '🤖 Remote Agent', sub: 'Specialist', color: '#9333ea' },
+      { id: 'a2a-card', x: 260, y: 150, w: 100, h: 40, label: '📇 Agent Card', sub: '/.well-known/', color: '#fbbc04' }
+    ];
+    boxes.forEach(b => {
+      h += `<rect data-tooltip="${b.id}" x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="10" fill="${b.color}11" stroke="${b.color}" stroke-width="2" style="cursor:pointer;transition:all 0.2s;"/>`;
+      h += `<text data-tooltip="${b.id}" x="${b.x+b.w/2}" y="${b.y+22}" text-anchor="middle" font-size="10" font-weight="600" fill="${b.color}" style="cursor:pointer;pointer-events:all;">${b.label}</text>`;
+      h += `<text data-tooltip="${b.id}" x="${b.x+b.w/2}" y="${b.y+40}" text-anchor="middle" font-size="8" fill="#888" style="cursor:pointer;pointer-events:all;">${b.sub}</text>`;
+    });
+    h += `<line x1="120" y1="77" x2="138" y2="77" stroke="#9333ea" stroke-width="2" marker-end="url(#ma2)"/>`;
+    h += `<line x1="240" y1="77" x2="258" y2="77" stroke="#9333ea" stroke-width="2" marker-end="url(#ma2)"/>`;
+    h += `<line x1="310" y1="105" x2="310" y2="148" stroke="#fbbc04" stroke-width="1.5" stroke-dasharray="4"/>`;
+    // Status labels
+    h += `<text x="190" y="28" text-anchor="middle" font-size="8" fill="#ea4335">submitted → working → completed</text>`;
+    h += `<circle id="a2a-packet" cx="120" cy="77" r="5" fill="#9333ea" opacity="0"/>`;
+    svg.innerHTML = h;
+    svg.querySelectorAll('[data-tooltip]').forEach(el => {
+      el.addEventListener('click', () => showTooltip(el.getAttribute('data-tooltip')));
+    });
+  }
+
+  function showTooltip(key) {
+    const tip = document.getElementById('proto-tooltip');
+    if (tooltips[key]) {
+      tip.innerHTML = tooltips[key];
+      tip.style.display = 'block';
+    }
+  }
+
+  function animateMCP() {
+    const pkt = document.getElementById('mcp-packet');
+    pkt.setAttribute('opacity', '1');
+    const keyframes = [
+      { cx: 120, cy: 45 }, { cx: 190, cy: 45 }, { cx: 190, cy: 95 },
+      { cx: 190, cy: 140 }, { cx: 260, cy: 145 }, { cx: 340, cy: 145 },
+      { cx: 260, cy: 145 }, { cx: 190, cy: 140 }, { cx: 190, cy: 45 }, { cx: 120, cy: 45 }
+    ];
+    let step = 0;
+    const interval = setInterval(() => {
+      if (step >= keyframes.length) { pkt.setAttribute('opacity', '0'); clearInterval(interval); return; }
+      pkt.setAttribute('cx', keyframes[step].cx);
+      pkt.setAttribute('cy', keyframes[step].cy);
+      step++;
+    }, 350);
+  }
+
+  function animateA2A() {
+    const pkt = document.getElementById('a2a-packet');
+    pkt.setAttribute('opacity', '1');
+    const keyframes = [
+      { cx: 120, cy: 77 }, { cx: 190, cy: 77 }, { cx: 260, cy: 77 },
+      { cx: 340, cy: 77 }, { cx: 340, cy: 77 }, { cx: 260, cy: 77 },
+      { cx: 190, cy: 77 }, { cx: 120, cy: 77 }
+    ];
+    let step = 0;
+    const interval = setInterval(() => {
+      if (step >= keyframes.length) { pkt.setAttribute('opacity', '0'); clearInterval(interval); return; }
+      pkt.setAttribute('cx', keyframes[step].cx);
+      pkt.setAttribute('cy', keyframes[step].cy);
+      step++;
+    }, 400);
+  }
+
+  // Scenarios
+  function renderScenarios() {
+    const container = document.getElementById('scenario-tabs');
+    container.innerHTML = scenarios.map((s, i) => `
+      <button class="scenario-btn" data-idx="${i}" style="padding:6px 12px;border-radius:8px;border:2px solid #e0e0e0;background:white;cursor:pointer;font-size:0.78rem;font-weight:500;color:#666;transition:all 0.2s;">${s.label}</button>
+    `).join('');
+    container.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const s = scenarios[parseInt(btn.dataset.idx)];
+        container.querySelectorAll('.scenario-btn').forEach(b => { b.style.borderColor = '#e0e0e0'; b.style.background = 'white'; b.style.color = '#666'; });
+        btn.style.borderColor = s.color;
+        btn.style.background = s.color + '11';
+        btn.style.color = s.color;
+        const result = document.getElementById('scenario-result');
+        result.innerHTML = s.text;
+        result.style.background = s.color + '08';
+        result.style.borderLeft = '4px solid ' + s.color;
+      });
+    });
+  }
+
+  // Comparison table
+  function renderTable() {
+    document.getElementById('compare-table').innerHTML = comparisons.map(([aspect, mcp, a2a]) => `
+      <tr style="border-bottom: 1px solid #f0f0f0;">
+        <td style="padding: 8px; font-weight: 500; color: #444;">${aspect}</td>
+        <td style="padding: 8px; color: #4285f4;">${mcp}</td>
+        <td style="padding: 8px; color: #9333ea;">${a2a}</td>
+      </tr>
+    `).join('');
+  }
+
+  drawMCP();
+  drawA2A();
+  renderScenarios();
+  renderTable();
+  document.getElementById('mcp-animate-btn').addEventListener('click', animateMCP);
+  document.getElementById('a2a-animate-btn').addEventListener('click', animateA2A);
+})();
+</script>
+
 ---
 
 ## Model Context Protocol (MCP)
@@ -143,18 +375,18 @@ ADK has built-in support for MCP. You can connect to any MCP server and use its 
 
 ```python
 from google.adk.agents import Agent
-from google.adk.tools.mcp_tool import MCPToolset, SseServerParams
+from google.adk.tools.mcp_tool import MCPToolset, SseConnectionParams
 
 # Connect to an MCP server
 mcp_tools = MCPToolset(
-    connection_params=SseServerParams(
+    connection_params=SseConnectionParams(
         url="http://localhost:3000/mcp",
     )
 )
 
 agent = Agent(
     name="mcp_agent",
-    model="gemini-2.0-flash",
+    model="gemini-3.5-flash",
     instruction="You are a helpful assistant with access to external tools.",
     tools=[mcp_tools],
 )
@@ -162,7 +394,7 @@ agent = Agent(
 
 The agent discovers the available tools from the MCP server at runtime. If the server exposes a `search_database` tool and a `create_ticket` tool, your agent can use both without any additional code.
 
-> **Learn more:** [MCP Tools in ADK](https://google.github.io/adk-docs/tools/mcp-tools/)
+> **Learn more:** [MCP Tools in ADK](https://adk.dev/tools/mcp-tools/)
 
 ### Limitations and security considerations
 
@@ -192,7 +424,7 @@ MCP is powerful, but it comes with trade-offs you should understand:
 
 ### What is A2A?
 
-A2A is an open protocol developed by Google for enabling agents to discover, communicate with, and delegate tasks to other agents - even agents built by different teams using different frameworks at different organizations.
+A2A is an open protocol originally developed by Google and now governed by the Linux Foundation (donated in 2025), for enabling agents to discover, communicate with, and delegate tasks to other agents - even agents built by different teams using different frameworks at different organizations.
 
 While MCP handles the "agent talks to tool" problem, A2A handles the "agent talks to agent" problem.
 
@@ -249,7 +481,7 @@ An Agent Card is like a business card for an agent. It is a standardized JSON do
 }
 ```
 
-Agent Cards are hosted at a well-known URL (typically `/.well-known/agent.json`), making discovery straightforward. Your agent can check a known endpoint to see what another agent offers.
+Agent Cards are hosted at a well-known URL (typically `/.well-known/agent-card.json`), making discovery straightforward. Your agent can check a known endpoint to see what another agent offers.
 
 #### Tasks
 
@@ -300,7 +532,7 @@ This is one of the most important distinctions to understand:
 - You would use **MCP** to connect to a flight search API (a tool that takes departure city, arrival city, and date, and returns flights)
 - You would use **A2A** to delegate to a hotel booking agent that can understand preferences like "somewhere quiet near the conference venue" and figure out the best options on its own
 
-> **Learn more:** [A2A in ADK](https://google.github.io/adk-docs/a2a/) and [A2A Protocol Spec](https://a2a-protocol.org/latest/)
+> **Learn more:** [A2A in ADK](https://adk.dev/a2a/) and [A2A Protocol Spec](https://a2a-protocol.org/latest/)
 
 ---
 
@@ -485,8 +717,8 @@ Both protocols are actively evolving. Expect to see:
 
 ## Where to learn more
 
-- **MCP Tools in ADK:** [https://google.github.io/adk-docs/tools/mcp-tools/](https://google.github.io/adk-docs/tools/mcp-tools/)
-- **A2A in ADK:** [https://google.github.io/adk-docs/a2a/](https://google.github.io/adk-docs/a2a/)
+- **MCP Tools in ADK:** [https://adk.dev/tools/mcp-tools/](https://adk.dev/tools/mcp-tools/)
+- **A2A in ADK:** [https://adk.dev/a2a/](https://adk.dev/a2a/)
 - **A2A Protocol Specification:** [https://a2a-protocol.org/latest/](https://a2a-protocol.org/latest/)
 - **MCP Specification:** [https://modelcontextprotocol.io](https://modelcontextprotocol.io)
 
@@ -494,6 +726,6 @@ Both protocols are actively evolving. Expect to see:
 
 ## What is next?
 
-You have covered the fundamentals and the building blocks. In the final lesson, we will step back and look at the big picture - where to go from here, what resources to explore, and how to continue growing as an agent builder.
+You have covered the fundamentals and the core building blocks. Next, we move into Part 3 - deep dives into specific topics. We start with AGENTS.md, the standard config file for giving AI coding agents the context they need about your project.
 
-[Next: Lesson 15 - Where to Go From Here -->](../15-where-to-go-from-here/README.md)
+[Next Lesson: AGENTS.md ->](../15-agents-md/)

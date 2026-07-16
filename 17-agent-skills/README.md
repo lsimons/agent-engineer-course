@@ -1,8 +1,8 @@
-# Lesson 18: agent skills - reusable knowledge for agents
+# Lesson 17: agent skills - reusable knowledge for agents
 
 ## Introduction
 
-In [Lesson 3](../03-tools-giving-agents-hands/README.md), we learned about tools - functions that let agents take actions like calling APIs, querying databases, and running code. Tools are about **doing things**.
+In [Lesson 3](../03-tools-giving-agents-hands/), we learned about tools - functions that let agents take actions like calling APIs, querying databases, and running code. Tools are about **doing things**.
 
 Skills are about **knowing things**. A skill packages domain expertise - instructions, best practices, decision frameworks, and reference materials - into a modular unit that an agent can discover and use when needed.
 
@@ -151,6 +151,234 @@ Task matches: [L2: full instructions]      ~2,000-5,000 tokens
 As needed:    [L3: reference files]        Variable
 ```
 
+<div id="skill-loading-timeline" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+  <h3 style="margin: 0 0 4px 0; font-size: 1.2rem; color: #1a1a2e;">Progressive Skill Loading Timeline</h3>
+  <p style="margin: 0 0 16px 0; font-size: 0.85rem; color: #666;">See how skills load incrementally to minimize context window cost.</p>
+
+  <!-- Controls -->
+  <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;">
+    <button id="slt-play" style="padding: 8px 20px; background: #4285f4; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;">&#9654; Play Animation</button>
+    <button id="slt-reset" style="padding: 8px 16px; background: #e8eaed; color: #333; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s;">Reset</button>
+    <div style="margin-left: auto; display: flex; gap: 6px;">
+      <span id="slt-phase-label" style="font-size: 0.8rem; color: #666; padding: 6px 12px; background: white; border-radius: 6px; border: 1px solid #e0e0e0;">Phase: Ready</span>
+    </div>
+  </div>
+
+  <!-- Context Window Meter -->
+  <div style="margin-bottom: 16px; background: white; border-radius: 10px; padding: 12px 16px; border: 1px solid #e0e0e0;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+      <span style="font-size: 0.8rem; font-weight: 600; color: #333;">Context Window Usage</span>
+      <span id="slt-token-count" style="font-size: 0.8rem; color: #666;">0 / 128,000 tokens</span>
+    </div>
+    <div style="background: #e8eaed; border-radius: 6px; height: 20px; overflow: hidden; position: relative;">
+      <div id="slt-meter" style="height: 100%; width: 0%; border-radius: 6px; transition: width 0.8s ease, background 0.5s; background: linear-gradient(90deg, #34a853, #4285f4);"></div>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+      <span style="font-size: 0.7rem; color: #999;">0%</span>
+      <span style="font-size: 0.7rem; color: #999;">50%</span>
+      <span style="font-size: 0.7rem; color: #999;">100%</span>
+    </div>
+  </div>
+
+  <!-- Phase Indicators -->
+  <div style="display: flex; gap: 4px; margin-bottom: 16px;">
+    <div id="slt-p1-ind" style="flex: 1; height: 4px; border-radius: 2px; background: #e0e0e0; transition: background 0.3s;"></div>
+    <div id="slt-p2-ind" style="flex: 1; height: 4px; border-radius: 2px; background: #e0e0e0; transition: background 0.3s;"></div>
+    <div id="slt-p3-ind" style="flex: 1; height: 4px; border-radius: 2px; background: #e0e0e0; transition: background 0.3s;"></div>
+  </div>
+
+  <!-- Skills Grid -->
+  <div id="slt-skills" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-bottom: 16px;"></div>
+
+  <!-- SKILL.md Viewer -->
+  <div id="slt-viewer" style="display: none; background: white; border-radius: 10px; padding: 16px; border: 1px solid #e0e0e0; margin-top: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <span style="font-size: 0.85rem; font-weight: 600; color: #333;">SKILL.md Preview</span>
+      <button id="slt-close-viewer" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; color: #999; padding: 0 4px;">&times;</button>
+    </div>
+    <pre id="slt-viewer-content" style="background: #1e1e2e; color: #cdd6f4; padding: 14px; border-radius: 8px; font-size: 0.75rem; line-height: 1.5; overflow-x: auto; margin: 0; white-space: pre-wrap;"></pre>
+  </div>
+</div>
+
+<script>
+(function() {
+  const skills = [
+    {
+      name: "Code Migration",
+      icon: "&#128736;",
+      desc: "Migrates codebases between frameworks, languages, or API versions.",
+      color: "#4285f4",
+      tokens: { l1: 95, l2: 3800, l3: 12000 },
+      skillmd: `---\nname: code-migration\ndescription: >\n  Migrates codebases between frameworks,\n  languages, or API versions. Use when asked\n  to upgrade, port, or migrate code.\n---\n\n## Migration Process\n\n### 1. Analyze source code\n- Identify framework-specific patterns\n- Map dependencies to target equivalents\n- Flag breaking changes\n\n### 2. Generate migration plan\n- Order files by dependency graph\n- Estimate effort per file\n- Identify manual intervention points\n\n### 3. Execute migration\n- Transform code file by file\n- Run target framework tests\n- Validate output matches behavior`
+    },
+    {
+      name: "Incident Response",
+      icon: "&#128680;",
+      desc: "Guides production incident triage, resolution, and post-mortem creation.",
+      color: "#ea4335",
+      tokens: { l1: 88, l2: 4200, l3: 9500 },
+      skillmd: `---\nname: incident-response\ndescription: >\n  Guides incident response and post-mortem\n  creation. Use when there is a production\n  incident, outage, or service degradation.\n---\n\n## During an Incident\n\n### 1. Assess severity\n- Check monitoring dashboards\n- Determine blast radius\n- Classify as P0/P1/P2\n\n### 2. Investigate\n- Check recent deployments\n- Review error logs (last 1h)\n- Identify root cause\n\n### 3. Mitigate\n- Rollback if deployment-related\n- Scale up if load-related\n- Failover if infra-related`
+    },
+    {
+      name: "Data Pipeline",
+      icon: "&#128202;",
+      desc: "Builds and debugs ETL/ELT data pipelines with quality checks.",
+      color: "#34a853",
+      tokens: { l1: 92, l2: 3500, l3: 15000 },
+      skillmd: `---\nname: data-pipeline\ndescription: >\n  Builds and debugs ETL/ELT data pipelines\n  with quality checks. Use when asked to\n  create, fix, or optimize data workflows.\n---\n\n## Pipeline Design\n\n### 1. Source analysis\n- Identify data sources and formats\n- Check schemas and data types\n- Estimate data volumes\n\n### 2. Transform logic\n- Define transformation rules\n- Add data quality checks\n- Handle nulls and edge cases\n\n### 3. Load and validate\n- Write to destination\n- Run row count validation\n- Compare checksums`
+    }
+  ];
+
+  let phase = 0;
+  let activeSkill = null;
+  let animating = false;
+  const container = document.getElementById('slt-skills');
+
+  function renderSkills() {
+    container.innerHTML = '';
+    skills.forEach((s, i) => {
+      const card = document.createElement('div');
+      card.id = 'slt-card-' + i;
+      card.style.cssText = `background: white; border-radius: 10px; padding: 14px; border: 2px solid #e0e0e0; cursor: pointer; transition: all 0.4s ease; position: relative; overflow: hidden;`;
+      card.innerHTML = getCardHTML(s, i, 0);
+      card.addEventListener('click', () => showSkillMd(i));
+      card.addEventListener('mouseenter', () => { card.style.borderColor = s.color; card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'; });
+      card.addEventListener('mouseleave', () => { if (activeSkill !== i || phase < 2) { card.style.borderColor = activeSkill === i && phase >= 2 ? s.color : '#e0e0e0'; card.style.boxShadow = 'none'; } });
+      container.appendChild(card);
+    });
+  }
+
+  function getCardHTML(s, idx, p) {
+    let html = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:1.3rem;">${s.icon}</span><span style="font-weight:700;font-size:0.95rem;color:#1a1a2e;">${s.name}</span>`;
+    if (p >= 2 && activeSkill === idx) html += `<span style="margin-left:auto;font-size:0.65rem;background:${s.color};color:white;padding:2px 8px;border-radius:10px;">ACTIVE</span>`;
+    html += `</div>`;
+    html += `<p style="font-size:0.78rem;color:#666;margin:0 0 8px 0;line-height:1.4;">${s.desc}</p>`;
+    // Token bar
+    let tokens = s.tokens.l1;
+    let label = 'L1: Metadata';
+    let barColor = '#e0e0e0';
+    if (p >= 2 && activeSkill === idx) { tokens = s.tokens.l1 + s.tokens.l2; label = 'L2: Full Instructions'; barColor = s.color; }
+    if (p >= 3 && activeSkill === idx) { tokens = s.tokens.l1 + s.tokens.l2 + s.tokens.l3; label = 'L3: Deep Resources'; barColor = s.color; }
+    if (p >= 1) {
+      const pct = Math.min((tokens / 20000) * 100, 100);
+      html += `<div style="margin-top:6px;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-size:0.65rem;color:#999;">${label}</span><span style="font-size:0.65rem;color:#999;">${tokens.toLocaleString()} tokens</span></div>`;
+      html += `<div style="background:#f0f0f0;border-radius:4px;height:6px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:${barColor};border-radius:4px;transition:width 0.6s ease;"></div></div></div>`;
+    }
+    html += `<div style="margin-top:8px;font-size:0.65rem;color:#999;cursor:pointer;">Click to view SKILL.md</div>`;
+    return html;
+  }
+
+  function updateCards(p) {
+    skills.forEach((s, i) => {
+      const card = document.getElementById('slt-card-' + i);
+      if (card) {
+        card.innerHTML = getCardHTML(s, i, p);
+        if (p >= 2 && activeSkill === i) {
+          card.style.borderColor = s.color;
+          card.style.boxShadow = `0 2px 12px ${s.color}33`;
+        } else if (p >= 3 && activeSkill !== i) {
+          card.style.opacity = '0.5';
+        } else {
+          card.style.opacity = '1';
+          card.style.borderColor = '#e0e0e0';
+          card.style.boxShadow = 'none';
+        }
+        card.onclick = () => showSkillMd(i);
+      }
+    });
+  }
+
+  function updateMeter(p) {
+    const meter = document.getElementById('slt-meter');
+    const counter = document.getElementById('slt-token-count');
+    let total = 0;
+    if (p >= 1) total = skills.reduce((a, s) => a + s.tokens.l1, 0);
+    if (p >= 2 && activeSkill !== null) total += skills[activeSkill].tokens.l2;
+    if (p >= 3 && activeSkill !== null) total += skills[activeSkill].tokens.l3;
+    const pct = (total / 128000) * 100;
+    meter.style.width = pct + '%';
+    if (pct < 5) meter.style.background = 'linear-gradient(90deg, #34a853, #4285f4)';
+    else if (pct < 15) meter.style.background = 'linear-gradient(90deg, #4285f4, #fbbc04)';
+    else meter.style.background = 'linear-gradient(90deg, #fbbc04, #ea4335)';
+    counter.textContent = total.toLocaleString() + ' / 128,000 tokens';
+  }
+
+  function updatePhaseIndicators(p) {
+    ['slt-p1-ind', 'slt-p2-ind', 'slt-p3-ind'].forEach((id, idx) => {
+      document.getElementById(id).style.background = idx < p ? ['#4285f4', '#34a853', '#9333ea'][idx] : '#e0e0e0';
+    });
+    const labels = ['Ready', 'L1: Discovery', 'L2: Activation', 'L3: Deep Resources'];
+    document.getElementById('slt-phase-label').textContent = 'Phase: ' + labels[p];
+  }
+
+  function showSkillMd(idx) {
+    const viewer = document.getElementById('slt-viewer');
+    const content = document.getElementById('slt-viewer-content');
+    content.textContent = skills[idx].skillmd;
+    viewer.style.display = 'block';
+  }
+
+  document.getElementById('slt-close-viewer').addEventListener('click', () => {
+    document.getElementById('slt-viewer').style.display = 'none';
+  });
+
+  async function animate() {
+    if (animating) return;
+    animating = true;
+    const btn = document.getElementById('slt-play');
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+
+    // Phase 1: Discovery
+    phase = 1;
+    activeSkill = null;
+    updatePhaseIndicators(1);
+    updateCards(1);
+    updateMeter(1);
+    await sleep(1500);
+
+    // Phase 2: Activation - pick Incident Response
+    phase = 2;
+    activeSkill = 1;
+    updatePhaseIndicators(2);
+    updateCards(2);
+    updateMeter(2);
+    await sleep(2000);
+
+    // Phase 3: Deep Resources
+    phase = 3;
+    updatePhaseIndicators(3);
+    updateCards(3);
+    updateMeter(3);
+    await sleep(1500);
+
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    animating = false;
+  }
+
+  function reset() {
+    phase = 0;
+    activeSkill = null;
+    animating = false;
+    updatePhaseIndicators(0);
+    renderSkills();
+    updateMeter(0);
+    document.getElementById('slt-viewer').style.display = 'none';
+    const btn = document.getElementById('slt-play');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  document.getElementById('slt-play').addEventListener('click', animate);
+  document.getElementById('slt-reset').addEventListener('click', reset);
+
+  renderSkills();
+})();
+</script>
+
 ---
 
 ## Skills vs. tools vs. MCP
@@ -263,7 +491,7 @@ The agent discovers and loads skills from this directory. Only the L1 metadata i
 
 For dynamic skill creation or modification, ADK also supports defining skills in code using the `Skill` model class. This is useful when skill content needs to change based on runtime conditions.
 
-For detailed implementation guidance, see the [ADK Skills documentation](https://google.github.io/adk-docs/skills/).
+For detailed implementation guidance, see the [ADK Skills documentation](https://adk.dev/skills/).
 
 ---
 
@@ -379,11 +607,11 @@ with these sections filled in:
 ## Further reading
 
 - [Agent Skills Specification](https://agentskills.io/specification)
-- [ADK Skills Documentation](https://google.github.io/adk-docs/skills/)
+- [ADK Skills Documentation](https://adk.dev/skills/)
 - [Anthropic Skills Repository](https://github.com/anthropics/skills)
 - [GitHub Copilot Agent Skills](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills)
 - [Skills vs. MCP Tools - LlamaIndex](https://www.llamaindex.ai/blog/skills-vs-mcp-tools-for-agents-when-to-use-what)
 
 ---
 
-[Previous Lesson: MCP Deep Dive](../17-mcp-deep-dive/README.md) | [Next Lesson: Orchestrators ->](../19-orchestrators/README.md)
+[Previous Lesson: MCP Deep Dive](../16-mcp-deep-dive/) | [Next Lesson: Orchestrators ->](../18-orchestrators/)

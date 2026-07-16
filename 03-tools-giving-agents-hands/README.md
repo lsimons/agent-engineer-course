@@ -233,6 +233,201 @@ Some models support parallel tool calls, where the model proposes multiple calls
 
 In a real agent, tool calling happens inside a loop: send the user message and tools to the model, check if the response is a text answer (done) or a tool call (execute it, append the result to the conversation, and loop back). This continues until the model decides it has enough information to respond.
 
+<div id="tool-call-flow" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 32px auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; box-sizing: border-box;">
+  <h3 style="margin: 0 0 4px 0; font-size: 20px; color: #1a1a2e;">Tool Call Flow: Step by Step</h3>
+  <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280;">Watch how an agent processes "What's the weather in Tokyo?" - use the controls to step through.</p>
+
+  <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 20px;">
+    <button id="tcf-prev" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #e5e7eb; background: white; font-size: 13px; font-weight: 600; cursor: pointer; color: #374151;">Prev</button>
+    <button id="tcf-play" style="padding: 8px 20px; border-radius: 8px; border: 2px solid #4285f4; background: #4285f4; color: white; font-size: 13px; font-weight: 600; cursor: pointer;">Play</button>
+    <button id="tcf-next" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #e5e7eb; background: white; font-size: 13px; font-weight: 600; cursor: pointer; color: #374151;">Next</button>
+    <button id="tcf-reset" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #e5e7eb; background: white; font-size: 13px; font-weight: 600; cursor: pointer; color: #6b7280;">Reset</button>
+    <div style="flex:1;"></div>
+    <span id="tcf-step-label" style="font-size: 13px; font-weight: 600; color: #6b7280;"></span>
+  </div>
+
+  <div id="tcf-progress" style="display: flex; gap: 4px; margin-bottom: 24px;"></div>
+
+  <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+    <div style="flex: 1.3; min-width: 300px;">
+      <svg id="tcf-svg" viewBox="0 0 520 360" style="width: 100%; background: white; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);"></svg>
+    </div>
+    <div style="flex: 0.7; min-width: 240px;">
+      <div id="tcf-desc" style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 12px; min-height: 80px;"></div>
+      <div id="tcf-data" style="background: #1a1a2e; border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); min-height: 120px;">
+        <div style="font-size: 11px; font-weight: 600; color: #6b7280; margin-bottom: 8px; text-transform: uppercase;">Data Flow</div>
+        <pre id="tcf-json" style="margin: 0; font-size: 12px; color: #34d399; line-height: 1.5; white-space: pre-wrap; word-break: break-all; font-family: 'SF Mono', Monaco, monospace;"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    var steps = [
+      {
+        title: "User Sends Message",
+        desc: "The user asks a question. The message is sent to the agent along with available tool definitions.",
+        active: [0], arrow: [0],
+        json: '{\n  "role": "user",\n  "content": "What\'s the weather\n             in Tokyo?"\n}'
+      },
+      {
+        title: "Agent Receives & Reasons",
+        desc: "The LLM receives the message and tool definitions. It reasons about what to do: 'I need current weather data - I should use the get_weather tool.'",
+        active: [1], arrow: [1],
+        json: '// Agent thinking:\n// "The user wants weather info.\n//  I have a get_weather tool.\n//  Let me call it with \n//  city=Tokyo."'
+      },
+      {
+        title: "Agent Formats Tool Call",
+        desc: "The agent outputs a structured tool call instead of a text response. It specifies the function name and arguments as JSON.",
+        active: [1, 2], arrow: [2],
+        json: '{\n  "tool_call": {\n    "name": "get_weather",\n    "arguments": {\n      "city": "Tokyo",\n      "units": "celsius"\n    }\n  }\n}'
+      },
+      {
+        title: "Tool Executes",
+        desc: "YOUR code receives the tool call, validates it, and executes the actual API call. The model never touches external systems directly.",
+        active: [2, 3], arrow: [3],
+        json: '// Your code executes:\nweather_api.get(\n  city="Tokyo",\n  units="celsius"\n)\n// Calls real weather API...'
+      },
+      {
+        title: "Tool Returns Result",
+        desc: "The tool returns structured data. This result is sent back to the model as part of the conversation history.",
+        active: [3, 2], arrow: [4],
+        json: '{\n  "city": "Tokyo",\n  "temperature": 18,\n  "conditions": "Partly cloudy",\n  "humidity": "65%"\n}'
+      },
+      {
+        title: "Agent Generates Response",
+        desc: "The agent incorporates the tool result and generates a natural language response for the user.",
+        active: [1, 4], arrow: [5],
+        json: '{\n  "role": "assistant",\n  "content": "The weather in\n  Tokyo is 18C and partly\n  cloudy with 65% humidity."\n}'
+      }
+    ];
+
+    var nodes = [
+      { x: 60, y: 80, w: 90, h: 48, label: "User", color: "#4285f4" },
+      { x: 215, y: 80, w: 90, h: 48, label: "Agent (LLM)", color: "#9333ea" },
+      { x: 215, y: 200, w: 90, h: 48, label: "Tool Call", color: "#fbbc04" },
+      { x: 370, y: 200, w: 90, h: 48, label: "Tool (API)", color: "#ea4335" },
+      { x: 370, y: 80, w: 90, h: 48, label: "Response", color: "#34a853" }
+    ];
+
+    var arrows = [
+      { from: 0, to: 1, label: "message" },
+      { from: 1, to: 1, label: "reason", self: true },
+      { from: 1, to: 2, label: "JSON call" },
+      { from: 2, to: 3, label: "execute" },
+      { from: 3, to: 2, label: "result", back: true },
+      { from: 1, to: 4, label: "answer" }
+    ];
+
+    var currentStep = -1;
+    var playing = false;
+    var playTimer = null;
+
+    function drawSVG() {
+      var svg = document.getElementById("tcf-svg");
+      var s = currentStep >= 0 ? steps[currentStep] : { active: [], arrow: [] };
+      var html = '<defs><marker id="tcf-ah" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,1 L8,4 L0,7" fill="#9ca3af"/></marker>' +
+        '<marker id="tcf-ah-active" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,1 L8,4 L0,7" fill="#4285f4"/></marker></defs>';
+
+      // Draw arrows
+      arrows.forEach(function(a, i) {
+        var isActive = s.arrow && s.arrow.indexOf(i) >= 0;
+        var color = isActive ? "#4285f4" : "#d1d5db";
+        var sw = isActive ? 3 : 1.5;
+        var marker = isActive ? "url(#tcf-ah-active)" : "url(#tcf-ah)";
+        var fn = nodes[a.from], tn = nodes[a.to];
+        if (a.self) {
+          html += '<path d="M'+(fn.x+fn.w/2-15)+','+(fn.y-fn.h/2)+' C'+(fn.x)+','+(fn.y-fn.h/2-40)+' '+(fn.x+fn.w)+','+(fn.y-fn.h/2-40)+' '+(fn.x+fn.w/2+15)+','+(fn.y-fn.h/2)+'" fill="none" stroke="'+color+'" stroke-width="'+sw+'" marker-end="'+marker+'"/>';
+          if (isActive) html += '<text x="'+(fn.x+fn.w/2)+'" y="'+(fn.y-fn.h/2-28)+'" text-anchor="middle" font-size="10" fill="'+color+'" font-weight="600">'+a.label+'</text>';
+        } else if (a.back) {
+          var mx = (fn.x + tn.x) / 2;
+          html += '<path d="M'+(fn.x-fn.w/2)+','+(fn.y)+' Q'+(mx)+','+(fn.y+40)+' '+(tn.x+tn.w/2)+','+(tn.y)+'" fill="none" stroke="'+color+'" stroke-width="'+sw+'" marker-end="'+marker+'"/>';
+          if (isActive) html += '<text x="'+mx+'" y="'+(fn.y+40)+'" text-anchor="middle" font-size="10" fill="'+color+'" font-weight="600">'+a.label+'</text>';
+        } else {
+          var x1 = fn.x + fn.w/2, y1 = fn.y;
+          var x2 = tn.x - tn.w/2, y2 = tn.y;
+          if (fn.y !== tn.y) {
+            if (fn.y < tn.y) { y1 = fn.y + fn.h/2; x2 = tn.x; y2 = tn.y - tn.h/2; }
+            else { y1 = fn.y - fn.h/2; x2 = tn.x; y2 = tn.y + tn.h/2; }
+          }
+          html += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="'+sw+'" marker-end="'+marker+'"/>';
+          if (isActive) {
+            var lx = (x1+x2)/2, ly = (y1+y2)/2 - 8;
+            html += '<text x="'+lx+'" y="'+ly+'" text-anchor="middle" font-size="10" fill="'+color+'" font-weight="600">'+a.label+'</text>';
+          }
+        }
+      });
+
+      // Draw nodes
+      nodes.forEach(function(n, i) {
+        var isActive = s.active && s.active.indexOf(i) >= 0;
+        var opacity = currentStep < 0 ? 1 : (isActive ? 1 : 0.35);
+        var scale = isActive ? "transform: scale(1.05);" : "";
+        html += '<g style="opacity:'+opacity+';transition:opacity 0.3s;'+scale+'">' +
+          '<rect x="'+(n.x-n.w/2)+'" y="'+(n.y-n.h/2)+'" width="'+n.w+'" height="'+n.h+'" rx="12" fill="'+n.color+'" opacity="0.12"/>' +
+          '<rect x="'+(n.x-n.w/2)+'" y="'+(n.y-n.h/2)+'" width="'+n.w+'" height="'+n.h+'" rx="12" fill="none" stroke="'+n.color+'" stroke-width="2"/>' +
+          '<text x="'+n.x+'" y="'+(n.y+1)+'" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="700" fill="'+n.color+'">'+n.label+'</text></g>';
+      });
+
+      // Step title on SVG
+      if (currentStep >= 0) {
+        html += '<text x="260" y="300" text-anchor="middle" font-size="14" font-weight="700" fill="#1a1a2e">Step ' + (currentStep+1) + ': ' + steps[currentStep].title + '</text>';
+        html += '<text x="260" y="340" text-anchor="middle" font-size="11" fill="#6b7280">Click Next or Play to continue</text>';
+      } else {
+        html += '<text x="260" y="320" text-anchor="middle" font-size="14" font-weight="600" fill="#6b7280">Click Play or Next to start the animation</text>';
+      }
+
+      svg.innerHTML = html;
+    }
+
+    function renderProgress() {
+      var el = document.getElementById("tcf-progress");
+      el.innerHTML = "";
+      steps.forEach(function(s, i) {
+        var dot = document.createElement("div");
+        dot.style.cssText = "flex:1;height:6px;border-radius:3px;transition:background 0.3s;cursor:pointer;background:" + (i <= currentStep ? "#4285f4" : "#e5e7eb") + ";";
+        dot.onclick = function() { currentStep = i; render(); };
+        el.appendChild(dot);
+      });
+    }
+
+    function render() {
+      drawSVG();
+      renderProgress();
+      var labelEl = document.getElementById("tcf-step-label");
+      labelEl.textContent = currentStep >= 0 ? "Step " + (currentStep + 1) + " / " + steps.length : "Ready";
+      var descEl = document.getElementById("tcf-desc");
+      var jsonEl = document.getElementById("tcf-json");
+      if (currentStep >= 0) {
+        descEl.innerHTML = '<div style="font-size:15px;font-weight:700;color:#1a1a2e;margin-bottom:6px;">' + steps[currentStep].title + '</div><div style="font-size:13px;color:#6b7280;line-height:1.5;">' + steps[currentStep].desc + '</div>';
+        jsonEl.textContent = steps[currentStep].json;
+      } else {
+        descEl.innerHTML = '<div style="font-size:13px;color:#6b7280;">Press Play to watch a complete tool call cycle for the query "What\'s the weather in Tokyo?"</div>';
+        jsonEl.textContent = "// Waiting to start...";
+      }
+    }
+
+    function stopPlay() { playing = false; clearInterval(playTimer); document.getElementById("tcf-play").textContent = "Play"; }
+
+    document.getElementById("tcf-play").onclick = function() {
+      if (playing) { stopPlay(); return; }
+      playing = true; this.textContent = "Pause";
+      if (currentStep >= steps.length - 1) currentStep = -1;
+      playTimer = setInterval(function() {
+        currentStep++;
+        if (currentStep >= steps.length) { stopPlay(); currentStep = steps.length - 1; }
+        render();
+      }, 2000);
+    };
+    document.getElementById("tcf-next").onclick = function() { stopPlay(); if (currentStep < steps.length - 1) { currentStep++; render(); } };
+    document.getElementById("tcf-prev").onclick = function() { stopPlay(); if (currentStep > 0) { currentStep--; render(); } };
+    document.getElementById("tcf-reset").onclick = function() { stopPlay(); currentStep = -1; render(); };
+
+    render();
+  })();
+  </script>
+</div>
+
 ---
 
 ## Tool design best practices
@@ -581,7 +776,7 @@ Google Cloud provides several ways to give agents tools:
 
 Vertex AI supports function calling with Gemini models. You define your tools as function declarations, and the model will generate structured function calls when appropriate.
 
-> **Learn more:** [Vertex AI Function Calling](https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling)
+> **Learn more:** [Vertex AI Function Calling](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling)
 
 ### Agent Development Kit ADK tools
 
@@ -594,7 +789,7 @@ The Agent Development Kit (ADK) provides a structured way to define and manage t
 
 ADK handles the tool definition format, execution, and result passing so you can focus on the tool's logic rather than the plumbing.
 
-> **Learn more:** [ADK Tools Documentation](https://google.github.io/adk-docs/tools/)
+> **Learn more:** [ADK Tools Documentation](https://adk.dev/integrations/)
 
 ### Built-in grounding tools
 
@@ -689,4 +884,4 @@ This example shows how well-designed tools with clear names, good descriptions, 
 
 Now that we understand the brain (LLM) and the hands (tools), the next lesson brings them together with the orchestration layer - the control loop that manages how an agent thinks, acts, observes, and repeats until the job is done.
 
-[Next: Lesson 4 - Orchestration: The Agent Loop -->](../04-orchestration/README.md)
+[Next: Lesson 4 - Orchestration: The Agent Loop -->](../04-agentic-design-patterns/)

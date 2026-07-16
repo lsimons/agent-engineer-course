@@ -1,5 +1,7 @@
 # Lesson 12: getting started with Vertex AI and ADK
 
+> **A note on naming (2026):** At Google Cloud Next 2026, **Vertex AI** was rebranded to the **Gemini Enterprise Agent Platform**, and the managed runtime formerly called **Agent Engine** is now **Agent Runtime**. The underlying services, APIs, and SDKs are unchanged, so everything below still applies; you will just see the new names in the Cloud console and docs. This guide keeps the familiar "Vertex AI" and "Agent Engine" labels for continuity with existing tutorials.
+
 ## Introduction
 
 Over the first eleven lessons, we built a strong foundation in how agents work - reasoning, tools, memory, planning, multi-agent systems, RAG, evaluation, safety, and production operations. All of those concepts are platform-agnostic.
@@ -65,6 +67,201 @@ Here is a map of the major components and how they relate to each other:
 +------------------------------------------------------------------+
 ```
 
+<div id="stack-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
+  <div style="background: linear-gradient(135deg, #9333ea, #7928ca); padding: 20px 24px; color: white;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <div style="font-size: 1.25rem; font-weight: 700;">Google Cloud AI Stack Explorer</div>
+        <div style="font-size: 0.85rem; opacity: 0.9;">Click any component to learn more. Try the Decision Helper.</div>
+      </div>
+      <button id="stack-helper-btn" onclick="toggleDecisionHelper()" style="background: white; color: #9333ea; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 600; cursor: pointer; font-size: 0.85rem;">Decision Helper</button>
+    </div>
+  </div>
+  <div id="stack-main" style="padding: 24px;">
+    <!-- Top Layer: Platform Services -->
+    <div style="margin-bottom: 8px; font-size: 0.7rem; font-weight: 600; color: #5f6368; text-transform: uppercase; letter-spacing: 1px;">Platform Services</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+      <div class="stack-card" onclick="showStackInfo('agent-engine')" style="background: white; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; text-align: center;" onmouseenter="this.style.borderColor='#9333ea';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='transparent';this.style.transform='none'">
+        <div style="font-size: 1.3rem; margin-bottom: 6px;">🏗️</div>
+        <div style="font-size: 0.8rem; font-weight: 700; color: #202124;">Agent Engine</div>
+        <div style="font-size: 0.65rem; color: #5f6368;">Managed Runtime</div>
+      </div>
+      <div class="stack-card" onclick="showStackInfo('cloud-run')" style="background: white; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; text-align: center;" onmouseenter="this.style.borderColor='#4285f4';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='transparent';this.style.transform='none'">
+        <div style="font-size: 1.3rem; margin-bottom: 6px;">☁️</div>
+        <div style="font-size: 0.8rem; font-weight: 700; color: #202124;">Cloud Run</div>
+        <div style="font-size: 0.65rem; color: #5f6368;">Container Hosting</div>
+      </div>
+      <div class="stack-card" onclick="showStackInfo('monitoring')" style="background: white; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; text-align: center;" onmouseenter="this.style.borderColor='#34a853';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='transparent';this.style.transform='none'">
+        <div style="font-size: 1.3rem; margin-bottom: 6px;">📊</div>
+        <div style="font-size: 0.8rem; font-weight: 700; color: #202124;">Monitoring</div>
+        <div style="font-size: 0.65rem; color: #5f6368;">Observability</div>
+      </div>
+    </div>
+    <!-- Connection lines -->
+    <div style="text-align: center; margin: -8px 0; color: #e8eaed; font-size: 1.2rem;">▼ ▼ ▼</div>
+    <!-- Middle Layer: Developer Tools -->
+    <div style="margin: 8px 0; font-size: 0.7rem; font-weight: 600; color: #5f6368; text-transform: uppercase; letter-spacing: 1px;">Developer Tools</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+      <div class="stack-card" onclick="showStackInfo('adk')" style="background: white; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; text-align: center;" onmouseenter="this.style.borderColor='#fbbc04';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='transparent';this.style.transform='none'">
+        <div style="font-size: 1.3rem; margin-bottom: 6px;">🛠️</div>
+        <div style="font-size: 0.8rem; font-weight: 700; color: #202124;">ADK</div>
+        <div style="font-size: 0.65rem; color: #5f6368;">Agent Dev Kit</div>
+      </div>
+      <div class="stack-card" onclick="showStackInfo('model-armor')" style="background: white; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; text-align: center;" onmouseenter="this.style.borderColor='#ea4335';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='transparent';this.style.transform='none'">
+        <div style="font-size: 1.3rem; margin-bottom: 6px;">🛡️</div>
+        <div style="font-size: 0.8rem; font-weight: 700; color: #202124;">Model Armor</div>
+        <div style="font-size: 0.65rem; color: #5f6368;">Safety & Guardrails</div>
+      </div>
+      <div class="stack-card" onclick="showStackInfo('rag-engine')" style="background: white; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; text-align: center;" onmouseenter="this.style.borderColor='#34a853';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='transparent';this.style.transform='none'">
+        <div style="font-size: 1.3rem; margin-bottom: 6px;">🔍</div>
+        <div style="font-size: 0.8rem; font-weight: 700; color: #202124;">RAG Engine</div>
+        <div style="font-size: 0.65rem; color: #5f6368;">Knowledge Retrieval</div>
+      </div>
+    </div>
+    <div style="text-align: center; margin: -8px 0; color: #e8eaed; font-size: 1.2rem;">▼ ▼ ▼</div>
+    <!-- Bottom Layer: Foundation Models -->
+    <div style="margin: 8px 0; font-size: 0.7rem; font-weight: 600; color: #5f6368; text-transform: uppercase; letter-spacing: 1px;">Foundation Models</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+      <div class="stack-card" onclick="showStackInfo('gemini-pro')" style="background: white; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; text-align: center;" onmouseenter="this.style.borderColor='#4285f4';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='transparent';this.style.transform='none'">
+        <div style="font-size: 1.3rem; margin-bottom: 6px;">🧠</div>
+        <div style="font-size: 0.8rem; font-weight: 700; color: #202124;">Gemini Pro</div>
+        <div style="font-size: 0.65rem; color: #5f6368;">Complex Reasoning</div>
+      </div>
+      <div class="stack-card" onclick="showStackInfo('gemini-flash')" style="background: white; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; text-align: center;" onmouseenter="this.style.borderColor='#fbbc04';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='transparent';this.style.transform='none'">
+        <div style="font-size: 1.3rem; margin-bottom: 6px;">⚡</div>
+        <div style="font-size: 0.8rem; font-weight: 700; color: #202124;">Gemini Flash</div>
+        <div style="font-size: 0.65rem; color: #5f6368;">Balanced</div>
+      </div>
+      <div class="stack-card" onclick="showStackInfo('gemini-lite')" style="background: white; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; text-align: center;" onmouseenter="this.style.borderColor='#34a853';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='transparent';this.style.transform='none'">
+        <div style="font-size: 1.3rem; margin-bottom: 6px;">💨</div>
+        <div style="font-size: 0.8rem; font-weight: 700; color: #202124;">Flash-Lite</div>
+        <div style="font-size: 0.65rem; color: #5f6368;">High Volume</div>
+      </div>
+    </div>
+    <!-- Info Panel -->
+    <div id="stack-info" style="margin-top: 16px; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: none;"></div>
+  </div>
+  <!-- Decision Helper Panel -->
+  <div id="stack-helper" style="display: none; padding: 0 24px 24px;">
+    <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+      <div style="font-weight: 700; margin-bottom: 12px; color: #202124;">Decision Helper</div>
+      <div id="stack-question" style="font-size: 0.9rem; color: #202124; margin-bottom: 16px;">What kind of system are you building?</div>
+      <div id="stack-options" style="display: grid; gap: 8px;"></div>
+      <div id="stack-recommendation" style="display: none; margin-top: 16px; padding: 16px; background: #f0e6ff; border-radius: 10px;"></div>
+      <button id="stack-reset-btn" onclick="resetDecisionHelper()" style="display: none; margin-top: 12px; padding: 8px 16px; background: #9333ea; color: white; border: none; border-radius: 6px; font-size: 0.8rem; cursor: pointer;">Start Over</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var stackInfo = {
+    'agent-engine': {title:'Vertex AI Agent Engine', color:'#9333ea', desc:'Managed runtime for deploying and running AI agents in production. Handles scaling, session management, and monitoring automatically.', when:'Use when you want zero-ops agent deployment with built-in session persistence and auto-scaling.', connects:'Runs ADK agents, uses Gemini models, integrates with Monitoring.'},
+    'cloud-run': {title:'Cloud Run', color:'#4285f4', desc:'Serverless container platform. Run any containerized agent with custom dependencies and full control over the runtime.', when:'Use when you need custom runtime environments, specific dependencies, or more control than Agent Engine provides.', connects:'Hosts containerized ADK agents, integrates with Monitoring and Model Armor.'},
+    'monitoring': {title:'Cloud Monitoring & Logging', color:'#34a853', desc:'Observability stack with dashboards, alerting, distributed tracing (OpenTelemetry), and structured logging.', when:'Use always in production. Essential for tracking agent health, costs, latency, and safety incidents.', connects:'Collects data from Agent Engine, Cloud Run, and all Google Cloud services.'},
+    'adk': {title:'Agent Development Kit (ADK)', color:'#fbbc04', desc:'Open-source, code-first framework for building AI agents. Supports Python, TypeScript, Go, Java. Model and deployment agnostic.', when:'Use when building any agent that needs tools, orchestration, multi-agent coordination, or session management.', connects:'Deploys to Agent Engine or Cloud Run, uses Gemini or other models, integrates with RAG Engine and Model Armor.'},
+    'model-armor': {title:'Model Armor', color:'#ea4335', desc:'Managed guardrails service. Screens prompts and responses for harmful content, detects prompt injections, enforces safety policies.', when:'Use when you need production-grade input/output safety filtering without building it from scratch.', connects:'Sits between your agent and Gemini models, screens both inputs and outputs.'},
+    'rag-engine': {title:'RAG Engine & Vertex AI Search', color:'#34a853', desc:'Managed retrieval pipeline for grounding agent responses in your documents. Handles chunking, embedding, indexing, and search.', when:'Use when your agent needs to answer questions from your own documents, knowledge bases, or websites.', connects:'Provides grounded context to Gemini models, integrates with ADK as a tool.'},
+    'gemini-pro': {title:'Gemini Pro', color:'#4285f4', desc:'Highest capability model for complex multi-step reasoning, nuanced decisions, and long document analysis.', when:'Use for complex planning tasks, difficult multi-step reasoning, or when quality matters more than speed.', connects:'Called by ADK agents, available through Vertex AI API.'},
+    'gemini-flash': {title:'Gemini Flash', color:'#fbbc04', desc:'Balanced model with good capability, fast responses, and moderate cost. The workhorse for most agent tasks.', when:'Use for general agent tasks: tool use, RAG, summarization, conversation. Best default choice.', connects:'Called by ADK agents, available through Vertex AI API.'},
+    'gemini-lite': {title:'Gemini Flash-Lite', color:'#34a853', desc:'Fastest and cheapest model. Optimized for high-volume, simpler tasks like classification, routing, and extraction.', when:'Use for intent detection, routing decisions, simple classification, or any high-throughput simple task.', connects:'Called by ADK agents, ideal for model routing (handle simple tasks cheaply).'}
+  };
+
+  var decisionTree = {
+    q: 'What kind of system are you building?',
+    options: [
+      {label: 'A simple chatbot (no tools)', next: {
+        q: 'Do you need to search your own documents?',
+        options: [
+          {label: 'Yes', result: {services: ['gemini-flash', 'rag-engine'], text: 'Use <strong>Gemini Flash</strong> with <strong>RAG Engine</strong> for document-grounded conversations. No framework needed for simple cases.'}},
+          {label: 'No', result: {services: ['gemini-flash'], text: 'Use the <strong>Gemini Flash API</strong> directly. For a simple chatbot without tools, you may not need a framework.'}}
+        ]
+      }},
+      {label: 'An agent with tools and reasoning', next: {
+        q: 'Do you need managed production hosting?',
+        options: [
+          {label: 'Yes, zero-ops preferred', result: {services: ['adk', 'gemini-flash', 'agent-engine', 'model-armor'], text: 'Use <strong>ADK</strong> to build, <strong>Gemini Flash</strong> for reasoning, <strong>Agent Engine</strong> for managed hosting, and <strong>Model Armor</strong> for safety.'}},
+          {label: 'No, I want full control', result: {services: ['adk', 'gemini-flash', 'cloud-run'], text: 'Use <strong>ADK</strong> to build, <strong>Gemini Flash</strong> for reasoning, and deploy to <strong>Cloud Run</strong> for full container control.'}}
+        ]
+      }},
+      {label: 'A multi-agent system', result: {services: ['adk', 'gemini-pro', 'gemini-flash', 'agent-engine', 'monitoring'], text: 'Use <strong>ADK</strong> with multi-agent orchestration, <strong>Gemini Pro</strong> for complex reasoning and <strong>Flash</strong> for simpler tasks, <strong>Agent Engine</strong> for hosting, and <strong>Monitoring</strong> for observability.'}},
+      {label: 'A high-volume, cost-sensitive app', result: {services: ['adk', 'gemini-lite', 'gemini-flash', 'cloud-run'], text: 'Use <strong>ADK</strong> with model routing: <strong>Flash-Lite</strong> for simple tasks and <strong>Flash</strong> for complex ones. Deploy on <strong>Cloud Run</strong> with auto-scaling and caching.'}}
+    ]
+  };
+
+  var currentNode = decisionTree;
+
+  window.showStackInfo = function(key) {
+    var info = stackInfo[key];
+    var el = document.getElementById('stack-info');
+    el.style.display = 'block';
+    el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><div style="width:12px;height:12px;border-radius:50%;background:' + info.color + ';"></div><span style="font-weight:700;font-size:1rem;color:#202124;">' + info.title + '</span></div>' +
+      '<div style="font-size:0.85rem;color:#5f6368;margin-bottom:10px;">' + info.desc + '</div>' +
+      '<div style="display:grid;gap:8px;">' +
+      '<div style="padding:10px 12px;background:#f0f4ff;border-radius:8px;font-size:0.8rem;"><strong>When to use:</strong> ' + info.when + '</div>' +
+      '<div style="padding:10px 12px;background:#f0fff4;border-radius:8px;font-size:0.8rem;"><strong>Connects to:</strong> ' + info.connects + '</div></div>';
+  };
+
+  window.toggleDecisionHelper = function() {
+    var helper = document.getElementById('stack-helper');
+    var main = document.getElementById('stack-main');
+    if (helper.style.display === 'none') {
+      helper.style.display = 'block';
+      document.getElementById('stack-helper-btn').textContent = 'Show Stack';
+      resetDecisionHelper();
+    } else {
+      helper.style.display = 'none';
+      document.getElementById('stack-helper-btn').textContent = 'Decision Helper';
+    }
+  };
+
+  window.resetDecisionHelper = function() {
+    currentNode = decisionTree;
+    document.getElementById('stack-recommendation').style.display = 'none';
+    document.getElementById('stack-reset-btn').style.display = 'none';
+    renderQuestion(currentNode);
+  };
+
+  function renderQuestion(node) {
+    document.getElementById('stack-question').textContent = node.q;
+    var optEl = document.getElementById('stack-options');
+    optEl.innerHTML = '';
+    node.options.forEach(function(opt) {
+      var btn = document.createElement('button');
+      btn.textContent = opt.label;
+      btn.style.cssText = 'padding:10px 16px;background:#f8f9fa;border:2px solid #e8eaed;border-radius:8px;cursor:pointer;font-size:0.85rem;text-align:left;transition:all 0.2s;';
+      btn.onmouseenter = function() { btn.style.borderColor = '#9333ea'; btn.style.background = '#f0e6ff'; };
+      btn.onmouseleave = function() { btn.style.borderColor = '#e8eaed'; btn.style.background = '#f8f9fa'; };
+      btn.onclick = function() {
+        if (opt.result) {
+          showRecommendation(opt.result);
+        } else if (opt.next) {
+          currentNode = opt.next;
+          renderQuestion(opt.next);
+        }
+      };
+      optEl.appendChild(btn);
+    });
+  }
+
+  function showRecommendation(result) {
+    document.getElementById('stack-options').innerHTML = '';
+    document.getElementById('stack-question').textContent = 'Recommendation:';
+    var rec = document.getElementById('stack-recommendation');
+    rec.style.display = 'block';
+    rec.innerHTML = '<div style="font-size:0.9rem;line-height:1.6;">' + result.text + '</div>' +
+      '<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;">' +
+      result.services.map(function(s) {
+        var info = stackInfo[s];
+        return '<span style="padding:4px 10px;background:white;border-radius:6px;font-size:0.75rem;font-weight:600;color:' + info.color + ';border:1px solid ' + info.color + ';">' + info.title + '</span>';
+      }).join('') + '</div>';
+    document.getElementById('stack-reset-btn').style.display = 'inline-block';
+  }
+
+  renderQuestion(decisionTree);
+})();
+</script>
+
 Let's walk through each component.
 
 ---
@@ -78,6 +275,8 @@ Gemini is Google's family of multimodal AI models. For agent development, you wi
 | **Gemini Pro** | Complex reasoning, multi-step planning, nuanced decisions | Highest capability, higher latency, higher cost |
 | **Gemini Flash** | Balanced tasks - tool use, summarization, conversation | Good capability, fast, moderate cost |
 | **Gemini Flash-Lite** | High-volume, simpler tasks - classification, routing, extraction | Fast, lowest cost, good for high-throughput use cases |
+
+As of mid-2026, the current model IDs for these tiers are `gemini-3.1-pro` (Pro), `gemini-3.5-flash` (Flash), and `gemini-3.1-flash-lite` (Flash-Lite). The Gemini 2.5 family still works but is scheduled to retire on October 16, 2026, and Gemini 2.0 models were shut down on June 1, 2026 - so check the docs for the latest IDs, or use a rolling alias like `gemini-flash-latest`.
 
 ### Choosing the right model
 
@@ -100,7 +299,7 @@ Gemini models can process text, images, audio, and video. This means your agents
 
 This is a significant advantage over text-only models because it lets you build agents that interact with the real world in richer ways.
 
-For model details and capabilities, see the [Gemini model documentation](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models).
+For model details and capabilities, see the [Gemini model documentation](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/models).
 
 ---
 
@@ -132,7 +331,7 @@ These tools integrate with your CI/CD pipeline for evaluation-gated deployment (
 
 The Vertex AI Model Garden provides access to a wide range of models beyond Gemini - including open-source models and models from partner companies. This is useful when you need specialized models for particular tasks or want to compare different options.
 
-For the full platform overview, see the [Vertex AI documentation](https://cloud.google.com/vertex-ai/docs).
+For the full platform overview, see the [Vertex AI documentation](https://docs.cloud.google.com/vertex-ai/docs).
 
 ---
 
@@ -144,7 +343,7 @@ ADK is Google's open-source, code-first framework for building AI agents. If Ver
 
 | Feature | Detail |
 |---------|--------|
-| **Open source** | Available on GitHub, MIT licensed |
+| **Open source** | Available on GitHub, Apache 2.0 licensed |
 | **Multi-language** | Python, TypeScript/JavaScript, Go, Java |
 | **Model-agnostic** | Works with Gemini, but also supports other LLMs |
 | **Deployment-agnostic** | Run locally, on Agent Engine, on Cloud Run, on any container platform |
@@ -184,7 +383,7 @@ def get_weather(city: str) -> str:
 # Create an agent
 weather_agent = Agent(
     name="weather_agent",
-    model="gemini-2.0-flash",
+    model="gemini-3.5-flash",
     instruction="You are a helpful weather assistant. Use the get_weather "
                 "tool to answer questions about weather conditions.",
     tools=[get_weather],
@@ -276,7 +475,7 @@ Skills have three levels of increasing complexity:
 
 Skills make it easier to share and compose agent capabilities across teams and projects.
 
-For complete ADK documentation, see the [ADK docs site](https://google.github.io/adk-docs/).
+For complete ADK documentation, see the [ADK docs site](https://adk.dev/).
 
 ---
 
@@ -305,7 +504,7 @@ Agent Engine is a managed runtime service on Google Cloud for deploying and runn
 
 ADK agents can be deployed to any of these targets. Agent Engine is the most managed option - you give it your agent code and it handles the rest.
 
-For deployment details, see the [Agent Engine documentation](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview).
+For deployment details, see the [Agent Engine documentation](https://docs.cloud.google.com/agent-builder/agent-engine/overview).
 
 ---
 
@@ -334,7 +533,7 @@ RAG Engine provides a managed retrieval pipeline specifically designed for groun
 
 The advantage of these managed services is that you do not have to run your own vector database, manage embeddings, or build retrieval pipelines. The tradeoff is less control over the details.
 
-For RAG capabilities, see the [RAG Engine overview](https://cloud.google.com/vertex-ai/generative-ai/docs/rag-overview).
+For RAG capabilities, see the [RAG Engine overview](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview).
 
 ---
 
@@ -402,7 +601,7 @@ from google.adk.agents import Agent
 
 root_agent = Agent(
     name="greeting_agent",
-    model="gemini-2.0-flash",
+    model="gemini-3.5-flash",
     instruction="You are a friendly assistant that greets users "
                 "and answers basic questions.",
 )
@@ -418,7 +617,7 @@ This starts a local web interface where you can chat with your agent and inspect
 
 ### Step 5: Add tools and complexity
 
-From here, you can add tools, create multi-agent systems, integrate RAG, and eventually deploy to Agent Engine or Cloud Run. The [ADK getting started guide](https://google.github.io/adk-docs/get-started/) walks through these steps in detail.
+From here, you can add tools, create multi-agent systems, integrate RAG, and eventually deploy to Agent Engine or Cloud Run. The [ADK getting started guide](https://adk.dev/get-started/) walks through these steps in detail.
 
 ---
 
@@ -541,13 +740,13 @@ Here is a reference connecting the concepts from earlier lessons to specific Goo
 
 ## Further reading
 
-- [ADK Documentation](https://google.github.io/adk-docs/) - Complete guide to building agents with ADK
-- [Vertex AI Documentation](https://cloud.google.com/vertex-ai/docs) - The full Vertex AI platform reference
-- [Agent Engine Overview](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview) - Managed runtime for agents
-- [RAG Engine Overview](https://cloud.google.com/vertex-ai/generative-ai/docs/rag-overview) - Managed retrieval-augmented generation
+- [ADK Documentation](https://adk.dev/) - Complete guide to building agents with ADK
+- [Vertex AI Documentation](https://docs.cloud.google.com/vertex-ai/docs) - The full Vertex AI platform reference
+- [Agent Engine Overview](https://docs.cloud.google.com/agent-builder/agent-engine/overview) - Managed runtime for agents
+- [RAG Engine Overview](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview) - Managed retrieval-augmented generation
 - [Agent Starter Pack](https://github.com/GoogleCloudPlatform/agent-starter-pack) - Production-ready templates with CI/CD and observability built in
 - [Google AI Studio](https://aistudio.google.com/) - Get API keys and experiment with Gemini models
 
 ---
 
-Next lesson: [Building Your First Agent](../13-building-your-first-agent/README.md)
+Next lesson: [Building Your First Agent](../13-building-your-first-agent/)
