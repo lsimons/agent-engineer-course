@@ -430,6 +430,20 @@ A good rule: prototype the *idea* with the raw loop so you understand the moving
 
 ______________________________________________________________________
 
+## You have been building a harness
+
+Step back and look at what this lesson actually produced. The model call is one line. Everything else - the tool definitions and descriptions, the result formatting, the error handling, the iteration cap, the SDK's permissions and hooks - is scaffolding around the model. That scaffolding has a name: the **harness**. A useful equation to carry forward:
+
+```
+agent = model + harness
+```
+
+This matters because the harness, not the model, is usually what determines whether your agent works. A decent model with a great harness will beat a great model with a bad harness - benchmark teams have jumped dozens of ranks on agentic coding leaderboards by changing only the harness, with the model untouched. So when your agent misbehaves, resist the instinct to conclude "the model is not smart enough." Most agent failures are configuration failures: a vague tool description, a missing feedback signal, context stuffed with irrelevant material.
+
+The practical habit this suggests is the **ratchet**: every time your agent fails, turn the failure into a permanent constraint in the harness so it cannot happen the same way twice. The agent used the wrong test runner? Add a line to your [AGENTS.md](/15-agents-md/). It skipped verification? Add a hook that runs the tests after every edit. It produced a bad output shape? Add the case to your evals from [Lesson 9](/09-evaluating-and-testing-agents/). Each fix ratchets the floor upward, and the harness compounds in value while prompts alone would not. Addy Osmani's [Agent Harness Engineering](https://addyosmani.com/blog/agent-harness-engineering/) is a good deep dive on this mindset.
+
+______________________________________________________________________
+
 ## Before you ship
 
 An agent that calls tools is software that takes actions on your behalf, so treat it like production software from the first commit:
@@ -453,6 +467,8 @@ ______________________________________________________________________
 4. **Fail loudly to the model, not to your process.** Return `tool_result` with `is_error: True` so the model can recover, and cap iterations so a stuck agent cannot run forever.
 
 5. **Learn with the raw loop, ship with the SDK.** Hand-roll the loop to understand it, then reach for the Claude Agent SDK when you want built-in tools, permissioning, hooks, subagents, and MCP - all of which run through your LiteLLM proxy already.
+
+6. **The harness determines the agent.** Most agent failures are harness failures, not model failures. When something goes wrong, ratchet a fix into the harness - an instruction, a hook, an eval - so it cannot recur.
 
 ______________________________________________________________________
 
