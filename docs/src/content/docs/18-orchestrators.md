@@ -244,29 +244,49 @@ An agent executes repeatedly until a condition is met. This includes two importa
 
 **Important:** Always set a maximum iteration count. Without it, a loop can run forever if the critic never approves.
 
-With the Claude Agent SDK, a loop is just a Python `for`/`while` loop around `query()` calls, checking a condition after each iteration and enforcing a maximum iteration count yourself.
+A loop is a graph with a cycle: a conditional edge sends control back to the generator node until the critic approves, or until a maximum iteration count is reached. This is the shape LangGraph is built for - the cycle and its exit condition are visible as graph structure instead of a Python `for`/`while` loop.
 
 ```python
-import anyio
-from claude_agent_sdk import query, ClaudeAgentOptions
+import os
+from typing import TypedDict
+from langchain_anthropic import ChatAnthropic
+from langgraph.graph import StateGraph, END
 
-async def refine(prompt: str, max_iterations: int = 5):
-    options = ClaudeAgentOptions(allowed_tools=["Read", "Write"])
-    draft = prompt
-    for _ in range(max_iterations):
-        async for message in query(prompt=f"Write or improve:\n{draft}", options=options):
-            draft = str(message)
-        approved = False
-        async for message in query(prompt=f"Does this meet the bar? Answer yes or no:\n{draft}", options=options):
-            approved = "yes" in str(message).lower()
-        if approved:
-            break
-    return draft
+model = ChatAnthropic(
+    model="aws/claude-5-sonnet",
+    base_url=os.environ["ANTHROPIC_BASE_URL"],  # the LiteLLM proxy
+)
 
-anyio.run(refine, "a product description")
+class RefineState(TypedDict):
+    draft: str
+    approved: bool
+    iterations: int
+
+def generate(state: RefineState) -> RefineState:
+    response = model.invoke(f"Write or improve:\n{state['draft']}")
+    return {"draft": response.content, "iterations": state["iterations"] + 1}
+
+def critique(state: RefineState) -> RefineState:
+    response = model.invoke(f"Does this meet the bar? Answer yes or no:\n{state['draft']}")
+    return {"approved": "yes" in response.content.lower()}
+
+def should_continue(state: RefineState) -> str:
+    if state["approved"] or state["iterations"] >= 5:
+        return END
+    return "generate"
+
+graph = StateGraph(RefineState)
+graph.add_node("generate", generate)
+graph.add_node("critique", critique)
+graph.set_entry_point("generate")
+graph.add_edge("generate", "critique")
+graph.add_conditional_edges("critique", should_continue)
+app = graph.compile()
+
+result = app.invoke({"draft": "a product description", "approved": False, "iterations": 0})
 ```
 
-See the [Claude Agent SDK documentation](https://platform.claude.com/docs/en/api/agent-sdk/overview) for the full API surface.
+See the [LangGraph documentation](https://langchain-ai.github.io/langgraph/) for the full API surface.
 
 ### Routing (handoff / dispatch)
 
@@ -295,6 +315,56 @@ Routing can be:
 
 - When the request does not fit neatly into categories
 - When multiple agents need to collaborate on the same request
+
+This is one of the clearest matches for LangGraph: a router node classifies the input, and a conditional edge sends control to exactly one specialist node.
+
+```python
+import os
+from typing import Literal, TypedDict
+from langchain_anthropic import ChatAnthropic
+from langgraph.graph import StateGraph, END
+
+model = ChatAnthropic(
+    model="aws/claude-5-sonnet",
+    base_url=os.environ["ANTHROPIC_BASE_URL"],  # the LiteLLM proxy
+)
+
+class TicketState(TypedDict):
+    message: str
+    category: str
+    response: str
+
+def classify(state: TicketState) -> TicketState:
+    result = model.invoke(f"Classify as billing, technical, or general:\n{state['message']}")
+    return {"category": result.content.strip().lower()}
+
+def route(state: TicketState) -> Literal["billing", "technical", "general"]:
+    return state["category"]
+
+def billing(state: TicketState) -> TicketState:
+    return {"response": model.invoke(f"Handle this billing request:\n{state['message']}").content}
+
+def technical(state: TicketState) -> TicketState:
+    return {"response": model.invoke(f"Handle this technical request:\n{state['message']}").content}
+
+def general(state: TicketState) -> TicketState:
+    return {"response": model.invoke(f"Handle this general request:\n{state['message']}").content}
+
+graph = StateGraph(TicketState)
+graph.add_node("classify", classify)
+graph.add_node("billing", billing)
+graph.add_node("technical", technical)
+graph.add_node("general", general)
+graph.set_entry_point("classify")
+graph.add_conditional_edges("classify", route)
+for node in ["billing", "technical", "general"]:
+    graph.add_edge(node, END)
+app = graph.compile()
+
+result = app.invoke({"message": "My invoice looks wrong", "category": "", "response": ""})
+```
+
+See the [LangGraph documentation](https://langchain-ai.github.io/langgraph/) for the full API surface.
 
 ### Hierarchical (Coordinator-Worker)
 
@@ -717,7 +787,7 @@ content_pipeline (sequential)
         (loops until both approve)
 ```
 
-This combines parallel research, sequential progression, and iterative refinement into one system. With the Claude Agent SDK, each stage is ordinary Python calling `query()` - a task group for the parallel stage, a loop with a max iteration count for refinement - composed however your control flow needs.
+This combines parallel research, sequential progression, and iterative refinement into one system. With the Claude Agent SDK, each stage is ordinary Python calling `query()` - a task group for the parallel stage, a loop with a max iteration count for refinement - composed however your control flow needs. The same composition maps onto a single LangGraph graph too: the parallel research stage becomes a fan-out of nodes, and the refinement stage becomes a cycle with a conditional edge - worth it when you want the whole pipeline's state to be inspectable, checkpointed, or reviewed as a first-class artifact rather than as nested Python.
 
 ______________________________________________________________________
 
@@ -727,7 +797,9 @@ The Claude Agent SDK packages the same agent loop that powers Claude Code - tool
 
 ### `query()` as the building block
 
-Every pattern in this lesson - sequential, parallel, loop, routing, hierarchical - can be built by calling `query()` one or more times and wiring the results together yourself, as shown in the examples above. There is no dedicated `SequentialAgent` or `ParallelAgent` class to learn; ordinary control flow (function calls, `for` loops, `anyio` task groups) plays that role, so orchestration logic reads like the rest of your codebase.
+Sequential and parallel composition, and hierarchical delegation via subagents, can be built by calling `query()` one or more times and wiring the results together with ordinary Python control flow (function calls, `for` loops, `anyio` task groups), as shown in the examples above. There is no dedicated `SequentialAgent` or `ParallelAgent` class to learn - orchestration logic reads like the rest of your codebase.
+
+For patterns built around cycles or branching - loop and routing - the LangGraph examples earlier in this lesson show the complementary approach: modeling the control flow explicitly as a graph rather than as nested Python.
 
 ### Subagents for hierarchical delegation
 
@@ -749,19 +821,59 @@ Because the SDK inherits Claude Code's configuration and authentication and hono
 
 ______________________________________________________________________
 
+## Orchestration with LangGraph
+
+LangGraph models an agent system as an explicit graph: a `StateGraph` of nodes (plain functions or agents) connected by edges - including conditional edges chosen by a routing function or an LLM - operating over a shared, typed state object. This is the natural fit for patterns with cycles or branching, like the loop and routing examples earlier in this lesson, because the control flow is visible as data (nodes and edges) rather than buried in nested Python control flow.
+
+Install it with:
+
+```bash
+uv add langgraph langchain-anthropic
+```
+
+For a single ReAct-style agent, the prebuilt `create_react_agent` skips writing the graph by hand:
+
+```python
+import os
+from langchain_anthropic import ChatAnthropic
+from langgraph.prebuilt import create_react_agent
+
+model = ChatAnthropic(
+    model="aws/claude-5-sonnet",
+    base_url=os.environ["ANTHROPIC_BASE_URL"],  # the LiteLLM proxy
+)
+agent = create_react_agent(model, tools=[search_docs, get_weather])
+result = agent.invoke({"messages": [("user", "What's the weather in Tokyo?")]})
+```
+
+Because LangGraph talks to models through `langchain_anthropic.ChatAnthropic` (or the equivalent OpenAI-compatible client), the same graph runs unchanged against the OpenAI-series models your company's LiteLLM proxy also exposes - just swap the `model` string. LangGraph also supports checkpointing state to a persistence layer, which matters for long-running or human-in-the-loop orchestration: a run can be paused, inspected, and resumed later without losing state. Subgraphs let you nest one graph inside another, which is one way to build hierarchical orchestration entirely in LangGraph rather than with Agent SDK subagents. See the [LangGraph documentation](https://langchain-ai.github.io/langgraph/) for the full API.
+
+______________________________________________________________________
+
+## Choosing between the Claude Agent SDK and LangGraph
+
+Both appear throughout this lesson because they solve different problems, not competing ones:
+
+- **Claude Agent SDK** - the fastest path when the agent is Claude driving tools directly. It inherits Claude Code's tool implementations, permission system, hooks, and MCP configuration, so a `query()` call behaves like Claude Code itself. Reach for it when you're building a Claude-native agent, as in [Lesson 13: Building your first agent](/13-building-your-first-agent/) - orchestration is ordinary Python around `query()` calls and subagents.
+- **LangGraph** - the company's standard for production orchestration. It makes state, branching, and cycles explicit as a graph rather than as nested Python, and it isn't tied to a single model provider: the same graph runs against Claude or against the OpenAI-series models the LiteLLM proxy also exposes. Reach for it when you need durable, inspectable control flow, when more than one model or provider is in play, or when the orchestration itself is worth reviewing and testing as a first-class artifact.
+
+The two compose rather than compete: a LangGraph node can itself be a Claude Agent SDK `query()` call, so a coordinator built in LangGraph can delegate a step to a fully-tooled Claude-native subagent.
+
+______________________________________________________________________
+
 ## Framework comparison
 
-The Claude Agent SDK is one of several frameworks and libraries used for agent orchestration. Here is how it compares to other major options:
+LangGraph and the Claude Agent SDK are two of several frameworks and libraries used for agent orchestration. Here is how they compare to other major options:
 
-| Framework               | Approach                                                                              | Strengths                                                                                                             | Considerations                                           |
-| ----------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| **Claude Agent SDK**    | Orchestrator-worker with isolated context windows                                     | Subagents use isolated context, sending only relevant info back. Inherits Claude Code's tools, permissions, and auth. | Anthropic-specific                                       |
-| **Google ADK**          | Three deterministic primitives (Sequential, Parallel, Loop) + LLM-driven coordination | Clean separation of workflow vs. reasoning. Deployment to Vertex AI Agent Engine.                                     | Newer framework, smaller community than LangChain        |
-| **LangGraph**           | Graph-based workflow with nodes and edges                                             | Strongest support for complex branching and conditional logic. Mature observability.                                  | Steeper learning curve                                   |
-| **CrewAI**              | Role-based model where agents are defined like team members                           | Fastest time-to-value. Intuitive YAML-driven configuration.                                                           | May lack sophistication for complex enterprise scenarios |
-| **AutoGen** (Microsoft) | Conversational architecture with dynamic role-playing                                 | Good for human-in-the-loop and multi-party conversations.                                                             | Significant setup complexity for production              |
+| Framework               | Approach                                                                              | Strengths                                                                                                                                                                                                                                                   | Considerations                                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **LangGraph**           | Graph-based workflow with typed state, nodes, and conditional edges                   | Explicit, inspectable control flow with native support for cycles and branching. Provider-independent - the same graph runs against Claude and the OpenAI-series models exposed by the LiteLLM proxy. This company's standard for production orchestration. | Steeper learning curve than plain Python                                                                   |
+| **Claude Agent SDK**    | Orchestrator-worker with isolated context windows                                     | Subagents use isolated context, sending only relevant info back. Inherits Claude Code's tools, permissions, and auth.                                                                                                                                       | Claude-native - the natural choice when Claude is driving the tools directly, but not provider-independent |
+| **Google ADK**          | Three deterministic primitives (Sequential, Parallel, Loop) + LLM-driven coordination | Clean separation of workflow vs. reasoning. Deployment to Vertex AI Agent Engine.                                                                                                                                                                           | Newer framework, smaller community than LangChain                                                          |
+| **CrewAI**              | Role-based model where agents are defined like team members                           | Fastest time-to-value. Intuitive YAML-driven configuration.                                                                                                                                                                                                 | May lack sophistication for complex enterprise scenarios                                                   |
+| **AutoGen** (Microsoft) | Conversational architecture with dynamic role-playing                                 | Good for human-in-the-loop and multi-party conversations.                                                                                                                                                                                                   | Significant setup complexity for production                                                                |
 
-The choice depends on your priorities and what your organization has already standardized on. This course uses the Claude Agent SDK because it inherits Claude Code's configuration, tools, and permissions model - if you're already building on Claude, it's the natural fit. Reach for ADK if you want Vertex AI integration and clean workflow primitives, LangGraph if you need complex graph-based flows, or CrewAI if you want fast setup with role-based teams.
+This company uses LangGraph and the Claude Agent SDK for different jobs, not as competitors - see [Choosing between the Claude Agent SDK and LangGraph](#choosing-between-the-claude-agent-sdk-and-langgraph) above. Reach for ADK if you specifically need Vertex AI Agent Engine deployment, or CrewAI if you want the fastest possible time-to-value on a small role-based team of agents.
 
 ______________________________________________________________________
 
@@ -844,7 +956,7 @@ ______________________________________________________________________
 - Most production systems use a hybrid - deterministic structure with LLM flexibility within steps
 - Core patterns: sequential, parallel, loop, routing, hierarchical, group chat
 - Patterns compose - nest them to build complex systems from simple pieces
-- The Claude Agent SDK gives you `query()`, subagents, hooks, and MCP as building blocks - you compose sequential, parallel, and loop control flow yourself in code, while frameworks like ADK, LangGraph, and CrewAI offer alternative, more declarative approaches
+- The Claude Agent SDK gives you `query()`, subagents, hooks, and MCP as building blocks for Claude-native agents; LangGraph gives you an explicit, provider-independent graph for orchestration with cycles and branching, and is this company's standard for production orchestration - use each for what it's best at, not as competitors
 - Start simple. A single well-equipped agent is better than a poorly orchestrated team.
 - Set iteration limits, validate between steps, manage context aggressively, and design for failure
 

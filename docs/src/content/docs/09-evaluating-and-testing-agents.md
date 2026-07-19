@@ -867,6 +867,18 @@ You do not need a specialized platform to get started. A plain Python script tha
 - **LLM-as-a-Judge** runs next, calling a Claude model through your company's LiteLLM proxy to score the dimensions that automated checks cannot capture. A smaller, cheaper model such as `aws/claude-4-5-haiku` is often accurate enough for judging, which keeps the eval suite fast and inexpensive to run on every pull request.
 - **Results** get written to a file, database, or spreadsheet so you can track trends across runs.
 
+### Turning production traces into eval datasets with Langfuse
+
+[Langfuse](https://langfuse.com/docs) is the company's tracing and evaluation platform. Wrapping your agent loop in its `@observe()` decorator captures every nested LLM and tool call as a trace, so real production interactions - not just hand-written test cases - can be turned into eval datasets. Langfuse can also run LLM-as-a-Judge evaluations directly over stored traces, which pairs well with the harness above. Read `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_HOST` from the environment; the host points at the company's internal Langfuse instance (see the internal docs).
+
+```python
+from langfuse import observe
+
+@observe()
+def run_agent(user_input: str) -> str:
+    ...  # your agent loop; nested LLM calls are traced automatically
+```
+
 ## Common evaluation mistakes
 
 ### Mistake 1: only testing the happy path

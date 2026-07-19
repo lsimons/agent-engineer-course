@@ -690,6 +690,8 @@ When you externalize memory, you need somewhere to put it. Here are the main opt
 
 **Examples:** Pinecone, Weaviate, ChromaDB, pgvector
 
+The company standard vector store is [Qdrant](https://qdrant.tech/documentation/) - the products above are common alternatives you will see elsewhere in the industry.
+
 **Trade-offs:**
 
 - Great at semantic similarity search

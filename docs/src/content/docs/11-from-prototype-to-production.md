@@ -538,7 +538,7 @@ Traces show the full journey of a single request through your agent, including a
     Total: 885ms, Cost: $0.003
 ```
 
-[OpenTelemetry](https://opentelemetry.io/) is the industry standard for distributed tracing. Many agent frameworks support OpenTelemetry out of the box, and most observability platforms ingest it natively. Your company's LiteLLM proxy also logs every request that passes through it, which gives you a second, model-call-level view to correlate against your traces.
+[OpenTelemetry](https://opentelemetry.io/) is the industry standard for distributed tracing. Many agent frameworks support OpenTelemetry out of the box, and most observability platforms ingest it natively. [Langfuse](https://langfuse.com/docs) is the company's tracing and evaluation platform for agents: wrapping your agent loop in its `@observe()` decorator gives you the per-agent trace, with nested LLM and tool calls captured automatically. Your company's LiteLLM proxy also logs every request that passes through it, giving you a second, gateway-level view that you can correlate against your Langfuse traces.
 
 ### Metrics
 
@@ -723,6 +723,8 @@ ______________________________________________________________________
 Before launching your agent to production users, walk through this checklist:
 
 ### Reliability
+
+Most production agents are exposed to callers as an HTTP service; [FastAPI](https://fastapi.tiangolo.com/) with uvicorn is the company standard for building that service. The checks below assume you are running something of that shape.
 
 - [ ] Health checks and liveness probes configured
 - [ ] Graceful degradation when dependencies fail (model API down, tool unavailable)

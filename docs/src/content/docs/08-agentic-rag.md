@@ -487,7 +487,7 @@ Anthropic does not ship a single managed RAG service the way some cloud platform
 
 ### The retrieval building blocks
 
-- **Embedding model + vector store:** Convert your documents into embeddings with an embedding model of your choice, store them in a vector database (Pinecone, Weaviate, ChromaDB, pgvector), and expose search over that store to the agent as a tool. This is the "search engine" half of RAG; you bring your own components rather than a single managed product.
+- **Embedding model + vector store:** Convert your documents into embeddings with an embedding model of your choice, store them in a vector database, and expose search over that store to the agent as a tool. [Qdrant](https://qdrant.tech/documentation/) is the company standard here; Pinecone, Weaviate, ChromaDB, and pgvector are common alternatives elsewhere in the industry. This is the "search engine" half of RAG; you bring your own components rather than a single managed product.
 - **MCP servers for retrieval:** A [Model Context Protocol](https://modelcontextprotocol.io) server can wrap a vector store, a database, or an internal wiki, giving any Claude-based agent a consistent retrieval tool without hand-rolling integration code per data source.
 - **File-based context:** For small or moderately sized document sets, you can skip external retrieval entirely and let the agent read files directly - Claude Code does this natively - combined with prompt caching to keep repeated reads cheap across turns.
 

@@ -49,7 +49,7 @@ LiteLLM is an open-source proxy that speaks the Anthropic and OpenAI API formats
 - **Model allow-lists.** The proxy decides which models are exposed. That is how a company enforces "we only use approved models" without trusting every developer to remember the policy.
 - **Painless A/B of providers.** Because the proxy exposes Anthropic and OpenAI models behind the same API shape, you can compare a Claude model against a GPT model by changing a single string - no rewrite, no second SDK.
 
-The practical upshot for you: you write ordinary Anthropic SDK code, point two environment variables at the proxy, and everything else just works. We will do exactly that below.
+The practical upshot for you: you write ordinary Anthropic SDK code, point two environment variables at the proxy, and everything else just works. We will do exactly that below. (Not every workload goes through the proxy - some reach Claude directly via AWS Bedrock instead; the proxy is the default path for course work, so follow the internal documentation to know when Bedrock applies to you.)
 
 ______________________________________________________________________
 
@@ -347,7 +347,7 @@ A JSON response with a `content` array means everything is wired up correctly. A
 For real work you will use the SDK. Install it and make the same call:
 
 ```bash
-pip install anthropic
+uv add anthropic
 ```
 
 ```python
@@ -452,6 +452,23 @@ Here is a reference connecting the concepts from earlier lessons to the tools yo
 | 9 - Evaluation       | Testing agents                  | A/B of Claude and GPT models through the proxy            |
 | 10 - Safety          | Guardrails                      | Claude Code permissions; company guardrails via the proxy |
 | 11 - Production      | Deployment, CI/CD               | Claude Agent SDK; proxy budgets, limits, and logging      |
+
+______________________________________________________________________
+
+## The wider production toolbox
+
+Beyond this course's core stack, these are the standard tool choices for production agent work at the company; later lessons introduce each where it becomes relevant. None of them replace what you are about to build - they sit alongside it once an agent moves from prototype to production.
+
+| Concern                          | Tool                    | Where in this course                                                                       |
+| -------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------ |
+| Language & packaging             | Python 3.14 + uv        | Used throughout                                                                            |
+| HTTP services                    | FastAPI + uvicorn       | [Lesson 11](/11-from-prototype-to-production/)                                             |
+| Structured LLM output            | Instructor (+ Pydantic) | [Lesson 13](/13-building-your-first-agent/)                                                |
+| Claude-native agents             | Claude Agent SDK        | [Lesson 13](/13-building-your-first-agent/)                                                |
+| MCP servers (Python)             | FastMCP                 | [Lesson 14](/14-agent-protocols-mcp-and-a2a/) and [16](/16-mcp-deep-dive/)                 |
+| Orchestration                    | LangGraph               | [Lesson 18](/18-orchestrators/)                                                            |
+| Vector store / vectorized memory | Qdrant                  | [Lesson 5](/05-memory-and-context/) and [8](/08-agentic-rag/)                              |
+| Tracing & evaluation             | Langfuse                | [Lesson 9](/09-evaluating-and-testing-agents/) and [11](/11-from-prototype-to-production/) |
 
 ______________________________________________________________________
 

@@ -444,6 +444,30 @@ ______________________________________________________________________
 
 If you decide to build an MCP server for your service, here are the key decisions:
 
+### Building in Python: FastMCP
+
+Your company's standard way to build an MCP server in Python is [FastMCP](https://gofastmcp.com/). It takes care of the JSON-RPC and transport plumbing so you can focus on the tools themselves:
+
+```bash
+uv add fastmcp
+```
+
+```python
+from fastmcp import FastMCP
+
+mcp = FastMCP("internal-docs")
+
+@mcp.tool
+def search_docs(query: str) -> str:
+    """Search the internal documentation."""
+    return do_search(query)  # your implementation
+
+if __name__ == "__main__":
+    mcp.run()
+```
+
+`mcp.run()` defaults to the stdio transport; pass `transport="http"` to serve the same tools over Streamable HTTP when you need remote access. See the [FastMCP documentation](https://gofastmcp.com/) for the full API.
+
 ### Transport choice
 
 | Question                            | stdio | Streamable HTTP |

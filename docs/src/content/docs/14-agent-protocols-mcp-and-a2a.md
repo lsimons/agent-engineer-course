@@ -338,7 +338,7 @@ MCP uses a three-part architecture:
 
 **Client:** The MCP client lives inside the host and manages connections to MCP servers. It handles protocol negotiation, message routing, and connection lifecycle. A single client can connect to multiple servers.
 
-**Server:** An MCP server wraps a specific tool or data source and exposes it through the MCP protocol. There are servers for databases, file systems, APIs, SaaS products, and more. Anyone can build an MCP server.
+**Server:** An MCP server wraps a specific tool or data source and exposes it through the MCP protocol. There are servers for databases, file systems, APIs, SaaS products, and more. Anyone can build an MCP server - your company standardizes on [FastMCP](https://gofastmcp.com/) for building them in Python (see [Lesson 16](/16-mcp-deep-dive/) for a hands-on example).
 
 ### Key primitives
 

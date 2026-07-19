@@ -31,7 +31,7 @@ Think of this as a "hello world" for agents - simple enough to understand in one
 Before you start, make sure you have:
 
 - **Python 3.9+** installed
-- **The Anthropic SDK installed** (`pip install anthropic`)
+- **The Anthropic SDK installed** (`uv add anthropic`)
 - **`ANTHROPIC_BASE_URL` and `ANTHROPIC_API_KEY` set** in your environment, pointing at your company's LiteLLM proxy - see [Lesson 12](/12-getting-started-with-claude-code/) if you have not done this yet
 
 A quick check that your environment is wired up correctly:
@@ -309,6 +309,28 @@ for block in response.content:
 
 The loop you already wrote does this correctly because it builds the full `tool_results` list before appending. That is not an accident; it is the reason the results are gathered first and sent second.
 
+### Structured output with Instructor
+
+The `final_text` pattern above is fine when a plain string is the answer, but production code often needs the agent's output as validated, typed data instead - a ticket object, a structured report, a set of extracted fields. [Instructor](https://python.useinstructor.com/) patches the Anthropic client so you pass a `response_model` and get back a validated object instead of raw text; Pydantic v2 models are the company standard for this kind of validated LLM output.
+
+```python
+import anthropic
+import instructor
+from pydantic import BaseModel
+
+class Ticket(BaseModel):
+    title: str
+    priority: int
+
+client = instructor.from_anthropic(anthropic.Anthropic())
+ticket = client.messages.create(
+    model="aws/claude-5-sonnet",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "File a ticket: the login page is slow"}],
+    response_model=Ticket,
+)
+```
+
 ______________________________________________________________________
 
 ## Testing and iterating on your agent
@@ -364,7 +386,7 @@ Building the loop by hand is the right way to *learn*. But you saw how much is l
 The **Claude Agent SDK** packages all of that. It is the same production agent loop that Claude Code runs, exposed as a library you can call from your own code.
 
 ```bash
-pip install claude-agent-sdk
+uv add claude-agent-sdk
 ```
 
 ```python
@@ -415,6 +437,8 @@ An agent that calls tools is software that takes actions on your behalf, so trea
 > ⚠️ **Revisit the guardrails:** Before this agent touches anything real, revisit [Lesson 10: Guardrails and safety](/10-guardrails-and-safety/) and, earlier in the course, [Lesson 11: From prototype to production](/11-from-prototype-to-production/). Between them they cover the input validation, permissioning, monitoring, and rollout discipline a tool-using agent needs. And your company's own AI principles and guardrails still apply - check the internal documentation before you deploy.
 
 Never hardcode API keys or credentials in your agent code - read them from the environment, exactly as the SDK reads `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL`. This is basic software hygiene, but it is easy to forget while prototyping.
+
+If you are exposing this agent as a service other systems call into, the company's standard shape for that is a FastAPI app run under uvicorn - see [Lesson 11: From prototype to production](/11-from-prototype-to-production/) for the deployment concerns that come with it.
 
 ______________________________________________________________________
 
