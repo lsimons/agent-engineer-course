@@ -93,47 +93,43 @@ Imagine your company gives every new hire a one-page cheat sheet on day one. It 
           </label>
         </div>
         ${s.expanded ? `<div style="padding: 0 14px 12px; border-top: 1px solid #f0f0f0;">
-          <pre style="background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 0.72rem; line-height: 1.5; margin: 8px 0 0; white-space: pre-wrap; color: #444;">${s.content}</pre>
+          <pre style="background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 0.72rem; line-height: 1.5; margin: 8px 0 0; white-space: pre-wrap; color: #444;">${s.content}<\/pre>
+        </div>` : ''}
+      </div>
+    `).join('');
+    updatePreview();
+  }
 
-```
-    </div>` : ''}
-  </div>
-`).join('');
-updatePreview();
-```
+  function updatePreview() {
+    const active = sections.filter(s => s.active);
+    let md = '# AGENTS.md\n\n';
+    if (active.length === 0) {
+      md += '(Toggle sections on the left to build your AGENTS.md)';
+    } else {
+      active.forEach(s => { md += s.content + '\n\n'; });
+    }
+    document.getElementById('amd-preview').textContent = md.trim();
+    const lines = md.trim().split('\n').length;
+    document.getElementById('amd-stats').textContent = `${active.length} sections | ${lines} lines | ${active.length <= 4 ? 'Concise' : lines > 150 ? 'Consider trimming' : 'Good length'}`;
+  }
 
-}
-
-function updatePreview() {
-const active = sections.filter(s => s.active);
-let md = '# AGENTS.md\\n\\n';
-if (active.length === 0) {
-md += '(Toggle sections on the left to build your AGENTS.md)';
-} else {
-active.forEach(s => { md += s.content + '\\n\\n'; });
-}
-document.getElementById('amd-preview').textContent = md.trim();
-const lines = md.trim().split('\\n').length;
-document.getElementById('amd-stats').textContent = `${active.length} sections | ${lines} lines | ${active.length <= 4 ? 'Concise' : lines > 150 ? 'Consider trimming' : 'Good length'}`;
-}
-
-document.addEventListener('amd-toggle', e => {
-sections[e.detail].active = !sections[e.detail].active;
-render();
-});
-document.addEventListener('amd-toggle-expand', e => {
-sections[e.detail].expanded = !sections[e.detail].expanded;
-render();
-});
-document.getElementById('amd-copy').addEventListener('click', function() {
-const text = document.getElementById('amd-preview').textContent;
-navigator.clipboard.writeText(text).then(() => {
-this.textContent = 'Copied!';
-this.style.background = '#34a853';
-setTimeout(() => { this.textContent = 'Copy to Clipboard'; this.style.background = '#4285f4'; }, 2000);
-});
-});
-render();
+  document.addEventListener('amd-toggle', e => {
+    sections[e.detail].active = !sections[e.detail].active;
+    render();
+  });
+  document.addEventListener('amd-toggle-expand', e => {
+    sections[e.detail].expanded = !sections[e.detail].expanded;
+    render();
+  });
+  document.getElementById('amd-copy').addEventListener('click', function() {
+    const text = document.getElementById('amd-preview').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      this.textContent = 'Copied!';
+      this.style.background = '#34a853';
+      setTimeout(() => { this.textContent = 'Copy to Clipboard'; this.style.background = '#4285f4'; }, 2000);
+    });
+  });
+  render();
 })();
 </script>
 

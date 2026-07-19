@@ -168,96 +168,89 @@ Your laptop can plug directly into a wall outlet. That works fine at home. But i
         const m = messages[step];
         msgContent.innerHTML += `<div style="flex: 1; min-width: 160px; background: ${m.color}08; border: 1px solid ${m.color}33; border-radius: 8px; padding: 8px;">
           <div style="font-size: 0.72rem; font-weight: 600; color: ${m.color}; margin-bottom: 4px;">${m.stage}</div>
-          <pre style="font-size: 0.65rem; color: #444; margin: 0; white-space: pre-wrap; line-height: 1.4;">${m.json}</pre>
-
-```
-    </div>`;
+          <pre style="font-size: 0.65rem; color: #444; margin: 0; white-space: pre-wrap; line-height: 1.4;">${m.json}<\/pre>
+        </div>`;
+      }
+      step++;
+    }, 500);
   }
-  step++;
-}, 500);
-```
 
-}
+  function updateCost() {
+    const toolCount = parseInt(document.getElementById('mcp-tool-count').value);
+    const callCount = parseInt(document.getElementById('mcp-calls').value);
+    document.getElementById('mcp-tool-count-val').textContent = toolCount;
+    document.getElementById('mcp-calls-val').textContent = callCount;
 
-function updateCost() {
-const toolCount = parseInt(document.getElementById('mcp-tool-count').value);
-const callCount = parseInt(document.getElementById('mcp-calls').value);
-document.getElementById('mcp-tool-count-val').textContent = toolCount;
-document.getElementById('mcp-calls-val').textContent = callCount;
+    // CLI: ~140 tokens per tool call (command + output parsing)
+    const cliPerCall = 140;
+    const cliTotal = callCount * cliPerCall;
 
-```
-// CLI: ~140 tokens per tool call (command + output parsing)
-const cliPerCall = 140;
-const cliTotal = callCount * cliPerCall;
+    // MCP: schema loading (300 tokens per tool) + 80 tokens per call
+    const mcpSchemaLoad = toolCount * 300;
+    const mcpPerCall = 80;
+    const mcpTotal = mcpSchemaLoad + callCount * mcpPerCall;
 
-// MCP: schema loading (300 tokens per tool) + 80 tokens per call
-const mcpSchemaLoad = toolCount * 300;
-const mcpPerCall = 80;
-const mcpTotal = mcpSchemaLoad + callCount * mcpPerCall;
+    document.getElementById('mcp-cli-tokens').textContent = cliTotal.toLocaleString();
+    document.getElementById('mcp-mcp-tokens').textContent = mcpTotal.toLocaleString();
+    document.getElementById('mcp-cli-detail').textContent = `${callCount} calls x ~${cliPerCall} tokens each`;
+    document.getElementById('mcp-mcp-detail').textContent = `${toolCount} tools x 300 schema + ${callCount} x ${mcpPerCall}/call`;
 
-document.getElementById('mcp-cli-tokens').textContent = cliTotal.toLocaleString();
-document.getElementById('mcp-mcp-tokens').textContent = mcpTotal.toLocaleString();
-document.getElementById('mcp-cli-detail').textContent = `${callCount} calls x ~${cliPerCall} tokens each`;
-document.getElementById('mcp-mcp-detail').textContent = `${toolCount} tools x 300 schema + ${callCount} x ${mcpPerCall}/call`;
+    const maxVal = Math.max(cliTotal, mcpTotal);
+    document.getElementById('mcp-cli-bar').style.width = (cliTotal / maxVal * 100) + '%';
+    document.getElementById('mcp-mcp-bar').style.width = (mcpTotal / maxVal * 100) + '%';
 
-const maxVal = Math.max(cliTotal, mcpTotal);
-document.getElementById('mcp-cli-bar').style.width = (cliTotal / maxVal * 100) + '%';
-document.getElementById('mcp-mcp-bar').style.width = (mcpTotal / maxVal * 100) + '%';
+    const ratio = (mcpTotal / cliTotal).toFixed(1);
+    const verdict = document.getElementById('mcp-verdict');
+    const detail = document.getElementById('mcp-verdict-detail');
 
-const ratio = (mcpTotal / cliTotal).toFixed(1);
-const verdict = document.getElementById('mcp-verdict');
-const detail = document.getElementById('mcp-verdict-detail');
+    if (mcpTotal < cliTotal) {
+      verdict.textContent = 'MCP wins!';
+      verdict.style.color = '#4285f4';
+      detail.textContent = `MCP is ${(cliTotal/mcpTotal).toFixed(1)}x cheaper. High call volume amortizes schema cost.`;
+    } else if (ratio > 5) {
+      verdict.textContent = 'CLI much cheaper';
+      verdict.style.color = '#34a853';
+      detail.textContent = `CLI is ${ratio}x cheaper. Schema loading cost dominates with few calls.`;
+    } else {
+      verdict.textContent = 'CLI cheaper';
+      verdict.style.color = '#34a853';
+      detail.textContent = `CLI is ${ratio}x cheaper. Increase calls/session for MCP to break even.`;
+    }
 
-if (mcpTotal < cliTotal) {
-  verdict.textContent = 'MCP wins!';
-  verdict.style.color = '#4285f4';
-  detail.textContent = `MCP is ${(cliTotal/mcpTotal).toFixed(1)}x cheaper. High call volume amortizes schema cost.`;
-} else if (ratio > 5) {
-  verdict.textContent = 'CLI much cheaper';
-  verdict.style.color = '#34a853';
-  detail.textContent = `CLI is ${ratio}x cheaper. Schema loading cost dominates with few calls.`;
-} else {
-  verdict.textContent = 'CLI cheaper';
-  verdict.style.color = '#34a853';
-  detail.textContent = `CLI is ${ratio}x cheaper. Increase calls/session for MCP to break even.`;
-}
+    // Highlight winner
+    const cliBox = document.getElementById('mcp-cli-cost-box');
+    const mcpBox = document.getElementById('mcp-mcp-cost-box');
+    if (mcpTotal < cliTotal) {
+      mcpBox.style.borderColor = '#4285f4'; mcpBox.style.background = '#4285f40d';
+      cliBox.style.borderColor = '#e0e0e0'; cliBox.style.background = '#f8f9fa';
+    } else {
+      cliBox.style.borderColor = '#34a853'; cliBox.style.background = '#34a8530d';
+      mcpBox.style.borderColor = '#e0e0e0'; mcpBox.style.background = '#f8f9fa';
+    }
+  }
 
-// Highlight winner
-const cliBox = document.getElementById('mcp-cli-cost-box');
-const mcpBox = document.getElementById('mcp-mcp-cost-box');
-if (mcpTotal < cliTotal) {
-  mcpBox.style.borderColor = '#4285f4'; mcpBox.style.background = '#4285f40d';
-  cliBox.style.borderColor = '#e0e0e0'; cliBox.style.background = '#f8f9fa';
-} else {
-  cliBox.style.borderColor = '#34a853'; cliBox.style.background = '#34a8530d';
-  mcpBox.style.borderColor = '#e0e0e0'; mcpBox.style.background = '#f8f9fa';
-}
-```
+  // Transport toggle
+  document.getElementById('mcp-transport-stdio').addEventListener('click', function() {
+    transport = 'stdio';
+    this.style.background = '#4285f4'; this.style.color = 'white'; this.style.borderColor = '#4285f4';
+    const other = document.getElementById('mcp-transport-http');
+    other.style.background = 'white'; other.style.color = '#666'; other.style.borderColor = '#e0e0e0';
+    drawArch();
+  });
+  document.getElementById('mcp-transport-http').addEventListener('click', function() {
+    transport = 'http';
+    this.style.background = '#4285f4'; this.style.color = 'white'; this.style.borderColor = '#4285f4';
+    const other = document.getElementById('mcp-transport-stdio');
+    other.style.background = 'white'; other.style.color = '#666'; other.style.borderColor = '#e0e0e0';
+    drawArch();
+  });
 
-}
+  document.getElementById('mcp-send-btn').addEventListener('click', animateRequest);
+  document.getElementById('mcp-tool-count').addEventListener('input', updateCost);
+  document.getElementById('mcp-calls').addEventListener('input', updateCost);
 
-// Transport toggle
-document.getElementById('mcp-transport-stdio').addEventListener('click', function() {
-transport = 'stdio';
-this.style.background = '#4285f4'; this.style.color = 'white'; this.style.borderColor = '#4285f4';
-const other = document.getElementById('mcp-transport-http');
-other.style.background = 'white'; other.style.color = '#666'; other.style.borderColor = '#e0e0e0';
-drawArch();
-});
-document.getElementById('mcp-transport-http').addEventListener('click', function() {
-transport = 'http';
-this.style.background = '#4285f4'; this.style.color = 'white'; this.style.borderColor = '#4285f4';
-const other = document.getElementById('mcp-transport-stdio');
-other.style.background = 'white'; other.style.color = '#666'; other.style.borderColor = '#e0e0e0';
-drawArch();
-});
-
-document.getElementById('mcp-send-btn').addEventListener('click', animateRequest);
-document.getElementById('mcp-tool-count').addEventListener('input', updateCost);
-document.getElementById('mcp-calls').addEventListener('input', updateCost);
-
-drawArch();
-updateCost();
+  drawArch();
+  updateCost();
 })();
 </script>
 
