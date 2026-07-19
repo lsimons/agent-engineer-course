@@ -736,4 +736,4 @@ ______________________________________________________________________
 
 You have covered the fundamentals and the core building blocks. Next, we move into Part 3 - deep dives into specific topics. We start with AGENTS.md, the standard config file for giving AI coding agents the context they need about your project.
 
-[Next Lesson: AGENTS.md ->](./15-agents-md.md)
+[Next Lesson: AGENTS.md ->](/15-agents-md/)

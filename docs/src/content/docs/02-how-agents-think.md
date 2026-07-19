@@ -731,4 +731,4 @@ ______________________________________________________________________
 
 The brain is important, but an agent that can only think is just a chatbot. In the next lesson, we give our agent hands - tools that let it interact with the world, call APIs, search the web, and execute code.
 
-[Next: Lesson 3 - Tools: Giving Agents Hands -->](./03-tools-giving-agents-hands.md)
+[Next: Lesson 3 - Tools: Giving Agents Hands -->](/03-tools-giving-agents-hands/)

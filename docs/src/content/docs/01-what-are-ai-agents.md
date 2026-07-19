@@ -565,4 +565,4 @@ ______________________________________________________________________
 
 In the next lesson, we will look under the hood at the "brain" of the agent - the language model. You will learn how LLMs process information, how different reasoning strategies affect agent performance, and how to pick the right model for the job.
 
-[Next: Lesson 2 - How Agents Think: LLMs as the Reasoning Engine -->](./02-how-agents-think.md)
+[Next: Lesson 2 - How Agents Think: LLMs as the Reasoning Engine -->](/02-how-agents-think/)

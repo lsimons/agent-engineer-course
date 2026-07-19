@@ -941,4 +941,4 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-Next lesson: [From Prototype to Production - Shipping Your Agent](./11-from-prototype-to-production.md)
+Next lesson: [From Prototype to Production - Shipping Your Agent](/11-from-prototype-to-production/)

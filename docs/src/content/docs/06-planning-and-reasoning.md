@@ -17,9 +17,9 @@ sidebar:
 
 ## Prerequisites
 
-- [Lesson 2: How Agents Think](./02-how-agents-think.md)
-- [Lesson 4: Agentic Design Patterns](./04-agentic-design-patterns.md)
-- [Lesson 5: Memory and Context](./05-memory-and-context.md)
+- [Lesson 2: How Agents Think](/02-how-agents-think/)
+- [Lesson 4: Agentic Design Patterns](/04-agentic-design-patterns/)
+- [Lesson 5: Memory and Context](/05-memory-and-context/)
 
 ______________________________________________________________________
 
@@ -185,7 +185,7 @@ Execution phase:
 
 ### Reactive approach
 
-**How it works:** The agent takes things one step at a time. It looks at the current situation, decides the best next action, takes it, and reassesses. This is essentially the ReAct pattern from [Lesson 4](./04-agentic-design-patterns.md).
+**How it works:** The agent takes things one step at a time. It looks at the current situation, decides the best next action, takes it, and reassesses. This is essentially the ReAct pattern from [Lesson 4](/04-agentic-design-patterns/).
 
 ```
 User: "Migrate our application from Python 2 to Python 3."
@@ -811,7 +811,7 @@ Agent: "I was unable to complete the task due to formatting errors."
 - Summarize completed steps instead of keeping full details
 - Store intermediate results externally and reference them by ID
 - Budget context space: reserve a fixed amount for reasoning about the current step
-- See [Lesson 5: Memory and Context](./05-memory-and-context.md) for detailed strategies
+- See [Lesson 5: Memory and Context](/05-memory-and-context/) for detailed strategies
 
 ### Failure mode summary
 
@@ -888,4 +888,4 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-**Next lesson:** [Multi-Agent Systems](./07-multi-agent-systems.md)
+**Next lesson:** [Multi-Agent Systems](/07-multi-agent-systems/)

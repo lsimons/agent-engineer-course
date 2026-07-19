@@ -17,8 +17,8 @@ sidebar:
 
 ## Prerequisites
 
-- [Lesson 2: How Agents Think](./02-how-agents-think.md)
-- [Lesson 4: Agentic Design Patterns](./04-agentic-design-patterns.md)
+- [Lesson 2: How Agents Think](/02-how-agents-think/)
+- [Lesson 4: Agentic Design Patterns](/04-agentic-design-patterns/)
 
 ______________________________________________________________________
 
@@ -524,7 +524,7 @@ Agent:
 
 Memory tells the agent *what to look for*. RAG provides the *detailed information*.
 
-We will cover RAG in depth in [Lesson 8: Agentic RAG](./08-agentic-rag.md).
+We will cover RAG in depth in [Lesson 8: Agentic RAG](/08-agentic-rag/).
 
 ______________________________________________________________________
 
@@ -827,4 +827,4 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-**Next lesson:** [Planning and Reasoning - How Agents Tackle Complex Tasks](./06-planning-and-reasoning.md)
+**Next lesson:** [Planning and Reasoning - How Agents Tackle Complex Tasks](/06-planning-and-reasoning/)

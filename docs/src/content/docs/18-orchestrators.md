@@ -827,4 +827,4 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-[Previous Lesson: Agent Skills](./17-agent-skills.md) | [Next Lesson: Where to Go From Here ->](./19-where-to-go-from-here.md)
+[Previous Lesson: Agent Skills](/17-agent-skills/) | [Next Lesson: Where to Go From Here ->](/19-where-to-go-from-here/)

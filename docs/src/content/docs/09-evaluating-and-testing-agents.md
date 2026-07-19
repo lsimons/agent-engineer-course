@@ -939,4 +939,4 @@ Build an evaluation suite for an agent of your choice:
 
 ______________________________________________________________________
 
-**Next lesson:** [Guardrails and Safety - Keeping Agents Trustworthy](./10-guardrails-and-safety.md)
+**Next lesson:** [Guardrails and Safety - Keeping Agents Trustworthy](/10-guardrails-and-safety/)

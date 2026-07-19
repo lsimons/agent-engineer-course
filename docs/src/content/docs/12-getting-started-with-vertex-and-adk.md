@@ -755,4 +755,4 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-Next lesson: [Building Your First Agent](./13-building-your-first-agent.md)
+Next lesson: [Building Your First Agent](/13-building-your-first-agent/)

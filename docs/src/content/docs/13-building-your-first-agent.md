@@ -843,4 +843,4 @@ ______________________________________________________________________
 
 Now that you can build an agent, you need to understand how agents communicate with the wider world. In the next lesson, we will explore two important protocols - MCP and A2A - that let agents talk to tools and to each other using open standards.
 
-[Next: Lesson 14 - Agent Protocols: MCP and A2A -->](./14-agent-protocols-mcp-and-a2a.md)
+[Next: Lesson 14 - Agent Protocols: MCP and A2A -->](/14-agent-protocols-mcp-and-a2a/)

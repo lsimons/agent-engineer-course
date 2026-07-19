@@ -791,4 +791,4 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-Next lesson: [Getting Started with Vertex AI and ADK](./12-getting-started-with-vertex-and-adk.md)
+Next lesson: [Getting Started with Vertex AI and ADK](/12-getting-started-with-vertex-and-adk/)

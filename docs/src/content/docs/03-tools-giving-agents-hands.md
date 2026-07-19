@@ -908,4 +908,4 @@ ______________________________________________________________________
 
 Now that we understand the brain (LLM) and the hands (tools), the next lesson brings them together with the orchestration layer - the control loop that manages how an agent thinks, acts, observes, and repeats until the job is done.
 
-[Next: Lesson 4 - Orchestration: The Agent Loop -->](./04-agentic-design-patterns.md)
+[Next: Lesson 4 - Orchestration: The Agent Loop -->](/04-agentic-design-patterns/)

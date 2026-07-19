@@ -432,9 +432,9 @@ ______________________________________________________________________
 
 AGENTS.md handles project-level context well. But there are situations where you need more:
 
-- **Dynamic tool access** - If agents need to query databases, call APIs, or interact with external services, you need [MCP servers](./14-agent-protocols-mcp-and-a2a.md) or tools, not just instructions.
-- **Reusable workflows** - If you want to package multi-step processes that agents can invoke, look at [Agent Skills](./17-agent-skills.md).
-- **Cross-agent coordination** - If multiple agents need to work together, you need an [orchestration layer](./18-orchestrators.md).
+- **Dynamic tool access** - If agents need to query databases, call APIs, or interact with external services, you need [MCP servers](/14-agent-protocols-mcp-and-a2a/) or tools, not just instructions.
+- **Reusable workflows** - If you want to package multi-step processes that agents can invoke, look at [Agent Skills](/17-agent-skills/).
+- **Cross-agent coordination** - If multiple agents need to work together, you need an [orchestration layer](/18-orchestrators/).
 
 AGENTS.md is the foundation. Think of it as the first layer of context that makes everything else work better.
 
@@ -472,4 +472,4 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-[Previous Lesson: Agent Protocols - MCP and A2A](./14-agent-protocols-mcp-and-a2a.md) | [Next Lesson: MCP Deep Dive ->](./16-mcp-deep-dive.md)
+[Previous Lesson: Agent Protocols - MCP and A2A](/14-agent-protocols-mcp-and-a2a/) | [Next Lesson: MCP Deep Dive ->](/16-mcp-deep-dive/)

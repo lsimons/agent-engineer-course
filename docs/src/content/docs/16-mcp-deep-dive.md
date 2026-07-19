@@ -6,7 +6,7 @@ sidebar:
 
 ## Introduction
 
-In [Lesson 14](./14-agent-protocols-mcp-and-a2a.md), we introduced MCP (Model Context Protocol) and A2A at a high level. This lesson goes deeper on MCP specifically - how it actually works under the hood, when it adds real value, when simpler approaches are better, and how to think about security.
+In [Lesson 14](/14-agent-protocols-mcp-and-a2a/), we introduced MCP (Model Context Protocol) and A2A at a high level. This lesson goes deeper on MCP specifically - how it actually works under the hood, when it adds real value, when simpler approaches are better, and how to think about security.
 
 We also tackle one of the most debated questions in the AI engineering community: when should you use MCP servers vs. just letting your agent use CLI tools directly?
 
@@ -542,4 +542,4 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-[Previous Lesson: AGENTS.md](./15-agents-md.md) | [Next Lesson: Agent Skills ->](./17-agent-skills.md)
+[Previous Lesson: AGENTS.md](/15-agents-md/) | [Next Lesson: Agent Skills ->](/17-agent-skills/)

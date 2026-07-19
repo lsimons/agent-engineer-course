@@ -6,7 +6,7 @@ sidebar:
 
 ## Introduction
 
-In [Lesson 3](./03-tools-giving-agents-hands.md), we learned about tools - functions that let agents take actions like calling APIs, querying databases, and running code. Tools are about **doing things**.
+In [Lesson 3](/03-tools-giving-agents-hands/), we learned about tools - functions that let agents take actions like calling APIs, querying databases, and running code. Tools are about **doing things**.
 
 Skills are about **knowing things**. A skill packages domain expertise - instructions, best practices, decision frameworks, and reference materials - into a modular unit that an agent can discover and use when needed.
 
@@ -625,4 +625,4 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-[Previous Lesson: MCP Deep Dive](./16-mcp-deep-dive.md) | [Next Lesson: Orchestrators ->](./18-orchestrators.md)
+[Previous Lesson: MCP Deep Dive](/16-mcp-deep-dive/) | [Next Lesson: Orchestrators ->](/18-orchestrators/)

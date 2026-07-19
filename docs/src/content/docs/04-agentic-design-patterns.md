@@ -13,9 +13,9 @@ sidebar:
 
 ## Prerequisites
 
-- [Lesson 1: What Are AI Agents?](./01-what-are-ai-agents.md)
-- [Lesson 2: How Agents Think](./02-how-agents-think.md)
-- [Lesson 3: Tools - Giving Agents Hands](./03-tools-giving-agents-hands.md)
+- [Lesson 1: What Are AI Agents?](/01-what-are-ai-agents/)
+- [Lesson 2: How Agents Think](/02-how-agents-think/)
+- [Lesson 3: Tools - Giving Agents Hands](/03-tools-giving-agents-hands/)
 
 ______________________________________________________________________
 
@@ -422,7 +422,7 @@ ______________________________________________________________________
 
 In the Tool Use pattern, the agent decides which tools to call, with what arguments, and in what order. The LLM acts as a reasoning engine that orchestrates external capabilities rather than trying to do everything itself.
 
-We covered tools in depth in [Lesson 3](./03-tools-giving-agents-hands.md). This section focuses on the *pattern* of how agents decide to use tools.
+We covered tools in depth in [Lesson 3](/03-tools-giving-agents-hands/). This section focuses on the *pattern* of how agents decide to use tools.
 
 ### The craftsperson analogy
 
@@ -655,7 +655,7 @@ Key concepts in the Google Cloud ecosystem:
 - **ADK** provides the framework for defining agent behavior, tools, and orchestration
 - **Gemini models** serve as the LLM backbone that powers reasoning in each pattern
 
-We will get hands-on with these in [Lesson 12](./12-getting-started-with-vertex-and-adk.md) and [Lesson 13](./13-building-your-first-agent.md).
+We will get hands-on with these in [Lesson 12](/12-getting-started-with-vertex-and-adk/) and [Lesson 13](/13-building-your-first-agent/).
 
 ______________________________________________________________________
 
@@ -685,4 +685,4 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-**Next lesson:** [Memory and Context - How Agents Remember](./05-memory-and-context.md)
+**Next lesson:** [Memory and Context - How Agents Remember](/05-memory-and-context/)
