@@ -1,5 +1,3 @@
-bun.lock
-
 # build output
 dist/
 # generated types
