@@ -1,0 +1,5 @@
+# Lychee link checker configuration
+# https://lychee.cli.rs/usage/config/
+
+# Exclude known dead external URLs
+exclude = []

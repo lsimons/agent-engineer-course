@@ -20,37 +20,37 @@ This course is split into three parts:
 
 ### Part 1: fundamentals
 
-| # | Lesson | What you will learn |
-|---|--------|-------------------|
-| 01 | [What are AI agents?](./01-what-are-ai-agents/README.md) | The big picture - what agents are, why they matter, and when to use them |
-| 02 | [How agents think](./02-how-agents-think/README.md) | LLMs as the reasoning engine - how models plan, decide, and generate |
-| 03 | [Tools - giving agents hands](./03-tools-giving-agents-hands/README.md) | Function calling, tool design, and connecting agents to the real world |
-| 04 | [Agentic design patterns](./04-agentic-design-patterns/README.md) | ReAct, reflection, planning, and other core patterns |
-| 05 | [Memory and context](./05-memory-and-context/README.md) | How agents remember things - sessions, context windows, and long-term memory |
-| 06 | [Planning and reasoning](./06-planning-and-reasoning/README.md) | How agents break down complex tasks and make decisions |
-| 07 | [Multi-agent systems](./07-multi-agent-systems/README.md) | When one agent is not enough - coordination, delegation, and teamwork |
-| 08 | [Agentic RAG](./08-agentic-rag/README.md) | Going beyond basic retrieval - agents that search, evaluate, and refine |
-| 09 | [Evaluating and testing agents](./09-evaluating-and-testing-agents/README.md) | How to know if your agent actually works - metrics, evals, and observability |
-| 10 | [Guardrails and safety](./10-guardrails-and-safety/README.md) | Keeping agents trustworthy - security, alignment, and responsible AI |
+| #   | Lesson                                                                                       | What you will learn                                                          |
+| --- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 01  | [What are AI agents?](./docs/src/content/docs/01-what-are-ai-agents.md)                      | The big picture - what agents are, why they matter, and when to use them     |
+| 02  | [How agents think](./docs/src/content/docs/02-how-agents-think.md)                           | LLMs as the reasoning engine - how models plan, decide, and generate         |
+| 03  | [Tools - giving agents hands](./docs/src/content/docs/03-tools-giving-agents-hands.md)       | Function calling, tool design, and connecting agents to the real world       |
+| 04  | [Agentic design patterns](./docs/src/content/docs/04-agentic-design-patterns.md)             | ReAct, reflection, planning, and other core patterns                         |
+| 05  | [Memory and context](./docs/src/content/docs/05-memory-and-context.md)                       | How agents remember things - sessions, context windows, and long-term memory |
+| 06  | [Planning and reasoning](./docs/src/content/docs/06-planning-and-reasoning.md)               | How agents break down complex tasks and make decisions                       |
+| 07  | [Multi-agent systems](./docs/src/content/docs/07-multi-agent-systems.md)                     | When one agent is not enough - coordination, delegation, and teamwork        |
+| 08  | [Agentic RAG](./docs/src/content/docs/08-agentic-rag.md)                                     | Going beyond basic retrieval - agents that search, evaluate, and refine      |
+| 09  | [Evaluating and testing agents](./docs/src/content/docs/09-evaluating-and-testing-agents.md) | How to know if your agent actually works - metrics, evals, and observability |
+| 10  | [Guardrails and safety](./docs/src/content/docs/10-guardrails-and-safety.md)                 | Keeping agents trustworthy - security, alignment, and responsible AI         |
 
 ### Part 2: building and shipping
 
-| # | Lesson | What you will learn |
-|---|--------|-------------------|
-| 11 | [From prototype to production](./11-from-prototype-to-production/README.md) | The journey from demo to deployed - CI/CD, rollout, and operations |
-| 12 | [Getting started with Vertex AI and ADK](./12-getting-started-with-vertex-and-adk/README.md) | The Google Cloud AI stack for agents - what is available and how it fits together |
-| 13 | [Building your first agent](./13-building-your-first-agent/README.md) | Hands-on - build a working agent with ADK step by step |
-| 14 | [Agent protocols - MCP and A2A](./14-agent-protocols-mcp-and-a2a/README.md) | How agents talk to tools and to each other using open standards |
+| #   | Lesson                                                                                                      | What you will learn                                                               |
+| --- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| 11  | [From prototype to production](./docs/src/content/docs/11-from-prototype-to-production.md)                  | The journey from demo to deployed - CI/CD, rollout, and operations                |
+| 12  | [Getting started with Vertex AI and ADK](./docs/src/content/docs/12-getting-started-with-vertex-and-adk.md) | The Google Cloud AI stack for agents - what is available and how it fits together |
+| 13  | [Building your first agent](./docs/src/content/docs/13-building-your-first-agent.md)                        | Hands-on - build a working agent with ADK step by step                            |
+| 14  | [Agent protocols - MCP and A2A](./docs/src/content/docs/14-agent-protocols-mcp-and-a2a.md)                  | How agents talk to tools and to each other using open standards                   |
 
 ### Part 3: deep dives
 
-| # | Lesson | What you will learn |
-|---|--------|-------------------|
-| 15 | [AGENTS.md](./15-agents-md/README.md) | Giving AI coding agents context about your project with a standard config file |
-| 16 | [MCP deep dive](./16-mcp-deep-dive/README.md) | How MCP works under the hood, MCP vs. CLI tools, and security considerations |
-| 17 | [Agent skills](./17-agent-skills/README.md) | Packaging reusable domain expertise as portable skill modules |
-| 18 | [Orchestrators](./18-orchestrators/README.md) | Managing agent control flow - patterns, frameworks, and best practices |
-| 19 | [Where to go from here](./19-where-to-go-from-here/README.md) | Resources, codelabs, community, and next steps |
+| #   | Lesson                                                                       | What you will learn                                                            |
+| --- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| 15  | [AGENTS.md](./docs/src/content/docs/15-agents-md.md)                         | Giving AI coding agents context about your project with a standard config file |
+| 16  | [MCP deep dive](./docs/src/content/docs/16-mcp-deep-dive.md)                 | How MCP works under the hood, MCP vs. CLI tools, and security considerations   |
+| 17  | [Agent skills](./docs/src/content/docs/17-agent-skills.md)                   | Packaging reusable domain expertise as portable skill modules                  |
+| 18  | [Orchestrators](./docs/src/content/docs/18-orchestrators.md)                 | Managing agent control flow - patterns, frameworks, and best practices         |
+| 19  | [Where to go from here](./docs/src/content/docs/19-where-to-go-from-here.md) | Resources, codelabs, community, and next steps                                 |
 
 ## How to use this course
 
