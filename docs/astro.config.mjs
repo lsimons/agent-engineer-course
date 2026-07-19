@@ -2,8 +2,40 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
+const base = '/agent-engineer-course';
+
+/**
+ * The lesson content links between chapters with root-relative routes
+ * (`/NN-chapter-name/`), which keeps the markdown portable. This rehype
+ * plugin prefixes those links with the deploy base path at render time.
+ */
+function rehypeBaseLinks() {
+	/** @param {any} node */
+	const visit = (node) => {
+		if (
+			node.type === 'element' &&
+			node.tagName === 'a' &&
+			typeof node.properties?.href === 'string'
+		) {
+			const href = node.properties.href;
+			if (href.startsWith('/') && !href.startsWith('//') && !href.startsWith(`${base}/`)) {
+				node.properties.href = base + href;
+			}
+		}
+		for (const child of node.children ?? []) visit(child);
+	};
+	return (/** @type {any} */ tree) => {
+		visit(tree);
+	};
+}
+
 // https://astro.build/config
 export default defineConfig({
+	site: 'https://lsimons.github.io',
+	base,
+	markdown: {
+		rehypePlugins: [rehypeBaseLinks],
+	},
 	integrations: [
 		starlight({
 			title: 'Agent Engineer',

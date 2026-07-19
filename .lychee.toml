@@ -1,5 +1,7 @@
 # Lychee link checker configuration
 # https://lychee.cli.rs/usage/config/
 
-# Exclude known dead external URLs
-exclude = []
+# Exclude known dead external URLs.
+# Our own published URL is excluded: the deploy workflow proves it, and
+# checking it is a chicken-and-egg problem on the first deploy.
+exclude = ['^https://lsimons\.github\.io/agent-engineer-course/']
