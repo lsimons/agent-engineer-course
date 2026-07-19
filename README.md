@@ -50,13 +50,28 @@ This course is split into three parts:
 | 16  | [MCP deep dive](./docs/src/content/docs/16-mcp-deep-dive.md)                 | How MCP works under the hood, MCP vs. CLI tools, and security considerations   |
 | 17  | [Agent skills](./docs/src/content/docs/17-agent-skills.md)                   | Packaging reusable domain expertise as portable skill modules                  |
 | 18  | [Orchestrators](./docs/src/content/docs/18-orchestrators.md)                 | Managing agent control flow - patterns, frameworks, and best practices         |
-| 19  | [Where to go from here](./docs/src/content/docs/19-where-to-go-from-here.md) | Resources, codelabs, community, and next steps                                 |
+| 19  | [Where to go from here](./docs/src/content/docs/19-where-to-go-from-here.md) | Resources, community, and next steps                                           |
+
+## Read the course in your browser
+
+The course is built as an [Astro](https://astro.build) + [Starlight](https://starlight.astro.build) website, with navigation, search, and interactive widgets in most lessons. To run it locally:
+
+```bash
+mise install        # installs the pinned tools (bun, just, ...) - see mise.toml
+just docs-install   # install the site dependencies
+just docs-dev       # start the dev server
+```
+
+Then open <http://localhost:4321>. If you prefer bun directly: `cd docs && bun install && bun run dev`. A production build is `just docs-build` (output in `docs/dist/`).
+
+The lesson content lives as plain markdown in [`docs/src/content/docs/`](./docs/src/content/docs/), so reading it straight on GitHub works too - the tables above link there.
 
 ## How to use this course
 
 - **Read in order** if you are new to agents. Each lesson builds on the previous one.
 - **Jump around** if you already know the basics. Each lesson is self-contained enough to read on its own.
 - **Follow the links** to official docs and tutorials for hands-on practice. We intentionally link out to maintained resources rather than duplicating API docs or code samples that go stale.
+- **Do the hands-on lessons** (12 and 13) with Claude Code installed and an API key for your company's LiteLLM proxy at hand.
 
 ## Philosophy
 
@@ -85,6 +100,12 @@ This course follows a few principles:
 ## Contributing
 
 Found a typo? Have a suggestion? PRs and issues are welcome. See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+
+For development, `mise install` sets up the toolchain and `prek install -t pre-commit -t commit-msg` enables the git hooks (markdown formatting and linting, link checking, secret scanning). Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/), enforced by the commit-msg hook. CI builds and type-checks the site on every push and pull request.
+
+## Origins
+
+The course content was originally written by [Addy Osmani](https://github.com/addyosmani) in [addyosmani/agent-engineer](https://github.com/addyosmani/agent-engineer), and the Starlight site setup comes from [ivarurdalen/agent-engineer-course](https://github.com/ivarurdalen/agent-engineer-course). This fork adapts the course to build agents with the Claude stack - Claude Code, the Anthropic API via a company LiteLLM proxy, and the Claude Agent SDK - plus the production tool choices covered in [Lesson 12](./docs/src/content/docs/12-getting-started-with-claude-code.md).
 
 ## License
 
