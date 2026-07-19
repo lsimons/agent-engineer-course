@@ -155,13 +155,13 @@ Task matches: [L2: full instructions]      ~2,000-5,000 tokens
 As needed:    [L3: reference files]        Variable
 ```
 
-<div id="skill-loading-timeline" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+<div class="not-content" id="skill-loading-timeline" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
   <h3 style="margin: 0 0 4px 0; font-size: 1.2rem; color: #1a1a2e;">Progressive Skill Loading Timeline</h3>
   <p style="margin: 0 0 16px 0; font-size: 0.85rem; color: #666;">See how skills load incrementally to minimize context window cost.</p>
 
 <!-- Controls -->
 
-<div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;">
+<div class="not-content" style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;">
     <button id="slt-play" style="padding: 8px 20px; background: #4285f4; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;">&#9654; Play Animation</button>
     <button id="slt-reset" style="padding: 8px 16px; background: #e8eaed; color: #333; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s;">Reset</button>
     <div style="margin-left: auto; display: flex; gap: 6px;">
@@ -171,7 +171,7 @@ As needed:    [L3: reference files]        Variable
 
 <!-- Context Window Meter -->
 
-<div style="margin-bottom: 16px; background: white; border-radius: 10px; padding: 12px 16px; border: 1px solid #e0e0e0;">
+<div class="not-content" style="margin-bottom: 16px; background: white; border-radius: 10px; padding: 12px 16px; border: 1px solid #e0e0e0;">
     <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
       <span style="font-size: 0.8rem; font-weight: 600; color: #333;">Context Window Usage</span>
       <span id="slt-token-count" style="font-size: 0.8rem; color: #666;">0 / 128,000 tokens</span>
@@ -188,7 +188,7 @@ As needed:    [L3: reference files]        Variable
 
 <!-- Phase Indicators -->
 
-<div style="display: flex; gap: 4px; margin-bottom: 16px;">
+<div class="not-content" style="display: flex; gap: 4px; margin-bottom: 16px;">
     <div id="slt-p1-ind" style="flex: 1; height: 4px; border-radius: 2px; background: #e0e0e0; transition: background 0.3s;"></div>
     <div id="slt-p2-ind" style="flex: 1; height: 4px; border-radius: 2px; background: #e0e0e0; transition: background 0.3s;"></div>
     <div id="slt-p3-ind" style="flex: 1; height: 4px; border-radius: 2px; background: #e0e0e0; transition: background 0.3s;"></div>
@@ -196,11 +196,11 @@ As needed:    [L3: reference files]        Variable
 
 <!-- Skills Grid -->
 
-<div id="slt-skills" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-bottom: 16px;"></div>
+<div class="not-content" id="slt-skills" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-bottom: 16px;"></div>
 
 <!-- SKILL.md Viewer -->
 
-<div id="slt-viewer" style="display: none; background: white; border-radius: 10px; padding: 16px; border: 1px solid #e0e0e0; margin-top: 12px;">
+<div class="not-content" id="slt-viewer" style="display: none; background: white; border-radius: 10px; padding: 16px; border: 1px solid #e0e0e0; margin-top: 12px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
       <span style="font-size: 0.85rem; font-weight: 600; color: #333;">SKILL.md Preview</span>
       <button id="slt-close-viewer" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; color: #999; padding: 0 4px;">&times;</button>

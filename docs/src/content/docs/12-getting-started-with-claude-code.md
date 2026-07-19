@@ -96,7 +96,7 @@ Here is a map of the stack and how the parts relate:
 +------------------------------------------------------------------+
 ```
 
-<div id="claude-stack" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f7f5; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
+<div class="not-content" id="claude-stack" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f7f5; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
   <div style="background: linear-gradient(135deg, #cc785c, #a8543c); padding: 20px 24px; color: white;">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
       <div>

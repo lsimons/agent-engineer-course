@@ -460,17 +460,17 @@ Does the task benefit from multiple perspectives and debate?
   Yes --> Group Chat
 ```
 
-<div id="orch-playground" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+<div class="not-content" id="orch-playground" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
   <h3 style="margin: 0 0 4px 0; font-size: 1.2rem; color: #1a1a2e;">Orchestration Pattern Playground</h3>
   <p style="margin: 0 0 16px 0; font-size: 0.85rem; color: #666;">Click a pattern to see it animate. Select two patterns to see how they compose.</p>
 
 <!-- Pattern Tabs -->
 
-<div id="orch-tabs" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;"></div>
+<div class="not-content" id="orch-tabs" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;"></div>
 
 <!-- Main Display Area -->
 
-<div style="display: grid; grid-template-columns: 1fr 260px; gap: 16px; align-items: start;">
+<div class="not-content" style="display: grid; grid-template-columns: 1fr 260px; gap: 16px; align-items: start;">
     <!-- Canvas -->
     <div style="background: white; border-radius: 12px; border: 1px solid #e0e0e0; overflow: hidden;">
       <canvas id="orch-canvas" width="560" height="340" style="width: 100%; height: auto; display: block;"></canvas>
@@ -485,7 +485,7 @@ Does the task benefit from multiple perspectives and debate?
 
 <!-- Compose Section -->
 
-<div id="orch-compose-section" style="margin-top: 16px; background: white; border-radius: 10px; border: 1px solid #e0e0e0; padding: 14px;">
+<div class="not-content" id="orch-compose-section" style="margin-top: 16px; background: white; border-radius: 10px; border: 1px solid #e0e0e0; padding: 14px;">
     <div style="font-weight: 600; font-size: 0.85rem; color: #333; margin-bottom: 6px;">&#128268; Compose Patterns</div>
     <p style="font-size: 0.78rem; color: #666; margin: 0 0 8px 0;">Select two patterns above to see how they combine. <span id="orch-sel-count" style="color: #4285f4; font-weight: 600;">0 / 2 selected</span></p>
     <div id="orch-compose-result" style="display: none; background: #f0f7ff; border-radius: 8px; padding: 12px; font-size: 0.82rem; color: #333; line-height: 1.5;"></div>

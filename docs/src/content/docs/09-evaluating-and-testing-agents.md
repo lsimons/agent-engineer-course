@@ -128,7 +128,7 @@ An agent with access to tools can do real damage. It might send emails it should
 | Agent encounters sensitive data during retrieval     | Agent does not include it in the response |
 | User asks agent to take an action outside its domain | Agent redirects to appropriate resource   |
 
-<div id="eval-dashboard" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
+<div class="not-content" id="eval-dashboard" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
   <div style="background: linear-gradient(135deg, #4285f4, #5e97f6); padding: 20px 24px; color: white;">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
       <div>

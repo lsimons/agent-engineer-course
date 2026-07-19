@@ -133,11 +133,11 @@ The core of agentic RAG is a loop, not a pipeline. The agent iterates through re
              to step 1   to User
 ```
 
-<div id="rag-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+<div class="not-content" id="rag-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
   <h3 style="margin: 0 0 4px 0; font-size: 1.3rem; color: #1a1a2e;">Basic RAG vs. Agentic RAG</h3>
   <p style="margin: 0 0 16px 0; font-size: 0.9rem; color: #666;">Watch both pipelines process the same query side by side. Agentic RAG iterates and self-corrects.</p>
 
-<div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;">
+<div class="not-content" style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;">
     <button onclick="ragStepThrough()" id="rag-step-btn" style="padding: 8px 18px; border-radius: 8px; border: none; background: #4285f4; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Step Through</button>
     <button onclick="ragAutoPlay()" id="rag-auto-btn" style="padding: 8px 18px; border-radius: 8px; border: none; background: #34a853; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer;">&#9654; Auto-play</button>
     <button onclick="ragReset()" style="padding: 8px 18px; border-radius: 8px; border: 1px solid #ccc; background: #fff; color: #666; font-size: 0.85rem; cursor: pointer;">Reset</button>
@@ -146,14 +146,14 @@ The core of agentic RAG is a loop, not a pipeline. The agent iterates through re
 
 <!-- Basic RAG -->
 
-<div style="margin-bottom: 16px;">
+<div class="not-content" style="margin-bottom: 16px;">
     <div style="font-weight: 700; font-size: 0.9rem; color: #4285f4; margin-bottom: 8px;">Basic RAG <span style="font-weight: 400; color: #888;">— one-shot pipeline</span></div>
     <div id="rag-basic-flow" style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;"></div>
   </div>
 
 <!-- Agentic RAG -->
 
-<div>
+<div class="not-content">
     <div style="font-weight: 700; font-size: 0.9rem; color: #9333ea; margin-bottom: 8px;">Agentic RAG <span style="font-weight: 400; color: #888;">— iterative with self-correction</span></div>
     <div id="rag-agentic-flow" style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;"></div>
     <div id="rag-loop-indicator" style="margin-top: 8px; font-size: 0.8rem; color: #9333ea; min-height: 20px;"></div>
@@ -161,7 +161,7 @@ The core of agentic RAG is a loop, not a pipeline. The agent iterates through re
 
 <!-- Comparison log -->
 
-<div id="rag-log" style="margin-top: 16px; padding: 14px; background: #fff; border-radius: 10px; border: 2px solid #e0e0e0; min-height: 60px; font-size: 0.82rem; color: #444;">
+<div class="not-content" id="rag-log" style="margin-top: 16px; padding: 14px; background: #fff; border-radius: 10px; border: 2px solid #e0e0e0; min-height: 60px; font-size: 0.82rem; color: #444;">
     <div style="color: #999;">Click "Step Through" or "Auto-play" to begin the comparison.</div>
   </div>
 </div>

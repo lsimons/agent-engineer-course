@@ -56,13 +56,13 @@ Not every LLM interaction needs a design pattern. Here is a rough spectrum:
 
 Design patterns become important once you move past simple chains into truly agentic behavior - where the LLM is making decisions about what to do next.
 
-<div id="pattern-visualizer" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 32px auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; box-sizing: border-box;">
+<div class="not-content" id="pattern-visualizer" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 32px auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; box-sizing: border-box;">
   <h3 style="margin: 0 0 4px 0; font-size: 20px; color: #1a1a2e;">Agentic Design Patterns Visualizer</h3>
   <p style="margin: 0 0 16px 0; font-size: 14px; color: #6b7280;">Explore each pattern's flow diagram, or compare all four side by side.</p>
 
-<div id="pv-tabs" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;"></div>
+<div class="not-content" id="pv-tabs" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;"></div>
 
-<div id="pv-single" style="display: flex; gap: 20px; flex-wrap: wrap;">
+<div class="not-content" id="pv-single" style="display: flex; gap: 20px; flex-wrap: wrap;">
     <div style="flex: 1.3; min-width: 300px;">
       <div id="pv-anim-container" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); min-height: 280px;">
         <svg id="pv-svg" viewBox="0 0 500 260" style="width:100%;"></svg>
@@ -74,7 +74,7 @@ Design patterns become important once you move past simple chains into truly age
     </div>
   </div>
 
-<div id="pv-compare" style="display: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;"></div>
+<div class="not-content" id="pv-compare" style="display: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;"></div>
 
 <script>
   (function() {

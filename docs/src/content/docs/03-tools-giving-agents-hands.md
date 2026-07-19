@@ -245,11 +245,11 @@ Some models support parallel tool calls, where the model proposes multiple calls
 
 In a real agent, tool calling happens inside a loop: send the user message and tools to the model, check if the response is a text answer (done) or a tool call (execute it, append the result to the conversation, and loop back). This continues until the model decides it has enough information to respond.
 
-<div id="tool-call-flow" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 32px auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; box-sizing: border-box;">
+<div class="not-content" id="tool-call-flow" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 32px auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; box-sizing: border-box;">
   <h3 style="margin: 0 0 4px 0; font-size: 20px; color: #1a1a2e;">Tool Call Flow: Step by Step</h3>
   <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280;">Watch how an agent processes "What's the weather in Tokyo?" - use the controls to step through.</p>
 
-<div style="display: flex; gap: 12px; align-items: center; margin-bottom: 20px;">
+<div class="not-content" style="display: flex; gap: 12px; align-items: center; margin-bottom: 20px;">
     <button id="tcf-prev" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #e5e7eb; background: white; font-size: 13px; font-weight: 600; cursor: pointer; color: #374151;">Prev</button>
     <button id="tcf-play" style="padding: 8px 20px; border-radius: 8px; border: 2px solid #4285f4; background: #4285f4; color: white; font-size: 13px; font-weight: 600; cursor: pointer;">Play</button>
     <button id="tcf-next" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #e5e7eb; background: white; font-size: 13px; font-weight: 600; cursor: pointer; color: #374151;">Next</button>
@@ -258,9 +258,9 @@ In a real agent, tool calling happens inside a loop: send the user message and t
     <span id="tcf-step-label" style="font-size: 13px; font-weight: 600; color: #6b7280;"></span>
   </div>
 
-<div id="tcf-progress" style="display: flex; gap: 4px; margin-bottom: 24px;"></div>
+<div class="not-content" id="tcf-progress" style="display: flex; gap: 4px; margin-bottom: 24px;"></div>
 
-<div style="display: flex; gap: 20px; flex-wrap: wrap;">
+<div class="not-content" style="display: flex; gap: 20px; flex-wrap: wrap;">
     <div style="flex: 1.3; min-width: 300px;">
       <svg id="tcf-svg" viewBox="0 0 520 360" style="width: 100%; background: white; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);"></svg>
     </div>

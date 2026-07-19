@@ -36,7 +36,7 @@ Agent safety works the same way. You do not rely on one defense. You layer multi
 
 > **Key takeaway:** Safety is not a feature you bolt on at the end. It is an architectural concern that influences every layer of your agent's design.
 
-<div id="guardrails-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
+<div class="not-content" id="guardrails-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
   <div style="background: linear-gradient(135deg, #ea4335, #d93025); padding: 20px 24px; color: white;">
     <div style="font-size: 1.25rem; font-weight: 700;">Defense-in-Depth Visualizer</div>
     <div style="font-size: 0.85rem; opacity: 0.9;">Click layers to explore. Launch attacks to see defenses in action.</div>
@@ -336,7 +336,7 @@ Three failure modes show up only at scale:
 
 > **Key takeaway:** The four pillars are the same whether you run one agent or ten thousand. What changes is the *cost of getting them wrong*. For a personal agent the blast radius is you; for an enterprise fleet it is every customer, system, and regulation you touch.
 
-<div id="pillars-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
+<div class="not-content" id="pillars-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
   <div style="background: linear-gradient(135deg, #4285f4, #9333ea); padding: 20px 24px; color: white;">
     <div style="font-size: 1.25rem; font-weight: 700;">The Four Pillars: Personal vs. Enterprise</div>
     <div style="font-size: 0.85rem; opacity: 0.9;">Toggle the scale to see how each pillar changes as agents go from "just me" to "the whole org."</div>

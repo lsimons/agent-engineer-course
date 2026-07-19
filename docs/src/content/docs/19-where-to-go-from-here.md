@@ -112,13 +112,13 @@ You want the research-level understanding.
 
 **Revisit:** Lessons 2 (How Agents Think), 6 (Planning), 7 (Multi-Agent Systems)
 
-<div id="learning-path" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+<div class="not-content" id="learning-path" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
   <h3 style="margin: 0 0 4px 0; font-size: 1.2rem; color: #1a1a2e;">Learning Path Recommender</h3>
   <p style="margin: 0 0 16px 0; font-size: 0.85rem; color: #666;">Answer two questions or pick a path directly to get a personalized roadmap.</p>
 
 <!-- Quick Pick Paths -->
 
-<div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+<div class="not-content" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
     <button class="lp-quick" data-path="builder" style="padding: 8px 16px; border: 2px solid #4285f4; border-radius: 8px; background: white; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #4285f4; transition: all 0.2s;">&#128736; Builder</button>
     <button class="lp-quick" data-path="improver" style="padding: 8px 16px; border: 2px solid #34a853; border-radius: 8px; background: white; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #34a853; transition: all 0.2s;">&#128295; Improver</button>
     <button class="lp-quick" data-path="deployer" style="padding: 8px 16px; border: 2px solid #fbbc04; border-radius: 8px; background: white; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #9a7400; transition: all 0.2s;">&#128640; Deployer</button>
@@ -127,7 +127,7 @@ You want the research-level understanding.
 
 <!-- Quiz Area -->
 
-<div id="lp-quiz" style="background: white; border-radius: 12px; border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 16px;">
+<div class="not-content" id="lp-quiz" style="background: white; border-radius: 12px; border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 16px;">
     <!-- Step 1 -->
     <div id="lp-step1">
       <div style="font-weight: 700; font-size: 0.95rem; color: #1a1a2e; margin-bottom: 4px;">Step 1 of 2</div>
@@ -144,11 +144,11 @@ You want the research-level understanding.
 
 <!-- Roadmap -->
 
-<div id="lp-roadmap" style="display: none;"></div>
+<div class="not-content" id="lp-roadmap" style="display: none;"></div>
 
 <!-- Reset -->
 
-<div style="text-align: center; margin-top: 12px;">
+<div class="not-content" style="text-align: center; margin-top: 12px;">
     <button id="lp-reset" style="padding: 6px 16px; background: #e8eaed; color: #555; border: none; border-radius: 6px; cursor: pointer; font-size: 0.82rem; display: none;">Start Over</button>
   </div>
 </div>

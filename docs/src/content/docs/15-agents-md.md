@@ -16,7 +16,7 @@ Imagine your company gives every new hire a one-page cheat sheet on day one. It 
 
 > **Key takeaway:** AGENTS.md is a simple Markdown file you place in your repo to tell AI agents how to work on your project. Most major AI coding tools read it automatically.
 
-<div id="agents-md-builder" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 920px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+<div class="not-content" id="agents-md-builder" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 920px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
   <div style="text-align: center; margin-bottom: 16px;">
     <h3 style="margin: 0 0 4px 0; color: #1a1a2e; font-size: 1.3rem;">Interactive AGENTS.md Template Builder</h3>
     <p style="margin: 0; color: #666; font-size: 0.9rem;">Toggle sections on/off to build your AGENTS.md. Click to expand and see sample content.</p>

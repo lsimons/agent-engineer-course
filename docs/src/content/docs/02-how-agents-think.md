@@ -121,11 +121,11 @@ Strategies to manage this:
 - **Use models with large context windows** for complex multi-step tasks
 - **Implement a sliding window** that drops older, less relevant context
 
-<div id="context-window-explorer" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 32px auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; box-sizing: border-box;">
+<div class="not-content" id="context-window-explorer" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 32px auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; box-sizing: border-box;">
   <h3 style="margin: 0 0 4px 0; font-size: 20px; color: #1a1a2e;">Context Window Explorer</h3>
   <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280;">Adjust the sliders to see how different components fill up the context window.</p>
 
-<div style="display: flex; gap: 24px; flex-wrap: wrap;">
+<div class="not-content" style="display: flex; gap: 24px; flex-wrap: wrap;">
     <div style="flex: 1.2; min-width: 300px;">
       <div id="cwe-sliders"></div>
       <div id="cwe-model-select" style="margin-top: 16px; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">

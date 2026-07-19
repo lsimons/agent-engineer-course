@@ -65,7 +65,7 @@ Agents need to communicate in two fundamentally different ways:
 
 Understanding this distinction is key to understanding why we need two protocols, not one.
 
-<div id="mcp-a2a-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 920px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+<div class="not-content" id="mcp-a2a-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 920px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
   <div style="text-align: center; margin-bottom: 16px;">
     <h3 style="margin: 0 0 4px 0; color: #1a1a2e; font-size: 1.3rem;">MCP vs A2A Protocol Comparison</h3>
     <p style="margin: 0; color: #666; font-size: 0.9rem;">Click components to learn more. Use tabs to explore scenarios.</p>
@@ -73,7 +73,7 @@ Understanding this distinction is key to understanding why we need two protocols
 
 <!-- Split screen diagrams -->
 
-<div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
+<div class="not-content" style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
     <!-- MCP Side -->
     <div style="flex: 1; min-width: 280px; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
       <div style="text-align: center; margin-bottom: 8px;">
@@ -106,11 +106,11 @@ Understanding this distinction is key to understanding why we need two protocols
 
 <!-- Tooltip -->
 
-<div id="proto-tooltip" style="display:none; background: #1a1a2e; color: white; padding: 12px 16px; border-radius: 10px; font-size: 0.82rem; line-height: 1.5; margin-bottom: 12px; transition: all 0.3s;"></div>
+<div class="not-content" id="proto-tooltip" style="display:none; background: #1a1a2e; color: white; padding: 12px 16px; border-radius: 10px; font-size: 0.82rem; line-height: 1.5; margin-bottom: 12px; transition: all 0.3s;"></div>
 
 <!-- When to use which -->
 
-<div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 12px;">
+<div class="not-content" style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 12px;">
     <div style="font-weight: 600; color: #1a1a2e; margin-bottom: 10px; font-size: 0.95rem;">When to use which?</div>
     <div id="scenario-tabs" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;"></div>
     <div id="scenario-result" style="padding: 12px; border-radius: 8px; font-size: 0.85rem; line-height: 1.6; min-height: 40px;"></div>
@@ -118,7 +118,7 @@ Understanding this distinction is key to understanding why we need two protocols
 
 <!-- Comparison Table -->
 
-<div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); overflow-x: auto;">
+<div class="not-content" style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); overflow-x: auto;">
     <div style="font-weight: 600; color: #1a1a2e; margin-bottom: 10px; font-size: 0.95rem;">Side-by-Side Comparison</div>
     <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem;">
       <thead>

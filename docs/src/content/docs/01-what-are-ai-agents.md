@@ -243,13 +243,13 @@ Not all agents are created equal. It is helpful to think about agent systems on 
 
 Most production agent systems today operate at Level 1 or Level 2. Levels 3 and 4 are active areas of research and are becoming more practical, but they add significant complexity. Start simple and move up only when you have a clear reason to.
 
-<div id="agent-levels-explorer" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 32px auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; box-sizing: border-box;">
+<div class="not-content" id="agent-levels-explorer" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 32px auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; box-sizing: border-box;">
   <h3 style="margin: 0 0 4px 0; font-size: 20px; color: #1a1a2e;">Interactive Agent Levels Explorer</h3>
   <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280;">Click on a level to explore its capabilities, architecture, and examples.</p>
 
-<div id="ale-tabs" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;"></div>
+<div class="not-content" id="ale-tabs" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;"></div>
 
-<div id="ale-detail" style="display: flex; gap: 24px; flex-wrap: wrap;">
+<div class="not-content" id="ale-detail" style="display: flex; gap: 24px; flex-wrap: wrap;">
     <div id="ale-diagram" style="flex: 1; min-width: 280px; background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);"></div>
     <div id="ale-info" style="flex: 1; min-width: 280px;">
       <div id="ale-autonomy" style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">

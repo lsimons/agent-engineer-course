@@ -257,17 +257,17 @@ This gives you the structure of planning with the adaptability of reactive execu
 | Failure is costly                         | Yes            |                |
 | Task is simple (fewer than 3 steps)       |                | Yes            |
 
-<div id="planning-sim" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+<div class="not-content" id="planning-sim" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
   <h3 style="margin: 0 0 4px 0; font-size: 1.3rem; color: #1a1a2e;">Planning Strategy Simulator</h3>
   <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: #666;">Task: <em>"Research and compare the top 3 JavaScript frameworks"</em></p>
 
-<div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+<div class="not-content" style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
     <button onclick="setPlanTab('linear')" id="plan-btn-linear" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #4285f4; background: #4285f4; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Linear Plan</button>
     <button onclick="setPlanTab('hierarchical')" id="plan-btn-hierarchical" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #34a853; background: #fff; color: #34a853; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Hierarchical Plan</button>
     <button onclick="setPlanTab('adaptive')" id="plan-btn-adaptive" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #9333ea; background: #fff; color: #9333ea; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Adaptive / Reactive</button>
   </div>
 
-<div id="plan-content" style="background: #fff; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0; min-height: 300px;">
+<div class="not-content" id="plan-content" style="background: #fff; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0; min-height: 300px;">
     <div id="plan-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
       <div id="plan-title" style="font-weight: 700; font-size: 1rem;"></div>
       <div style="display: flex; gap: 8px; align-items: center;">

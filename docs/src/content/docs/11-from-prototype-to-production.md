@@ -116,7 +116,7 @@ Your eval suite for deployment should cover:
 
 Safety evals should have a hard gate - any failure blocks deployment. Other categories might have softer thresholds where you accept small regressions if overall quality improves.
 
-<div id="pipeline-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
+<div class="not-content" id="pipeline-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
   <div style="background: linear-gradient(135deg, #34a853, #2d9249); padding: 20px 24px; color: white;">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
       <div>

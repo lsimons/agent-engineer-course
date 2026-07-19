@@ -220,17 +220,17 @@ Procedural memory: "When a user reports a bug:
 | **Procedural**  | Permanent       | System prompt / config | By developers                      | Workflow instructions |
 | **Declarative** | Varies          | Knowledge bases / RAG  | By data pipelines                  | Product documentation |
 
-<div id="memory-explorer" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+<div class="not-content" id="memory-explorer" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
   <h3 style="margin: 0 0 4px 0; font-size: 1.3rem; color: #1a1a2e;">Memory Architecture Explorer</h3>
   <p style="margin: 0 0 16px 0; font-size: 0.9rem; color: #666;">Click each memory layer to explore what it stores, how it works, and see example data.</p>
 
-<div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+<div class="not-content" style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
     <button onclick="setMemView('layers')" id="mem-btn-layers" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #4285f4; background: #4285f4; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Layer View</button>
     <button onclick="setMemView('vector')" id="mem-btn-vector" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #4285f4; background: #fff; color: #4285f4; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Vector Store</button>
     <button onclick="setMemView('graph')" id="mem-btn-graph" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #4285f4; background: #fff; color: #4285f4; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Knowledge Graph</button>
   </div>
 
-<div id="mem-layers-view">
+<div class="not-content" id="mem-layers-view">
     <div id="mem-layers-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
     <div id="mem-detail" style="margin-top: 16px; padding: 16px; background: #fff; border-radius: 12px; border: 2px solid #e0e0e0; min-height: 120px; display: none;">
       <div id="mem-detail-content"></div>
@@ -241,7 +241,7 @@ Procedural memory: "When a user reports a bug:
     </div>
   </div>
 
-<div id="mem-vector-view" style="display: none;">
+<div class="not-content" id="mem-vector-view" style="display: none;">
     <div style="background: #fff; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0;">
       <h4 style="margin: 0 0 12px 0; color: #4285f4;">Vector Store Approach</h4>
       <p style="margin: 0 0 16px 0; font-size: 0.85rem; color: #555;">Memories are converted to numerical vectors (embeddings) and stored for similarity search.</p>
@@ -258,7 +258,7 @@ Procedural memory: "When a user reports a bug:
     </div>
   </div>
 
-<div id="mem-graph-view" style="display: none;">
+<div class="not-content" id="mem-graph-view" style="display: none;">
     <div style="background: #fff; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0;">
       <h4 style="margin: 0 0 12px 0; color: #9333ea;">Knowledge Graph Approach</h4>
       <p style="margin: 0 0 16px 0; font-size: 0.85rem; color: #555;">Memories are stored as entities and relationships, enabling structured queries.</p>

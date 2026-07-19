@@ -222,11 +222,11 @@ In a competitive architecture, multiple agents independently tackle the same pro
 | Collaborative | Mesh (peer-to-peer)      | Complex problems needing diverse input | High                    |
 | Competitive   | Parallel with judge      | High-stakes decisions                  | Medium                  |
 
-<div id="multi-agent-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+<div class="not-content" id="multi-agent-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
   <h3 style="margin: 0 0 4px 0; font-size: 1.3rem; color: #1a1a2e;">Multi-Agent Architecture Visualizer</h3>
   <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: #666;">Click an architecture to see animated message passing between agents.</p>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;" id="ma-tabs">
+<div class="not-content" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;" id="ma-tabs">
     <button onclick="setMATab('sequential')" id="ma-btn-sequential" class="ma-tab-btn" style="padding: 10px 12px; border-radius: 10px; border: 2px solid #4285f4; background: #4285f4; color: #fff; font-size: 0.82rem; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s;">
       <div>Sequential (Pipeline)</div><div style="font-weight: 400; font-size: 0.75rem; opacity: 0.85; margin-top: 2px;">A &rarr; B &rarr; C linear chain</div>
     </button>
@@ -241,7 +241,7 @@ In a competitive architecture, multiple agents independently tackle the same pro
     </button>
   </div>
 
-<div style="background: #fff; border-radius: 12px; padding: 16px; border: 2px solid #e0e0e0;">
+<div class="not-content" style="background: #fff; border-radius: 12px; padding: 16px; border: 2px solid #e0e0e0;">
     <canvas id="ma-canvas" width="760" height="320" style="width: 100%; border-radius: 8px; display: block;"></canvas>
     <div id="ma-metrics" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 16px;"></div>
     <div id="ma-description" style="margin-top: 12px; font-size: 0.82rem; color: #555; padding: 10px; background: #f8f9fa; border-radius: 8px;"></div>

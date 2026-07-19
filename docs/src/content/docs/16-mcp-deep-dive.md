@@ -16,7 +16,7 @@ Your laptop can plug directly into a wall outlet. That works fine at home. But i
 
 > **Key takeaway:** MCP is a powerful protocol for connecting agents to external tools and data, but it has real trade-offs in cost and complexity. Understanding when MCP adds value versus when simpler approaches work better is a critical skill for agent builders.
 
-<div id="mcp-deep-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 920px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
+<div class="not-content" id="mcp-deep-viz" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 920px; margin: 2rem auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 24px; box-sizing: border-box;">
   <div style="text-align: center; margin-bottom: 16px;">
     <h3 style="margin: 0 0 4px 0; color: #1a1a2e; font-size: 1.3rem;">MCP Architecture Deep Dive</h3>
     <p style="margin: 0; color: #666; font-size: 0.9rem;">Watch a request flow through the MCP stack. Toggle transport type and explore cost tradeoffs.</p>
@@ -24,14 +24,14 @@ Your laptop can plug directly into a wall outlet. That works fine at home. But i
 
 <!-- Transport Toggle -->
 
-<div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 16px;">
+<div class="not-content" style="display: flex; justify-content: center; gap: 8px; margin-bottom: 16px;">
     <button id="mcp-transport-stdio" class="mcp-transport-btn" style="padding: 8px 18px; border-radius: 8px; border: 2px solid #4285f4; background: #4285f4; color: white; cursor: pointer; font-weight: 600; font-size: 0.82rem; transition: all 0.2s;">stdio (Local)</button>
     <button id="mcp-transport-http" class="mcp-transport-btn" style="padding: 8px 18px; border-radius: 8px; border: 2px solid #e0e0e0; background: white; color: #666; cursor: pointer; font-weight: 600; font-size: 0.82rem; transition: all 0.2s;">Streamable HTTP (Remote)</button>
   </div>
 
 <!-- Architecture Diagram -->
 
-<div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px;">
+<div class="not-content" style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px;">
     <svg id="mcp-arch-svg" viewBox="0 0 820 200" style="width: 100%; height: auto;"></svg>
     <div style="text-align: center; margin-top: 8px;">
       <button id="mcp-send-btn" style="padding: 10px 28px; background: #4285f4; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.9rem; transition: all 0.2s;">▶ Send Request</button>
@@ -40,14 +40,14 @@ Your laptop can plug directly into a wall outlet. That works fine at home. But i
 
 <!-- JSON-RPC Messages -->
 
-<div id="mcp-messages" style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px; display: none;">
+<div class="not-content" id="mcp-messages" style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px; display: none;">
     <div style="font-weight: 600; color: #1a1a2e; margin-bottom: 10px; font-size: 0.95rem;">JSON-RPC Messages</div>
     <div id="mcp-msg-content" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
   </div>
 
 <!-- Cost Comparison -->
 
-<div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+<div class="not-content" style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
     <div style="font-weight: 600; color: #1a1a2e; margin-bottom: 12px; font-size: 0.95rem;">Cost Comparison: CLI vs MCP</div>
     <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 16px;">
       <div style="flex: 1; min-width: 200px;">
