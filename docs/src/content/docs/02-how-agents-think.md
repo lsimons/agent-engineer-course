@@ -158,9 +158,7 @@ Strategies to manage this:
     var models = [
       { name: "Claude Opus 4.8", tokens: 1000000 },
       { name: "Claude Sonnet 5", tokens: 1000000 },
-      { name: "Claude Haiku 4.5", tokens: 200000 },
-      { name: "Gemini 3.5 Flash", tokens: 1000000 },
-      { name: "Gemini 3.1 Pro", tokens: 1000000 }
+      { name: "Claude Haiku 4.5", tokens: 200000 }
     ];
     var selectedModel = 0;
 
