@@ -726,4 +726,4 @@ A system that reviews user-generated content for policy violations, spam, misinf
 
 ______________________________________________________________________
 
-**Next lesson:** [Agentic RAG](../08-agentic-rag/)
+**Next lesson:** [Agentic RAG](./08-agentic-rag.md)

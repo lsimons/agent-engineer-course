@@ -640,4 +640,4 @@ Build an agentic RAG system for a technical documentation use case:
 
 ______________________________________________________________________
 
-**Next lesson:** [Evaluating and Testing Agents](../09-evaluating-and-testing-agents/)
+**Next lesson:** [Evaluating and Testing Agents](./09-evaluating-and-testing-agents.md)
