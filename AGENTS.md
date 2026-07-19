@@ -70,14 +70,4 @@ lessons.
   (@astrojs/check needs ^5||^6) - keep the ignore rule.
 - Verify changes with: `just docs-build`, then curl the dev server; a full
   internal-link audit is: crawl every page's `href="/..."` and expect 200s.
-
-## In progress / next steps
-
-- **Widget visual QC: done (2026-07-19).** All 29 local/addy screenshot
-  pairs (plus the local-only lesson-12 `claude-stack` widget) were reviewed
-  pair-by-pair with vision; no layout/rendering defects found - the systemic
-  `not-content` fix covers everything. The Playwright harness remains at
-  `~/git/lsimons/lsimons-tmp/widget-qc/` (`capture.mjs` + `manifest.json` +
-  `shots/`) for re-runs after future widget edits.
-- Consider a `robots`-friendly OG/social image for the site (nice-to-have).
-- The lsimons.github.io root site links here; keep the URL stable.
+- The lsimons.github.io root site links here; keep the published URL stable.
