@@ -452,11 +452,11 @@ The advantage is a clean cutover and instant rollback (just switch back to Blue)
 
 Route traffic to different agent versions and compare their performance on real interactions.
 
-| Version A                  | Version B                     | Metric               | Winner                       |
-| -------------------------- | ----------------------------- | -------------------- | ---------------------------- |
-| GPT-based, verbose prompts | Gemini-based, concise prompts | Task completion rate | Compare after N interactions |
-| ReAct pattern              | Plan-then-execute             | User satisfaction    | Compare after N interactions |
-| Model A, 3 tool retries    | Model A, 1 tool retry         | Cost per interaction | Compare after N interactions |
+| Version A                    | Version B                     | Metric               | Winner                       |
+| ---------------------------- | ----------------------------- | -------------------- | ---------------------------- |
+| Claude Opus, verbose prompts | Claude Haiku, concise prompts | Task completion rate | Compare after N interactions |
+| ReAct pattern                | Plan-then-execute             | User satisfaction    | Compare after N interactions |
+| Model A, 3 tool retries      | Model A, 1 tool retry         | Cost per interaction | Compare after N interactions |
 
 A/B testing is especially valuable for agents because it lets you compare different models, prompts, and architectures on real traffic.
 
@@ -519,7 +519,7 @@ Traces show the full journey of a single request through your agent, including a
 [User Request] "Help me return my order"
     |
     +-- [LLM Call 1] Understand intent (150ms)
-    |       Model: gemini-3.5-flash, Tokens: 800 in / 120 out
+    |       Model: aws/claude-4-5-haiku, Tokens: 800 in / 120 out
     |
     +-- [Tool Call] lookup_order(order_id="12345") (340ms)
     |       Status: success
@@ -528,7 +528,7 @@ Traces show the full journey of a single request through your agent, including a
     |       Status: success, eligible=true
     |
     +-- [LLM Call 2] Generate response (200ms)
-    |       Model: gemini-3.5-flash, Tokens: 1200 in / 250 out
+    |       Model: aws/claude-4-5-haiku, Tokens: 1200 in / 250 out
     |
     +-- [Output Guardrail] PII check (15ms)
     |       Status: pass
@@ -538,7 +538,7 @@ Traces show the full journey of a single request through your agent, including a
     Total: 885ms, Cost: $0.003
 ```
 
-[OpenTelemetry](https://opentelemetry.io/) is the industry standard for distributed tracing. Many agent frameworks support OpenTelemetry out of the box, and Google Cloud's operations suite (Cloud Logging, Cloud Trace, Cloud Monitoring) integrates with OpenTelemetry natively.
+[OpenTelemetry](https://opentelemetry.io/) is the industry standard for distributed tracing. Many agent frameworks support OpenTelemetry out of the box, and most observability platforms ingest it natively. Your company's LiteLLM proxy also logs every request that passes through it, which gives you a second, model-call-level view to correlate against your traces.
 
 ### Metrics
 
@@ -648,31 +648,31 @@ Use the cheapest model that can handle each task. Not every step requires your m
 User Query
     |
     v
-[Router] --Simple query--> Gemini Flash-Lite ($)
+[Router] --Simple query--> Claude Haiku ($)
     |
-    +-----Medium complexity--> Gemini Flash ($$)
+    +-----Medium complexity--> Claude Sonnet ($$)
     |
-    +-----Complex reasoning--> Gemini Pro ($$$)
+    +-----Complex reasoning--> Claude Opus ($$$)
 ```
 
 | Task Type             | Recommended Model Tier | Rationale                                     |
 | --------------------- | ---------------------- | --------------------------------------------- |
-| Intent classification | Small / Flash-Lite     | Simple classification task                    |
-| Information retrieval | Medium / Flash         | Needs good comprehension, moderate generation |
-| Complex reasoning     | Large / Pro            | Multi-step reasoning, nuanced judgment        |
-| Summarization         | Medium / Flash         | Good balance of quality and cost              |
-| Safety checks         | Small / Flash-Lite     | Pattern matching, classification              |
+| Intent classification | Small / Haiku          | Simple classification task                    |
+| Information retrieval | Medium / Sonnet        | Needs good comprehension, moderate generation |
+| Complex reasoning     | Large / Opus           | Multi-step reasoning, nuanced judgment        |
+| Summarization         | Medium / Sonnet        | Good balance of quality and cost              |
+| Safety checks         | Small / Haiku          | Pattern matching, classification              |
 
 ### Caching
 
 Cache responses for repeated or similar queries to avoid redundant LLM calls.
 
-| Caching Strategy      | When to Use                                                                                |
-| --------------------- | ------------------------------------------------------------------------------------------ |
-| **Exact match cache** | FAQ-style queries where many users ask the same thing                                      |
-| **Semantic cache**    | Queries that are different in wording but identical in meaning                             |
-| **Tool result cache** | Tool outputs that do not change frequently (e.g., product catalog lookups)                 |
-| **Prompt cache**      | Reuse cached prefixes for system prompts across calls (Vertex AI supports context caching) |
+| Caching Strategy      | When to Use                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------- |
+| **Exact match cache** | FAQ-style queries where many users ask the same thing                                  |
+| **Semantic cache**    | Queries that are different in wording but identical in meaning                         |
+| **Tool result cache** | Tool outputs that do not change frequently (e.g., product catalog lookups)             |
+| **Prompt cache**      | Reuse cached prefixes for system prompts across calls (Claude supports prompt caching) |
 
 ### Token budgets
 
@@ -784,11 +784,10 @@ ______________________________________________________________________
 
 ## Further reading
 
-- [Deploy Agents on Vertex AI Agent Engine](https://docs.cloud.google.com/agent-builder/agent-engine/deploy) - Official guide for deploying agents on Google Cloud
-- [Agent Starter Pack](https://github.com/GoogleCloudPlatform/agent-starter-pack) - Production-ready templates for deploying agents on Google Cloud with CI/CD, observability, and evaluation
-- [Vertex AI Model Monitoring](https://docs.cloud.google.com/vertex-ai/docs/model-monitoring/overview) - Monitor model performance in production
+- [Claude Agent SDK documentation](https://platform.claude.com/docs/en/api/agent-sdk/overview) - Building and deploying production agents with the same loop that powers Claude Code
+- [Claude Developer Platform documentation](https://platform.claude.com/docs) - API reference, including prompt caching for cost control
 - [OpenTelemetry](https://opentelemetry.io/) - The industry standard for distributed tracing and observability
 
 ______________________________________________________________________
 
-Next lesson: [Getting Started with Vertex AI and ADK](/12-getting-started-with-vertex-and-adk/)
+Next lesson: [Getting Started with Claude Code](/12-getting-started-with-claude-code/)

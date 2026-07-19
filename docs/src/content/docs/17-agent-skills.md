@@ -474,35 +474,35 @@ For the full security checklist, refer to `references/security-checklist.md`.
 
 ______________________________________________________________________
 
-## Skills in Google ADK
+## Skills in Claude Code
 
-Google's Agent Development Kit supports skills through the `SkillToolset` class. Here is a conceptual overview of how it works:
+Claude Code is one of the primary consumers of the Agent Skills specification. Here is a conceptual overview of how it works:
 
-### File-based skills (recommended)
+### File-based skills
 
-Place skill directories in a `skills/` folder within your agent project:
+Place skill directories in a `skills/` folder - either project-level (`.claude/skills/`, so the skill ships with the repo) or personal (`~/.claude/skills/`, so it is available across all your work):
 
 ```
-my-agent/
-  agent.py
-  skills/
-    code-review/
-      SKILL.md
-      references/
-        security-checklist.md
-    deploy/
-      SKILL.md
-      scripts/
-        pre-deploy-check.sh
+my-project/
+  .claude/
+    skills/
+      code-review/
+        SKILL.md
+        references/
+          security-checklist.md
+      deploy/
+        SKILL.md
+        scripts/
+          pre-deploy-check.sh
 ```
 
-The agent discovers and loads skills from this directory. Only the L1 metadata is loaded at startup. Full instructions load when the agent activates the skill.
+Claude Code discovers skills from these directories automatically. Only the L1 metadata (`name` and `description`) is loaded at startup. Full instructions load only when Claude Code decides the skill is relevant to the current task - you can also invoke a skill directly, similar to a slash command.
 
-### Code-based skills
+### Skills from plugins
 
-For dynamic skill creation or modification, ADK also supports defining skills in code using the `Skill` model class. This is useful when skill content needs to change based on runtime conditions.
+Skills can also ship as part of an installed Claude Code plugin, bundled alongside other plugin assets. This is useful for distributing a skill across a team without every user copying files into their own `.claude/skills/` folder.
 
-For detailed implementation guidance, see the [ADK Skills documentation](https://adk.dev/skills/).
+For detailed implementation guidance, see the [Claude Code documentation](https://code.claude.com/docs).
 
 ______________________________________________________________________
 
@@ -618,7 +618,7 @@ ______________________________________________________________________
 ## Further reading
 
 - [Agent Skills Specification](https://agentskills.io/specification)
-- [ADK Skills Documentation](https://adk.dev/skills/)
+- [Claude Code documentation](https://code.claude.com/docs)
 - [Anthropic Skills Repository](https://github.com/anthropics/skills)
 - [GitHub Copilot Agent Skills](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills)
 - [Skills vs. MCP Tools - LlamaIndex](https://www.llamaindex.ai/blog/skills-vs-mcp-tools-for-agents-when-to-use-what)

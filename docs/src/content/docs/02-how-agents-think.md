@@ -82,12 +82,14 @@ LLMs do not read characters or words. They read **tokens** - chunks of text that
 
 The **context window** is the total number of tokens a model can consider at once. Think of it like the model's desk - everything it needs to reference must fit on this desk.
 
-| Model            | Context Window   |
-| ---------------- | ---------------- |
-| Gemini 3.1 Pro   | 1,000,000 tokens |
-| Gemini 3.5 Flash | 1,000,000 tokens |
-| GPT-5.6          | 1,050,000 tokens |
-| Claude Sonnet 5  | 1,000,000 tokens |
+| Model               | Context Window    |
+| ------------------- | ----------------- |
+| Claude Opus 4.8     | 1,000,000 tokens  |
+| Claude Sonnet 5     | 1,000,000 tokens  |
+| Claude Haiku 4.5    | 200,000 tokens    |
+| Gemini 3.1 Pro      | 1,000,000 tokens  |
+| Gemini 3.5 Flash    | 1,000,000 tokens  |
+| GPT-series (OpenAI) | ~1,000,000 tokens |
 
 **What goes into the context window during an agent call:**
 
@@ -154,8 +156,9 @@ Strategies to manage this:
       { name: "Retrieved Context (RAG)", color: "#ea4335", min: 0, max: 30000, value: 4000, icon: "R" }
     ];
     var models = [
-      { name: "GPT-5.6", tokens: 1050000 },
+      { name: "Claude Opus 4.8", tokens: 1000000 },
       { name: "Claude Sonnet 5", tokens: 1000000 },
+      { name: "Claude Haiku 4.5", tokens: 200000 },
       { name: "Gemini 3.5 Flash", tokens: 1000000 },
       { name: "Gemini 3.1 Pro", tokens: 1000000 }
     ];
@@ -235,7 +238,7 @@ Strategies to manage this:
       components.forEach(function(c) {
         var barPct = Math.min((c.value / total) * 100, 100);
         barsEl.innerHTML += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
-          '<span style="font-size:11px;color:#6b7280;width:80px;text-align:right;flex-shrink:0;">'+c.name.split(" ")[0]+'</span>' +
+          '<span style="font-size:11px;color:#6b7280;width:80px;text-align:right;flex-shrink:0;">'+c.name.split(" ").at(0)+'</span>' +
           '<div style="flex:1;background:#f3f4f6;border-radius:4px;height:16px;overflow:hidden;">' +
           '<div style="width:'+barPct+'%;height:100%;background:'+c.color+';border-radius:4px;transition:width 0.3s;"></div></div>' +
           '<span style="font-size:11px;color:#374151;font-weight:600;width:40px;">'+barPct.toFixed(0)+'%</span></div>';
@@ -374,7 +377,7 @@ Not all tasks need the most powerful model. Choosing the right model is an engin
 ```
 Lighter / Faster / Cheaper                  Heavier / Smarter / More Expensive
 |----------------------------------------------------------|
-Gemini Flash-Lite     Gemini Flash        Gemini Pro
+Claude Haiku 4.5      Claude Sonnet 5     Claude Opus 4.8
 (simple tasks)        (balanced)          (complex reasoning)
 ```
 
@@ -429,19 +432,17 @@ User: "Review this pull request and suggest improvements"
 
 This task needs deep reasoning, so it warrants a more capable model.
 
-### Google Cloud Model options
+### Claude model options
 
-Google Cloud provides access to Gemini models through Vertex AI:
+The company's LiteLLM proxy gives you access to Claude models (see [Lesson 12](/12-getting-started-with-claude-code/) for how to connect):
 
-- **Gemini 3.5 Flash** - Google's current default workhorse. Fast and efficient for most agent tasks, with strong agentic and coding performance and a large context window (1M tokens).
-- **Gemini 3.1 Pro** - Top-tier reasoning for complex tasks. Use when the task requires deep analysis, complex multi-step logic, or nuanced understanding.
-- **Gemini 3.1 Flash-Lite** - Fastest and cheapest option for simple tasks like classification and extraction.
+- **Claude Opus 4.8** (`aws/claude-4-8-opus`) - The most capable model. Use when the task requires deep analysis, complex multi-step logic, or nuanced understanding.
+- **Claude Sonnet 5** (`aws/claude-5-sonnet`) - Balanced speed and intelligence. A strong default workhorse for most agent tasks, with a large context window (1M tokens).
+- **Claude Haiku 4.5** (`aws/claude-4-5-haiku`) - Fastest and cheapest option for simple tasks like classification and extraction.
 
-> **Note:** Model names move quickly. The Gemini 2.5 family (2.5 Flash, 2.5 Pro, 2.5 Flash-Lite) is still available but is scheduled to retire on October 16, 2026, and Gemini 2.0 models were shut down on June 1, 2026. Always check the docs for the current model IDs.
+> **Note:** Model names move quickly, and the identifiers above are the spellings used on our proxy - they differ a bit in every company's environment. Always check the internal documentation and the proxy's `/v1/models` endpoint for what is currently available.
 
-> **Learn more:** [Vertex AI Model Documentation](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/models)
-
-> **Learn more:** [Gemini API Documentation](https://ai.google.dev/gemini-api/docs)
+> **Learn more:** [Claude Developer Platform documentation](https://platform.claude.com/docs)
 
 ______________________________________________________________________
 

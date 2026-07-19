@@ -23,7 +23,7 @@ If you're going to use AI to contribute, please follow the guidelines above and 
 ## What we are not looking for
 
 - Full code samples or tutorials. We link to official resources for that.
-- Content that duplicates existing Google Cloud documentation.
+- Content that duplicates existing official documentation.
 - Marketing language or promotional content.
 
 ## Process

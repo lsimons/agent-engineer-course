@@ -62,13 +62,15 @@ Function tools are the most common type. They are the primary way you extend an 
 
 These are tools provided by the platform or framework you are using. They come pre-built and ready to use.
 
-**Google Cloud / Gemini built-in tools:**
+**Anthropic built-in tools:**
 
 | Tool               | What It Does                                                                                                           |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| **Google Search**  | Grounds the model's responses in real-time web search results. Reduces hallucination by providing current information. |
-| **Code Execution** | Runs Python code in a sandboxed environment. Useful for math, data analysis, and generating charts.                    |
-| **URL Context**    | Fetches and processes content from a given URL.                                                                        |
+| **Web search**     | Grounds the model's responses in real-time web search results. Reduces hallucination by providing current information. |
+| **Code execution** | Runs code in a sandboxed environment. Useful for math, data analysis, and generating charts.                           |
+| **Web fetch**      | Fetches and processes content from a given URL.                                                                        |
+
+These are server tools that run on Anthropic's infrastructure - you declare them in the request's `tools` list alongside your own custom function tools, and no execution code of your own is required.
 
 **When to use built-in tools:**
 
@@ -792,32 +794,32 @@ When you design tools, you are essentially building the app store for your agent
 
 ______________________________________________________________________
 
-## Tools on Google Cloud
+## Tools in the Claude stack
 
-Google Cloud provides several ways to give agents tools:
+The Claude stack gives you several ways to give agents tools:
 
-### Vertex AI Function calling
+### Claude function calling
 
-Vertex AI supports function calling with Gemini models. You define your tools as function declarations, and the model will generate structured function calls when appropriate.
+The Anthropic Messages API supports function calling with Claude models. You define your tools as JSON schemas (an `input_schema` per tool), and the model returns structured tool-use blocks when appropriate. We build this from scratch in [Lesson 13](/13-building-your-first-agent/).
 
-> **Learn more:** [Vertex AI Function Calling](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling)
+> **Learn more:** [Claude Developer Platform documentation](https://platform.claude.com/docs)
 
-### Agent Development Kit ADK tools
+### Claude Agent SDK tools
 
-The Agent Development Kit (ADK) provides a structured way to define and manage tools for your agents. ADK supports:
+The Claude Agent SDK provides a structured way to define and manage tools for your agents. It supports:
 
-- **Function tools**: Wrap any Python function as an agent tool
-- **Built-in tools**: Google Search, Code Execution, and more
-- **Agent tools**: Use another ADK agent as a tool
-- **Third-party tools**: Integration with LangChain tools, CrewAI tools, and MCP servers
+- **Function tools**: Wrap any function as an agent tool
+- **Built-in tools**: The same file, shell, and search tools Claude Code uses (Read, Write, Bash, and more)
+- **Agent tools**: Use subagents as tools for delegated subtasks
+- **MCP servers**: Integration with any Model Context Protocol server
 
-ADK handles the tool definition format, execution, and result passing so you can focus on the tool's logic rather than the plumbing.
+The SDK handles the tool definition format, execution, and result passing so you can focus on the tool's logic rather than the plumbing.
 
-> **Learn more:** [ADK Tools Documentation](https://adk.dev/integrations/)
+> **Learn more:** [Claude Agent SDK documentation](https://platform.claude.com/docs/en/api/agent-sdk/overview)
 
-### Built-in grounding tools
+### Built-in server tools
 
-Google Search grounding is available as a built-in tool for Gemini models on Vertex AI. When enabled, the model can search the web to ground its responses in current information - no custom tool code required.
+Web search, code execution, and web fetch are available as built-in tools for Claude models. When enabled, the model can search the web, run code, or fetch a URL to ground its responses in current information - no custom tool code required.
 
 ______________________________________________________________________
 

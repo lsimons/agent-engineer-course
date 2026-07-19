@@ -683,15 +683,15 @@ The orchestration layer is the control system that manages how an agent plans, r
 
 ### Orchestration in practice
 
-In Google Cloud's [Vertex AI Agent Engine](https://docs.cloud.google.com/agent-builder/agent-engine/overview), the orchestration layer handles:
+Claude Code is an orchestration layer you can see in action: it handles
 
-- **Routing:** Directing user requests to the right agent or tool
-- **State management:** Tracking where the agent is in its plan
+- **Routing:** Directing a request to the right tool, subagent, or MCP server
+- **State management:** Tracking where the agent is in its plan (visible as its todo list)
 - **Tool execution:** Calling tools and processing results
 - **Error handling:** Catching failures and deciding how to recover
 - **Context management:** Keeping the context window organized
 
-The [Agent Development Kit (ADK)](https://adk.dev/) gives you building blocks for customizing orchestration behavior. You define the agent's tools, instructions, and behavior - the framework handles the execution loop.
+The [Claude Agent SDK](https://platform.claude.com/docs/en/api/agent-sdk/overview) gives you the same orchestration loop as a library, so you can build custom agents rather than a chat interface. You define the agent's tools, instructions, and permissions - the framework handles the execution loop, including the planning and re-planning behavior described in this lesson.
 
 ### Key orchestration decisions
 
@@ -882,9 +882,9 @@ ______________________________________________________________________
 
 ## Further reading
 
-- [Vertex AI Agent Engine overview](https://docs.cloud.google.com/agent-builder/agent-engine/overview)
-- [Agent Development Kit (ADK) documentation](https://adk.dev/)
-- [Google Cloud AI codelabs](https://codelabs.developers.google.com/?cat=AI)
+- [Claude Agent SDK docs](https://platform.claude.com/docs/en/api/agent-sdk/overview) - building custom agents with the same orchestration loop as Claude Code
+- [Claude Code documentation](https://code.claude.com/docs) - orchestration, subagents, and planning behavior in practice
+- [Anthropic engineering blog](https://www.anthropic.com/engineering) - "Building effective agents" and related posts
 
 ______________________________________________________________________
 

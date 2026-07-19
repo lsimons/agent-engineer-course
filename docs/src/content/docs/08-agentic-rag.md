@@ -481,36 +481,27 @@ Agentic RAG is like hiring a research assistant. You say, "I need to understand 
 
 The librarian gives you a book. The research assistant gives you an answer.
 
-## Agentic RAG with Google Cloud
+## Agentic RAG with the Claude stack
 
-Google Cloud provides several building blocks for implementing agentic RAG:
+Anthropic does not ship a single managed RAG service the way some cloud platforms do. Instead, you compose agentic RAG from a few building blocks, with an agent - Claude Code, the Claude Agent SDK, or a custom agent loop calling the Anthropic API directly - deciding when and how to use them.
 
-### Vertex AI RAG engine
+### The retrieval building blocks
 
-The [Vertex AI RAG Engine](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview) provides managed infrastructure for RAG pipelines. It handles document ingestion, chunking, embedding, and retrieval so you can focus on the agentic logic.
-
-Key features:
-
-- Managed vector search with automatic indexing
-- Multiple data source connectors (Cloud Storage, Google Drive, web URLs)
-- Configurable chunking and embedding strategies
-- Integration with Vertex AI's model endpoints
-
-### Vertex AI Agent engine
-
-The [Vertex AI Agent Engine](https://docs.cloud.google.com/agent-builder/agent-engine/overview) lets you build agents that use RAG as one of their tools. The agent can decide when to search, which data sources to query, and how to combine results.
+- **Embedding model + vector store:** Convert your documents into embeddings with an embedding model of your choice, store them in a vector database (Pinecone, Weaviate, ChromaDB, pgvector), and expose search over that store to the agent as a tool. This is the "search engine" half of RAG; you bring your own components rather than a single managed product.
+- **MCP servers for retrieval:** A [Model Context Protocol](https://modelcontextprotocol.io) server can wrap a vector store, a database, or an internal wiki, giving any Claude-based agent a consistent retrieval tool without hand-rolling integration code per data source.
+- **File-based context:** For small or moderately sized document sets, you can skip external retrieval entirely and let the agent read files directly - Claude Code does this natively - combined with prompt caching to keep repeated reads cheap across turns.
 
 ### Building the loop
 
-A practical agentic RAG implementation on Google Cloud might look like this:
+A practical agentic RAG implementation on the Claude stack might look like this:
 
 ```
 User Query
     |
     v
-[Vertex AI Agent Engine]
+[Agent: Claude Code / Claude Agent SDK / custom loop]
     |-- Plans retrieval strategy
-    |-- Calls RAG Engine (possibly multiple times)
+    |-- Calls retrieval tool (vector search or MCP server), possibly multiple times
     |-- Evaluates results
     |-- Reformulates if needed
     |-- Generates grounded answer
@@ -611,7 +602,7 @@ The agent tries to answer even when the knowledge base does not contain the need
 
 Build an agentic RAG system for a technical documentation use case:
 
-1. **Setup:** Choose a set of technical documents (your own project docs, or a public documentation set like the Google Cloud docs).
+1. **Setup:** Choose a set of technical documents (your own project docs, or a public documentation set such as a popular open-source project's docs).
 
 2. **Basic RAG baseline:** Implement a simple retrieve-then-read pipeline. Test it with five questions of varying complexity.
 
@@ -635,8 +626,9 @@ Build an agentic RAG system for a technical documentation use case:
 
 ## Further reading
 
-- [Vertex AI RAG Engine Overview](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview) - Managed RAG infrastructure on Google Cloud
-- [Vertex AI Agent Engine Overview](https://docs.cloud.google.com/agent-builder/agent-engine/overview) - Building agents that use RAG as a tool on Vertex AI
+- [Model Context Protocol](https://modelcontextprotocol.io) - connecting agents to external retrieval sources
+- [Claude Agent SDK docs](https://platform.claude.com/docs/en/api/agent-sdk/overview) - building custom agents that use retrieval as a tool
+- [Anthropic Cookbook](https://github.com/anthropics/anthropic-cookbook) - runnable RAG and retrieval examples
 
 ______________________________________________________________________
 

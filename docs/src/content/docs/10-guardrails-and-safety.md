@@ -233,6 +233,12 @@ Agent safety works the same way. You do not rely on one defense. You layer multi
 
 ______________________________________________________________________
 
+> ⚠️ **Company policy comes first:** Beyond the general practices in this lesson, your company
+> defines its own AI principles and guardrails. They are documented internally and take
+> precedence over anything written here - review them before you build or deploy any agent.
+
+______________________________________________________________________
+
 ## Why safety is hard with agents
 
 Traditional software has predictable behavior. If you write `if balance < 0: deny_transaction()`, it always denies negative-balance transactions. Agents are different because their behavior emerges from the combination of:
@@ -482,7 +488,7 @@ The agent acts on behalf of a user, but it makes its own decisions about which t
 - **Audit:** Can you trace every action back to a specific agent invocation and user request?
 - **Accountability:** When something goes wrong, who is responsible?
 
-Google Cloud's approach treats agents as principals that should follow the same identity and access management patterns as other service identities. See the [Google Cloud AI Security Framework](https://cloud.google.com/security/ai-framework) for detailed guidance on securing AI workloads.
+Treat agents as principals that need the same identity and access management rigor as any other service identity - provisioned, scoped, and audited like the non-human identities discussed earlier in this lesson, following standards such as OAuth, OpenID Connect, and SPIFFE (see the NIST AI Agent Standards Initiative above) rather than one-off, ad hoc credentials.
 
 ______________________________________________________________________
 
@@ -552,16 +558,11 @@ def safe_database_query(query: str, user_context: dict) -> str:
     return execute_with_readonly_connection(query)
 ```
 
-### Using Model Armor on Vertex AI
+### Anthropic's built-in safety layer
 
-Google Cloud provides [Model Armor](https://cloud.google.com/security-command-center/docs/model-armor-overview) as a managed service for applying guardrails to generative AI applications. Model Armor can:
+Beyond the guardrails you build yourself, the model itself provides a baseline layer of defense. Claude is trained using **Constitutional AI**, Anthropic's approach to aligning model behavior with a set of explicit principles rather than relying on human feedback alone. In practice this means Claude will refuse clearly harmful requests on its own - and when it does, the API response carries `stop_reason: "refusal"`, which your code should check explicitly (log it, surface a clean message to the user, and treat it as a signal rather than an error to be caught).
 
-- Screen prompts and responses for harmful content
-- Detect prompt injection attempts
-- Filter based on configurable content safety policies
-- Integrate with your existing security workflows
-
-This gives you a production-ready guardrails layer without building everything from scratch.
+This built-in behavior is a foundation, not a substitute for the guardrails covered in this lesson. It catches broad classes of clearly harmful requests, but it knows nothing about your company's specific policies - which tables an agent may query, which refund amount needs approval, which customers can see which data. Your own input and output guardrails, and your tool-level checks, still carry that weight.
 
 ______________________________________________________________________
 
@@ -860,10 +861,10 @@ These evals should run automatically in your CI/CD pipeline (more on this in Les
 
 ### Responsible AI testing
 
-Google Cloud provides guidance and tools for responsible AI development:
+Anthropic publishes its own guidance on building safe, reliable agents:
 
-- [Responsible AI practices](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/responsible-ai) on Vertex AI cover fairness, safety, and transparency
-- The [Google Secure AI Framework (SAIF)](https://cloud.google.com/security/ai-framework) provides a comprehensive approach to securing AI systems
+- The [Anthropic engineering blog](https://www.anthropic.com/engineering) covers practical guidance on agent safety and reliability, including the widely cited "Building Effective Agents" post
+- The [Claude Developer Platform documentation](https://platform.claude.com/docs) documents Claude's built-in safety behavior, refusal handling, and usage policies
 
 These resources help you think beyond just prompt injection to broader concerns like bias, fairness, and transparency in your agent's behavior.
 
@@ -930,9 +931,8 @@ ______________________________________________________________________
 
 ## Further reading
 
-- [Google Cloud Responsible AI](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/responsible-ai) - Guidance on building fair, safe, and transparent AI applications on Vertex AI
-- [Google Secure AI Framework (SAIF)](https://cloud.google.com/security/ai-framework) - A comprehensive framework for securing AI systems
-- [Model Armor Overview](https://cloud.google.com/security-command-center/docs/model-armor-overview) - Managed guardrails for generative AI on Google Cloud
+- [Claude Developer Platform documentation](https://platform.claude.com/docs) - Claude's built-in safety behavior, refusal handling, and usage policies
+- [Anthropic engineering blog](https://www.anthropic.com/engineering) - Practical guidance on building safe, effective agents
 - [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/) - Industry-standard list of LLM security risks
 - [OWASP Top 10 for Agentic Applications (2026)](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) - The agent-specific extension of the OWASP Top 10, covering risks unique to autonomous agents
 - [NIST AI Agent Standards Initiative](https://www.nist.gov/news-events/news/2026/02/announcing-ai-agent-standards-initiative-interoperable-and-secure) - Government standards effort built on agent security, interoperability, and identity

@@ -59,12 +59,13 @@ The context window is the total amount of text (measured in tokens) that an LLM 
 
 Context windows have grown dramatically:
 
-| Model                 | Context window |
-| --------------------- | -------------- |
-| GPT-3 (2020)          | 2K tokens      |
-| GPT-4 Turbo (2023)    | 128K tokens    |
-| Gemini 1.5 Pro (2024) | 1M tokens      |
-| Gemini 3.1 Pro (2026) | 1M tokens      |
+| Model                             | Context window |
+| --------------------------------- | -------------- |
+| GPT-3 (2020)                      | 2K tokens      |
+| GPT-4 Turbo (2023)                | 128K tokens    |
+| Gemini 3.1 Pro (2026)             | 1M tokens      |
+| Claude Opus 4.8 / Sonnet 5 (2026) | 1M tokens      |
+| Claude Haiku 4.5 (2026)           | 200K tokens    |
 
 A token is roughly 3/4 of a word in English. So 1 million tokens is approximately 750,000 words - that is about 10 novels worth of text.
 
@@ -304,7 +305,7 @@ Procedural memory: "When a user reports a bug:
     div.style.cssText = 'padding: 14px 18px; background: #fff; border-radius: 10px; border-left: 5px solid ' + layer.color + '; cursor: pointer; transition: all 0.25s; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);';
     div.onmouseenter = function() { this.style.transform = 'translateX(6px)'; this.style.boxShadow = '0 3px 12px rgba(0,0,0,0.1)'; };
     div.onmouseleave = function() { this.style.transform = 'translateX(0)'; this.style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)'; };
-    div.innerHTML = '<span style="font-size: 1.4rem;">' + layer.icon + '</span><div><strong style="color: ' + layer.color + '; font-size: 0.95rem;">' + layer.name + '</strong><div style="font-size: 0.8rem; color: #888; margin-top: 2px;">Scope: ' + layer.scope + ' · ' + layer.persistence.split('—')[0].trim() + '</div></div>';
+    div.innerHTML = '<span style="font-size: 1.4rem;">' + layer.icon + '</span><div><strong style="color: ' + layer.color + '; font-size: 0.95rem;">' + layer.name + '</strong><div style="font-size: 0.8rem; color: #888; margin-top: 2px;">Scope: ' + layer.scope + ' · ' + layer.persistence.split('—').at(0).trim() + '</div></div>';
     container.appendChild(div);
   });
 
@@ -473,14 +474,11 @@ Session
 
 State is useful because it gives the agent quick access to important facts without having to re-read the entire conversation history.
 
-### Session management in Google Cloud
+### Session management with the Claude stack
 
-Google Cloud provides session management through the Agent Development Kit (ADK) and Vertex AI:
+Claude Code manages sessions for you: each conversation gets a session ID, and you can resume or fork a prior session (`--continue`, `--resume`) instead of rebuilding context from scratch. The [Claude Agent SDK](https://platform.claude.com/docs/en/api/agent-sdk/overview) exposes the same session model as a library, so custom agents get event tracking and state handling without reimplementing it.
 
-- **ADK Sessions:** The [ADK session system](https://adk.dev/sessions/) provides built-in session management with event tracking and state.
-- **Vertex AI Sessions:** [Vertex AI Agent Engine sessions](https://docs.cloud.google.com/agent-builder/agent-engine/manage/sessions) offer managed session storage with automatic scaling.
-
-These handle the infrastructure of storing and retrieving sessions, so you can focus on the agent logic.
+If you are calling the Anthropic API directly rather than through Claude Code or the Agent SDK, session management is on you: persist the `messages` list somewhere (a database, a file, a cache) and reload it into the request on each turn. **Prompt caching** helps here - it lets you mark a stable prefix of the conversation (system instructions, tool definitions, earlier turns) so the model does not have to reprocess it in full on every request, cutting latency and cost for long-running sessions.
 
 ______________________________________________________________________
 
@@ -690,7 +688,7 @@ When you externalize memory, you need somewhere to put it. Here are the main opt
 
 **Good for:** Finding semantically similar content. "What did we discuss about deployment?" will match past conversations about deploying, even if they used different words.
 
-**Examples:** Vertex AI Vector Search, Pinecone, Weaviate, ChromaDB
+**Examples:** Pinecone, Weaviate, ChromaDB, pgvector
 
 **Trade-offs:**
 
@@ -712,7 +710,7 @@ When you externalize memory, you need somewhere to put it. Here are the main opt
 
 **Good for:** Representing structured relationships between entities. "Who works on the Payments API?" or "What platform is the Payments API deployed on?"
 
-**Examples:** Neo4j, Amazon Neptune, Google Cloud's Knowledge Graph
+**Examples:** Neo4j, Amazon Neptune
 
 **Trade-offs:**
 
@@ -820,10 +818,9 @@ ______________________________________________________________________
 
 ## Further reading
 
-- [ADK Sessions documentation](https://adk.dev/sessions/)
-- [Vertex AI Agent Engine - Manage Sessions](https://docs.cloud.google.com/agent-builder/agent-engine/manage/sessions)
-- [Vertex AI Vector Search](https://docs.cloud.google.com/vertex-ai/docs/vector-search/overview)
-- [Google Cloud AI codelabs](https://codelabs.developers.google.com/?cat=AI)
+- [Claude Developer Platform documentation](https://platform.claude.com/docs) - API reference, including prompt caching
+- [Claude Agent SDK docs](https://platform.claude.com/docs/en/api/agent-sdk/overview) - session and state management for custom agents
+- [Model Context Protocol](https://modelcontextprotocol.io) - a standard way to connect agents to external memory and retrieval sources
 
 ______________________________________________________________________
 

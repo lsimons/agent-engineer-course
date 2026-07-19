@@ -28,7 +28,7 @@ export default defineConfig({
 					label: 'Part 2: Building and Shipping',
 					items: [
 						{ slug: '11-from-prototype-to-production' },
-						{ slug: '12-getting-started-with-vertex-and-adk' },
+						{ slug: '12-getting-started-with-claude-code' },
 						{ slug: '13-building-your-first-agent' },
 						{ slug: '14-agent-protocols-mcp-and-a2a' },
 					],

@@ -33,12 +33,12 @@ Let us do a quick flyover of the entire course. Use this as a refresher and a wa
 
 ### Part 2: building and shipping
 
-| Lesson | Title                                  | Core Idea                                                                                                                                                |
-| ------ | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 11     | From Prototype to Production           | The gap between a working demo and a production agent is bridged by CI/CD, monitoring, graceful degradation, and operational practices.                  |
-| 12     | Getting Started with Vertex AI and ADK | Google Cloud provides Vertex AI Agent Engine for managed deployment, Gemini models for reasoning, and ADK as an open-source toolkit for building agents. |
-| 13     | Building Your First Agent              | ADK agents need a name, model, and instructions. Start with LlmAgent, add tools incrementally, and test with `adk web` and `adk eval`.                   |
-| 14     | Agent Protocols - MCP and A2A          | MCP standardizes agent-to-tool communication. A2A standardizes agent-to-agent collaboration. Together they solve the integration problem.                |
+| Lesson | Title                                                  | Core Idea                                                                                                                                                                                   |
+| ------ | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 11     | From Prototype to Production                           | The gap between a working demo and a production agent is bridged by CI/CD, monitoring, graceful degradation, and operational practices.                                                     |
+| 12     | Getting Started with Claude Code and the LiteLLM Proxy | Claude Code is your daily-driver agent, the Anthropic API (via your company's LiteLLM proxy) gives programmatic access, and the Claude Agent SDK packages the same agent loop as a library. |
+| 13     | Building Your First Agent                              | Agents need a model, tools, and an instruction loop. Start by building the raw tool-use loop from scratch, then rebuild it with the Claude Agent SDK.                                       |
+| 14     | Agent Protocols - MCP and A2A                          | MCP standardizes agent-to-tool communication. A2A standardizes agent-to-agent collaboration. Together they solve the integration problem.                                                   |
 
 That is a lot of ground. If any of these summaries feel unfamiliar, go back and re-read that lesson before moving forward.
 
@@ -64,9 +64,9 @@ You have read the theory and you want to get your hands dirty.
 
 **Start here:**
 
-1. Follow the [ADK Quickstart](https://adk.dev/get-started/quickstart/) end to end. Build the sample agent, run it locally, and make sure everything works.
-2. Modify the quickstart agent. Change the system instructions. Add a custom tool. Break it, fix it, and learn how the pieces fit.
-3. Clone the [Agent Starter Pack](https://github.com/GoogleCloudPlatform/agent-starter-pack) for a production-ready template with CI/CD, monitoring, and deployment already configured.
+1. Work through [Lesson 12](/12-getting-started-with-claude-code/) end to end - get Claude Code running through your company's LiteLLM proxy, then make your first Anthropic API call.
+2. Build the tool-use loop from scratch, then rebuild the same agent with the [Claude Agent SDK](https://platform.claude.com/docs/en/api/agent-sdk/overview). Change the instructions. Add a custom tool. Break it, fix it, and learn how the pieces fit.
+3. Browse the [Anthropic Cookbook](https://github.com/anthropics/anthropic-cookbook) for runnable, production-flavored examples you can adapt.
 4. Pick a small, real problem and build an agent to solve it. Keep it scoped - one agent, two to three tools, a clear success metric.
 
 **Revisit:** Lessons 3 (Tools), 13 (Building Your First Agent)
@@ -78,7 +78,7 @@ You have an agent but it is not performing well enough.
 **Start here:**
 
 1. Go back to Lesson 9 and build an evaluation suite for your agent. You cannot improve what you cannot measure.
-2. Review the Google Cloud whitepaper on "Agent Quality" for systematic approaches to improving agent reliability and accuracy.
+2. Read ["Building Effective Agents"](https://www.anthropic.com/engineering) on the Anthropic engineering blog for systematic approaches to improving agent reliability and accuracy.
 3. Audit your system instructions using the guidelines from Lesson 13. Vague instructions are the most common source of poor behavior.
 4. Check your tool design. Are tool names clear? Are descriptions accurate? Are error cases handled?
 5. Add guardrails (Lesson 10) if you have not already. Reliability and safety go hand in hand.
@@ -92,12 +92,12 @@ You have a working agent and you need to run it in production.
 **Start here:**
 
 1. Re-read Lesson 11 (From Prototype to Production) with a focus on the operational concerns: monitoring, logging, error handling, and rollback.
-2. Explore [Vertex AI Agent Engine](https://docs.cloud.google.com/agent-builder/agent-engine/overview) for managed deployment that handles scaling, session management, and infrastructure.
-3. Study the Google Cloud whitepaper on "From Prototype to Production" for a detailed treatment of the deployment lifecycle.
+2. Check with your platform team and internal developer portal for how services that call through your company's LiteLLM proxy handle scaling, session management, and infrastructure in your environment.
+3. Browse the [Anthropic engineering blog](https://www.anthropic.com/engineering) for practical patterns that carry over from prototype to production.
 4. Set up CI/CD for your agent. Treat prompt changes with the same rigor as code changes - version them, review them, test them.
 5. Implement comprehensive observability. You need to see what your agent is doing in production, not just whether it returned a response.
 
-**Revisit:** Lessons 11 (Production), 12 (Vertex AI and ADK)
+**Revisit:** Lessons 11 (Production), 12 (Claude Code and the LiteLLM Proxy)
 
 ### Path 4: "i want to understand the theory deeper"
 
@@ -105,8 +105,8 @@ You want the research-level understanding.
 
 **Start here:**
 
-1. Read the Google Cloud whitepapers listed below. They provide in-depth technical treatment of every topic in this course.
-2. Follow the research papers on planning, reasoning, and multi-agent coordination referenced in those whitepapers.
+1. Read the [Anthropic engineering blog](https://www.anthropic.com/engineering). Posts like "Building Effective Agents" provide in-depth technical treatment of many topics in this course.
+2. Follow the research papers on planning, reasoning, and multi-agent coordination referenced in those posts.
 3. Experiment with advanced patterns - multi-agent systems (Lesson 7), agentic RAG (Lesson 8), and loop-based refinement agents.
 4. Study the MCP and A2A protocol specifications directly for a deep understanding of how agent communication works at the wire level.
 
@@ -173,36 +173,36 @@ You want the research-level understanding.
       stages: [
         { type: 'learn', title: 'Foundations', items: ['Lesson 1: What Are AI Agents?', 'Lesson 2: How Agents Think', 'Lesson 3: Tools - Giving Agents Hands'] },
         { type: 'learn', title: 'Patterns & Memory', items: ['Lesson 4: Agentic Design Patterns', 'Lesson 5: Memory and Context'] },
-        { type: 'build', title: 'Build Your First Agent', items: ['ADK Quickstart Tutorial', 'Lesson 13: Building Your First Agent', 'Modify quickstart: add custom tool'] },
+        { type: 'build', title: 'Build Your First Agent', items: ['Lesson 12: Claude Code and the LiteLLM proxy', 'Lesson 13: Building Your First Agent', 'Rebuild the sample agent with the Claude Agent SDK'] },
         { type: 'build', title: 'Add Capabilities', items: ['Add MCP integration (Lesson 14)', 'Implement agent skills (Lesson 17)', 'Build a multi-tool agent'] },
-        { type: 'deploy', title: 'Ship It', items: ['Clone Agent Starter Pack', 'Deploy to Vertex AI Agent Engine', 'Set up basic monitoring'] }
+        { type: 'deploy', title: 'Ship It', items: ['Package the agent with the Claude Agent SDK', "Deploy through your company's existing infrastructure", 'Set up basic monitoring'] }
       ],
       project: 'Build an internal knowledge agent that answers questions about your team docs using RAG + 2-3 tools.',
-      resources: ['ADK Quickstart', 'Agent Starter Pack on GitHub', 'Gemini API function calling docs']
+      resources: ['Claude Code docs', 'Claude Agent SDK docs', 'Anthropic Cookbook']
     },
     improver: {
       name: 'The Improver Path', color: '#34a853',
       stages: [
         { type: 'learn', title: 'Evaluation Fundamentals', items: ['Lesson 9: Evaluating and Testing Agents', 'Build 10+ eval test cases for your agent'] },
-        { type: 'learn', title: 'Quality Frameworks', items: ['Google Cloud "Agent Quality" whitepaper', 'Lesson 4: Design Patterns (review)'] },
+        { type: 'learn', title: 'Quality Frameworks', items: ['Anthropic engineering blog: "Building Effective Agents"', 'Lesson 4: Design Patterns (review)'] },
         { type: 'build', title: 'Audit & Fix', items: ['Audit system instructions (Lesson 13)', 'Review tool designs for clarity', 'Add missing error handling'] },
         { type: 'build', title: 'Add Guardrails', items: ['Lesson 10: Guardrails and Safety', 'Implement input validation', 'Add output filtering and scope limits'] },
         { type: 'deploy', title: 'Measure & Iterate', items: ['Set up A/B evaluation pipeline', 'Track success rate metrics', 'Iterate based on production data'] }
       ],
       project: 'Take your worst-performing agent and improve its eval pass rate from current to 90%+ through systematic instruction and tool refinement.',
-      resources: ['Agent Quality whitepaper', 'ADK eval documentation', 'Vertex AI evaluation tools']
+      resources: ['Anthropic engineering blog', 'Lesson 9 evaluation techniques', 'Claude Agent SDK docs']
     },
     deployer: {
       name: 'The Deployer Path', color: '#d89700',
       stages: [
-        { type: 'learn', title: 'Production Concepts', items: ['Lesson 11: From Prototype to Production', 'Google Cloud "Prototype to Production" whitepaper'] },
-        { type: 'learn', title: 'Infrastructure', items: ['Lesson 12: Vertex AI and ADK', 'Vertex AI Agent Engine docs', 'Understand session management'] },
+        { type: 'learn', title: 'Production Concepts', items: ['Lesson 11: From Prototype to Production', 'Anthropic engineering blog: "Building Effective Agents"'] },
+        { type: 'learn', title: 'Infrastructure', items: ['Lesson 12: Claude Code and the LiteLLM proxy', 'Your internal developer portal docs', 'Understand session management'] },
         { type: 'build', title: 'CI/CD & Monitoring', items: ['Set up CI/CD for agent changes', 'Version control prompts like code', 'Configure logging and tracing'] },
         { type: 'build', title: 'Reliability', items: ['Implement graceful degradation', 'Add circuit breakers', 'Set up human escalation paths'] },
-        { type: 'deploy', title: 'Scale & Observe', items: ['Deploy to Agent Engine', 'Set up observability dashboards', 'Run load testing, tune scaling'] }
+        { type: 'deploy', title: 'Scale & Observe', items: ["Deploy through your company's platform", 'Set up observability dashboards', 'Run load testing, tune scaling'] }
       ],
-      project: 'Take an existing agent and deploy it with full CI/CD, monitoring, rollback, and alerting on Vertex AI.',
-      resources: ['Vertex AI Agent Engine docs', 'Agent Starter Pack (has CI/CD built in)', 'Google Cloud Trace for observability']
+      project: 'Take an existing agent and deploy it with full CI/CD, monitoring, rollback, and alerting.',
+      resources: ['Your internal developer portal', 'Anthropic Cookbook', "Your company's observability stack"]
     },
     theorist: {
       name: 'The Theorist Path', color: '#9333ea',
@@ -214,7 +214,7 @@ You want the research-level understanding.
         { type: 'deploy', title: 'Contribute', items: ['Write up findings', 'Contribute to open-source agent frameworks', 'Share learnings with community'] }
       ],
       project: 'Implement and compare 3 different orchestration patterns (sequential, parallel, hierarchical) on the same task, measuring quality, cost, and latency.',
-      resources: ['All 6 Google Cloud agent whitepapers', 'MCP specification at modelcontextprotocol.io', 'A2A spec at a2a-protocol.org/latest/']
+      resources: ['Anthropic engineering blog', 'MCP specification at modelcontextprotocol.io', 'A2A spec at a2a-protocol.org/latest/']
     }
   };
 
@@ -331,39 +331,32 @@ You want the research-level understanding.
 
 ______________________________________________________________________
 
-## Google Cloud Resources
-
-### Codelabs
-
-Hands-on, guided tutorials you can complete in your browser:
-
-- **Google Cloud AI/ML Codelabs:** [https://codelabs.developers.google.com/?cat=AI](https://codelabs.developers.google.com/?cat=AI) - Browse the full catalog of AI codelabs including agent-specific tutorials, Gemini API guides, and Vertex AI walkthroughs.
+## Claude and Anthropic resources
 
 ### Documentation
 
 Your primary reference when building:
 
-| Resource        | What It Covers                                                           | Link                                                                                 |
-| --------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| Vertex AI Docs  | Agent Engine, model serving, evaluation, and the full Vertex AI platform | [docs.cloud.google.com/vertex-ai/docs](https://docs.cloud.google.com/vertex-ai/docs) |
-| ADK Docs        | Agent Development Kit - building, testing, and deploying agents          | [adk.dev](https://adk.dev/)                                                          |
-| Gemini API Docs | Model capabilities, function calling, context caching, and API reference | [ai.google.dev/gemini-api/docs](https://ai.google.dev/gemini-api/docs)               |
-| Google Cloud AI | Overview of all AI services on Google Cloud                              | [cloud.google.com/ai](https://cloud.google.com/ai)                                   |
+| Resource                  | What It Covers                                                                | Link                                                                                                             |
+| ------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Claude Developer Platform | The Anthropic API - messages, tool use, streaming, and the full API reference | [platform.claude.com/docs](https://platform.claude.com/docs)                                                     |
+| Claude Code Docs          | Installing, configuring, and extending Claude Code                            | [code.claude.com/docs](https://code.claude.com/docs)                                                             |
+| Claude Agent SDK Docs     | Building agents with the same loop that powers Claude Code                    | [platform.claude.com/docs/en/api/agent-sdk/overview](https://platform.claude.com/docs/en/api/agent-sdk/overview) |
+| MCP Specification         | The Model Context Protocol - standardizing agent-to-tool communication        | [modelcontextprotocol.io](https://modelcontextprotocol.io)                                                       |
 
 ### Templates and starter projects
 
 Do not start from scratch when you do not have to:
 
-- **Agent Starter Pack:** [https://github.com/GoogleCloudPlatform/agent-starter-pack](https://github.com/GoogleCloudPlatform/agent-starter-pack) - A production-ready template for building and deploying agents on Google Cloud. Includes CI/CD pipelines, monitoring setup, evaluation frameworks, and deployment configurations. This is the fastest way to go from idea to production.
+- **Anthropic Cookbook:** [https://github.com/anthropics/anthropic-cookbook](https://github.com/anthropics/anthropic-cookbook) - Runnable examples covering tool use, agent loops, retrieval, evaluation, and more. This is the fastest way to see production-flavored patterns end to end.
 
 ### Community
 
 Connect with other agent builders:
 
-- **Google Cloud Community forums** - Ask questions and share what you are building
-- **Stack Overflow** - Tag questions with `google-cloud-vertex-ai` or `google-adk`
-- **GitHub Issues** - Report bugs and request features on the ADK repository
-- **Google Cloud Discord** - Real-time conversations with other developers
+- **Stack Overflow** - Tag questions with `anthropic` or `claude`
+- **GitHub Issues** - Report bugs and request features on the Anthropic Cookbook repository
+- **Your internal engineering channels** - Whoever runs your company's LiteLLM proxy and internal developer portal is usually plugged into a wider internal community of people building agents
 
 Building agents can feel isolating when you are the only one on your team doing it. The community is where you find people who have hit the same problems you are facing. Do not hesitate to ask questions - the ecosystem is young enough that everyone is still learning.
 
@@ -371,37 +364,28 @@ Building agents can feel isolating when you are the only one on your team doing 
 
 Beyond the official docs, look for:
 
-- **Sample agents in the ADK repository** - The ADK GitHub repo includes example agents that demonstrate common patterns like multi-tool agents, sequential workflows, and agent teams
-- **Google Cloud blog posts** - The Google Cloud blog regularly publishes walkthroughs of agent architectures and deployment patterns
-- **Conference talks** - Google I/O and Google Cloud Next sessions on agents and AI are often recorded and published
+- **Sample agents in the Anthropic Cookbook** - The Cookbook repo includes example agents that demonstrate common patterns like multi-tool agents, sequential workflows, and agent teams
+- **Anthropic engineering blog posts** - Regularly publishes walkthroughs of agent architectures and deployment patterns
+- **Conference talks** - Recorded talks on agents and Claude from Anthropic and the wider community are often published after the fact
 
 ______________________________________________________________________
 
-## Key Google Cloud whitepapers on agents
+## Anthropic engineering resources
 
-Google Cloud has published a series of in-depth whitepapers covering the agent landscape. These go deeper than our lessons and are excellent references for both practitioners and decision-makers.
+Instead of a whitepaper series, Anthropic publishes practical, in-depth posts on the [Anthropic engineering blog](https://www.anthropic.com/engineering). "Building Effective Agents" is the standout starting point - it covers agent architectures, when (and when not) to add complexity, and patterns for tool use, evaluation, and reliability that apply throughout this course.
 
-| Whitepaper                                    | What It Covers                                                                                                                               |
-| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Introduction to Agents**                    | Foundational concepts - what agents are, core components, cognitive architecture, and the spectrum of agent capabilities                     |
-| **Agent Quality**                             | Systematic approaches to measuring and improving agent performance - evaluation methodologies, metrics, and quality assurance strategies     |
-| **Agent Tools and Interoperability with MCP** | Deep dive into tool design, the Model Context Protocol, and how to build interoperable agent-tool ecosystems                                 |
-| **Context Engineering: Sessions and Memory**  | How agents manage context - session state, memory architectures, context window optimization, and long-term knowledge retention              |
-| **From Prototype to Production**              | The complete lifecycle of taking an agent from demo to deployed - infrastructure, CI/CD, monitoring, scaling, and operational best practices |
-| **Agents Companion**                          | A practical reference guide that ties all the whitepapers together with actionable guidance and decision frameworks                          |
-
-These whitepapers are valuable whether you are building on Google Cloud or not. The concepts and patterns they describe are broadly applicable.
+These posts are valuable whether you are calling Claude directly, through your company's LiteLLM proxy, or through another integration. The concepts and patterns they describe are broadly applicable.
 
 ______________________________________________________________________
 
 ## Open source projects to explore
 
-### Google projects
+### Anthropic projects
 
-| Project                         | What It Is                                                                              | Link                                                                                                           |
-| ------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **ADK (Agent Development Kit)** | Google's open-source, code-first toolkit for building, evaluating, and deploying agents | [github.com/google/adk-python](https://github.com/google/adk-python)                                           |
-| **Agent Starter Pack**          | Production-ready templates for agent projects on Google Cloud                           | [github.com/GoogleCloudPlatform/agent-starter-pack](https://github.com/GoogleCloudPlatform/agent-starter-pack) |
+| Project                | What It Is                                                                     | Link                                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| **Claude Agent SDK**   | Anthropic's toolkit for building agents that use the same loop as Claude Code  | [Claude Agent SDK docs](https://platform.claude.com/docs/en/api/agent-sdk/overview)          |
+| **Anthropic Cookbook** | Runnable, open-source examples for tool use, agents, retrieval, and evaluation | [github.com/anthropics/anthropic-cookbook](https://github.com/anthropics/anthropic-cookbook) |
 
 ### Community frameworks
 
@@ -413,9 +397,9 @@ The agent ecosystem is broader than any single vendor. These community framework
 | **LangGraph** | Graph-based agent orchestration built on LangChain                      | Complex multi-step workflows, stateful agents     |
 | **CrewAI**    | Role-based multi-agent collaboration framework                          | Teams of specialized agents working together      |
 
-Each framework makes different trade-offs. ADK emphasizes Google Cloud integration, code-first design, and production deployment. LangChain emphasizes breadth of integrations. CrewAI emphasizes the multi-agent team metaphor. There is no single "best" framework - the right choice depends on your requirements, existing infrastructure, and team preferences.
+Each framework makes different trade-offs. The Claude Agent SDK emphasizes tight integration with Claude Code's tools, permissions, subagents, and MCP support. LangChain emphasizes breadth of integrations. CrewAI emphasizes the multi-agent team metaphor. There is no single "best" framework - the right choice depends on your requirements, existing infrastructure, and team preferences.
 
-**A note on framework choice:** Do not spend weeks evaluating frameworks. Pick one that fits your ecosystem, build something with it, and switch later if you need to. The concepts transfer across frameworks. What you learn about tool design in ADK applies in LangChain. What you learn about evaluation in one framework applies in all of them. Frameworks are vehicles, not destinations.
+**A note on framework choice:** Do not spend weeks evaluating frameworks. Pick one that fits your ecosystem, build something with it, and switch later if you need to. The concepts transfer across frameworks. What you learn about tool design with the Claude Agent SDK applies in LangChain. What you learn about evaluation in one framework applies in all of them. Frameworks are vehicles, not destinations.
 
 ### Protocol implementations
 
@@ -488,7 +472,7 @@ Once you move beyond tutorials, here are practical project patterns that work we
 
 **Why it is a good first project:** The scope is clear, the data is accessible, and you can measure success easily (does it answer correctly?). It combines RAG with tool use and gives your team immediate value.
 
-**Tools needed:** A document retrieval tool (vector search or API to your docs), optionally Google Search for fallback.
+**Tools needed:** A document retrieval tool (vector search or API to your docs), optionally a web search tool for fallback.
 
 ### The triage agent
 
@@ -526,14 +510,14 @@ Use this as a planning tool when you start your next build:
 - [ ] Verify an agent is the right approach (Lesson 1 decision flowchart)
 - [ ] Identify the tools and data sources the agent needs
 - [ ] Choose a model appropriate for the task complexity
-- [ ] Set up your development environment (ADK, API access, credentials)
+- [ ] Set up your development environment (Claude Code, API access via your company's LiteLLM proxy, credentials)
 
 ### During development
 
 - [ ] Write detailed system instructions (role, scope, boundaries, examples)
 - [ ] Build and test tools individually before connecting them to the agent
 - [ ] Create evaluation cases early - at least 5-10 to start
-- [ ] Test locally with `adk web` before deploying anywhere
+- [ ] Test locally with Claude Code or the Claude Agent SDK before deploying anywhere
 - [ ] Add guardrails for safety and reliability
 
 ### Before deployment
@@ -560,26 +544,20 @@ Keep these links handy. They are the primary references you will come back to:
 
 **Learning and Building:**
 
-- ADK Documentation: [https://adk.dev/](https://adk.dev/)
-- ADK Quickstart: [https://adk.dev/get-started/quickstart/](https://adk.dev/get-started/quickstart/)
-- Agent Starter Pack: [https://github.com/GoogleCloudPlatform/agent-starter-pack](https://github.com/GoogleCloudPlatform/agent-starter-pack)
-- Gemini API Docs: [https://ai.google.dev/gemini-api/docs](https://ai.google.dev/gemini-api/docs)
+- Claude Developer Platform docs: [https://platform.claude.com/docs](https://platform.claude.com/docs)
+- Claude Code docs: [https://code.claude.com/docs](https://code.claude.com/docs)
+- Claude Agent SDK docs: [https://platform.claude.com/docs/en/api/agent-sdk/overview](https://platform.claude.com/docs/en/api/agent-sdk/overview)
+- Anthropic Cookbook: [https://github.com/anthropics/anthropic-cookbook](https://github.com/anthropics/anthropic-cookbook)
 
-**Google Cloud Platform:**
+**Anthropic engineering:**
 
-- Vertex AI Docs: [https://docs.cloud.google.com/vertex-ai/docs](https://docs.cloud.google.com/vertex-ai/docs)
-- Agent Engine: [https://docs.cloud.google.com/agent-builder/agent-engine/overview](https://docs.cloud.google.com/agent-builder/agent-engine/overview)
-- AI/ML Codelabs: [https://codelabs.developers.google.com/?cat=AI](https://codelabs.developers.google.com/?cat=AI)
+- Anthropic engineering blog: [https://www.anthropic.com/engineering](https://www.anthropic.com/engineering)
+- Claude Enterprise: [https://www.anthropic.com/enterprise](https://www.anthropic.com/enterprise)
 
 **Protocols:**
 
 - MCP Specification: [https://modelcontextprotocol.io](https://modelcontextprotocol.io)
 - A2A Protocol: [https://a2a-protocol.org/latest/](https://a2a-protocol.org/latest/)
-- MCP Tools in ADK: [https://adk.dev/tools/mcp-tools/](https://adk.dev/tools/mcp-tools/)
-
-**Open Source:**
-
-- ADK Python: [https://github.com/google/adk-python](https://github.com/google/adk-python)
 
 ______________________________________________________________________
 
@@ -589,9 +567,9 @@ The agent ecosystem moves fast. Here is a practical strategy for keeping up with
 
 ### What to follow
 
-- **ADK release notes:** Check the [ADK GitHub repository](https://github.com/google/adk-python) for new releases. Major versions often introduce new agent types, tool integrations, or deployment options.
-- **Vertex AI changelog:** Google Cloud regularly ships new features for Agent Engine, model serving, and evaluation. The Vertex AI documentation includes a changelog.
-- **Model releases:** New Gemini model versions can unlock capabilities that were not possible before - better reasoning, longer context windows, improved function calling. Test new models with your existing eval suite to see if they improve performance.
+- **Claude Code and Claude Agent SDK release notes:** Check the [Claude Code docs](https://code.claude.com/docs) and [Claude Agent SDK docs](https://platform.claude.com/docs/en/api/agent-sdk/overview) for new releases. Major versions often introduce new agent types, tool integrations, or deployment options.
+- **Your internal developer portal:** Your company's LiteLLM proxy and developer portal are updated on their own schedule - watch their internal changelog for new model aliases and capabilities.
+- **Model releases:** New Claude model versions (and other models exposed through your company's proxy) can unlock capabilities that were not possible before - better reasoning, longer context windows, improved tool use. Test new models with your existing eval suite to see if they improve performance.
 - **Protocol updates:** Both MCP and A2A are actively evolving. Watch for new primitives, security improvements, and ecosystem growth.
 
 ### What to ignore (for now)
@@ -615,7 +593,7 @@ Once that works, iterate. Add another tool. Improve the instructions. Write eval
 
 The field is moving fast. New models with better reasoning ship regularly. New tools and protocols emerge. Best practices evolve as more teams put agents into production. The fundamentals you learned in this course - the agent loop, tool design, memory management, evaluation, safety - will stay relevant even as the specifics change. But the specific APIs, model versions, and framework features will evolve.
 
-Bookmark the resource list above and check back often. Follow the ADK and Vertex AI changelogs. Read the whitepapers when new ones come out. Join the community forums and see what other people are building.
+Bookmark the resource list above and check back often. Follow the Claude Code and Claude Agent SDK release notes. Read the Anthropic engineering blog when new posts come out. Join the community forums and see what other people are building.
 
 And most importantly: ship something. The gap between "I understand agents" and "I have built and deployed an agent" is where the real learning happens.
 

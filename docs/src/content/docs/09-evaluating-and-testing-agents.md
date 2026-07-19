@@ -859,17 +859,13 @@ Store evaluation results in a database or spreadsheet and track trends:
 - How do scores change when you update the prompt or model?
 - Are there new failure patterns emerging?
 
-## Evaluation with Google Cloud
+## Building an evaluation harness
 
-Google Cloud provides tools for evaluating agents at scale:
+You do not need a specialized platform to get started. A plain Python script that loads your golden test set, runs each case through the agent, and checks the results is enough for most teams:
 
-### Vertex AI Evaluation
-
-[Vertex AI's evaluation capabilities](https://docs.cloud.google.com/agent-builder/agent-engine/evaluate) let you run structured evaluations on agent outputs. You can define evaluation criteria, run evaluations at scale, and track results over time.
-
-### Google ADK Evaluation
-
-The [Google Agent Development Kit evaluation framework](https://adk.dev/evaluate/) provides built-in support for testing agents during development. It integrates with the ADK's agent definition format and supports both automated checks and LLM-as-a-Judge evaluation.
+- **Automated checks** run first, since they are fast and deterministic (exact match, regex, tool call verification, negative checks).
+- **LLM-as-a-Judge** runs next, calling a Claude model through your company's LiteLLM proxy to score the dimensions that automated checks cannot capture. A smaller, cheaper model such as `aws/claude-4-5-haiku` is often accurate enough for judging, which keeps the eval suite fast and inexpensive to run on every pull request.
+- **Results** get written to a file, database, or spreadsheet so you can track trends across runs.
 
 ## Common evaluation mistakes
 
@@ -934,8 +930,8 @@ Build an evaluation suite for an agent of your choice:
 
 ## Further reading
 
-- [Vertex AI Agent Evaluation](https://docs.cloud.google.com/agent-builder/agent-engine/evaluate) - Evaluating agents on Google Cloud's Vertex AI platform
-- [Google ADK Evaluation](https://adk.dev/evaluate/) - Built-in evaluation support in the Agent Development Kit
+- [Anthropic engineering blog](https://www.anthropic.com/engineering) - Practical guidance on building and evaluating effective agents
+- [Claude Developer Platform documentation](https://platform.claude.com/docs) - API reference, including how to call Claude models for LLM-as-a-Judge scoring
 
 ______________________________________________________________________
 

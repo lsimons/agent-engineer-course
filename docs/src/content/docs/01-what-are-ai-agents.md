@@ -6,7 +6,7 @@ sidebar:
 
 ## Introduction
 
-You have probably used ChatGPT, Gemini, or Claude to answer a question or write some code. You typed something in, got a response, and moved on. That is a language model doing its thing - predicting useful text based on your input.
+You have probably used Claude, ChatGPT, or Gemini to answer a question or write some code. You typed something in, got a response, and moved on. That is a language model doing its thing - predicting useful text based on your input.
 
 An AI agent is something different. An agent can **think**, **act**, and **remember**. It does not just answer your question - it figures out what steps to take, uses tools to carry those steps out, and adjusts its approach based on what happens along the way.
 
@@ -88,7 +88,7 @@ This is the language model at the center of the agent. It handles:
 - **Interpreting** the results of tool calls
 - **Generating** the final response
 
-The model you choose matters. Harder tasks (multi-step reasoning, complex code generation, nuanced decision-making) benefit from frontier models like Gemini or Opus. Simpler tasks (classification, extraction, straightforward Q&A) can use lighter models like Gemini Flash to save cost and latency.
+The model you choose matters. Harder tasks (multi-step reasoning, complex code generation, nuanced decision-making) benefit from frontier models like Claude Opus. Simpler tasks (classification, extraction, straightforward Q&A) can use lighter models like Claude Haiku to save cost and latency.
 
 ### 2. tools (the hands)
 
@@ -157,7 +157,7 @@ Not all agents are created equal. It is helpful to think about agent systems on 
 
 **What it is:** A language model answering questions with no tools or memory.
 
-**Example:** You ask Gemini "Explain the CAP theorem" and it gives you a clear explanation from its training data.
+**Example:** You ask Claude "Explain the CAP theorem" and it gives you a clear explanation from its training data.
 
 **Capabilities:**
 
@@ -531,19 +531,19 @@ The intern still makes mistakes sometimes - they are new, after all. But they ca
 
 ______________________________________________________________________
 
-## How Google Cloud fits in
+## How the Claude stack fits in
 
-Google Cloud provides infrastructure for building and deploying agents through several services:
+Several pieces of the Claude ecosystem work together to support building and deploying agents:
 
-- **Vertex AI Agent Engine** (rebranded in 2026 as **Agent Runtime**, part of the Gemini Enterprise Agent Platform) - A managed platform for building, deploying, and managing AI agents in production. It handles orchestration, tool management, session state, and scaling so you can focus on agent logic rather than infrastructure.
+- **Claude Code** - Your interactive AI agent for day-to-day engineering work: writing code, running tests, exploring a codebase, and iterating in a terminal or IDE session.
 
-- **Gemini Models** - The language models that serve as the "brain" of your agents, available in different sizes for different use cases.
+- **Claude models** - The language models that serve as the "brain" of your agents, available in different sizes for different use cases.
 
-- **Agent Development Kit (ADK)** - An open-source, code-first toolkit for building agents with features like multi-agent orchestration, built-in tool support, and easy deployment to Agent Engine.
+- **Claude Agent SDK** - A code-first toolkit for building custom agents, packaging the same agent loop that Claude Code uses (tools, permissions, subagents, hooks, MCP) as a library you can build on.
 
 We will use these tools throughout the course. For now, just know they exist.
 
-> **Learn more:** [Vertex AI Agent Engine Overview](https://docs.cloud.google.com/agent-builder/agent-engine/overview)
+> **Learn more:** [Claude Developer Platform documentation](https://platform.claude.com/docs)
 
 ______________________________________________________________________
 

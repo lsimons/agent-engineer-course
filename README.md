@@ -1,6 +1,6 @@
 # Agent Engineer - a course for software engineers
 
-Learn the fundamentals of AI agents and how to build them with Google Cloud AI.
+Learn the fundamentals of AI agents and how to build them with Claude.
 
 ## Who is this for?
 
@@ -12,7 +12,7 @@ This course is split into three parts:
 
 **Part 1: Fundamentals (101)** - Understand the core concepts behind AI agents. These lessons are platform-agnostic and focused on building your mental model.
 
-**Part 2: Building and shipping (201)** - Put those fundamentals into practice using Google Cloud AI, Vertex AI, and the Agent Development Kit (ADK).
+**Part 2: Building and shipping (201)** - Put those fundamentals into practice using Claude Code, the Anthropic API through your company's LiteLLM proxy, and the Claude Agent SDK.
 
 **Part 3: Deep dives (301)** - Go deeper on specific topics that matter for real-world agent development.
 
@@ -35,12 +35,12 @@ This course is split into three parts:
 
 ### Part 2: building and shipping
 
-| #   | Lesson                                                                                                      | What you will learn                                                               |
-| --- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| 11  | [From prototype to production](./docs/src/content/docs/11-from-prototype-to-production.md)                  | The journey from demo to deployed - CI/CD, rollout, and operations                |
-| 12  | [Getting started with Vertex AI and ADK](./docs/src/content/docs/12-getting-started-with-vertex-and-adk.md) | The Google Cloud AI stack for agents - what is available and how it fits together |
-| 13  | [Building your first agent](./docs/src/content/docs/13-building-your-first-agent.md)                        | Hands-on - build a working agent with ADK step by step                            |
-| 14  | [Agent protocols - MCP and A2A](./docs/src/content/docs/14-agent-protocols-mcp-and-a2a.md)                  | How agents talk to tools and to each other using open standards                   |
+| #   | Lesson                                                                                                                   | What you will learn                                                                                                     |
+| --- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| 11  | [From prototype to production](./docs/src/content/docs/11-from-prototype-to-production.md)                               | The journey from demo to deployed - CI/CD, rollout, and operations                                                      |
+| 12  | [Getting started with Claude Code and the LiteLLM proxy](./docs/src/content/docs/12-getting-started-with-claude-code.md) | The Claude stack for agents - Claude Code, the Anthropic API via your company's LiteLLM proxy, and the Claude Agent SDK |
+| 13  | [Building your first agent](./docs/src/content/docs/13-building-your-first-agent.md)                                     | Hands-on - build a working agent loop from scratch, then with the Claude Agent SDK                                      |
+| 14  | [Agent protocols - MCP and A2A](./docs/src/content/docs/14-agent-protocols-mcp-and-a2a.md)                               | How agents talk to tools and to each other using open standards                                                         |
 
 ### Part 3: deep dives
 
@@ -56,7 +56,7 @@ This course is split into three parts:
 
 - **Read in order** if you are new to agents. Each lesson builds on the previous one.
 - **Jump around** if you already know the basics. Each lesson is self-contained enough to read on its own.
-- **Follow the links** to official docs, codelabs, and tutorials for hands-on practice. We intentionally link out to maintained resources rather than duplicating API docs or code samples that go stale.
+- **Follow the links** to official docs and tutorials for hands-on practice. We intentionally link out to maintained resources rather than duplicating API docs or code samples that go stale.
 
 ## Philosophy
 
@@ -64,22 +64,23 @@ This course follows a few principles:
 
 - **Analogies first.** We use everyday comparisons to explain complex concepts before diving into technical details.
 - **Fundamentals over frameworks.** Understand the "why" before the "how." Frameworks change, but the core ideas stick around.
-- **Link, don't duplicate.** For API references, code samples, and setup instructions, we point to official Google Cloud docs and codelabs. This keeps our content focused on concepts and ensures you always see up-to-date information.
+- **Link, don't duplicate.** For API references, code samples, and setup instructions, we point to the official Claude Developer Platform, Claude Code, and Claude Agent SDK docs. This keeps our content focused on concepts and ensures you always see up-to-date information.
 - **Honest about trade-offs.** Every architectural choice has costs. We try to show both sides.
 
 ## Prerequisites
 
 - Basic Python knowledge (functions, classes, HTTP requests)
-- A Google Cloud account ([free trial available](https://cloud.google.com/free))
+- Claude Code installed and working, and an API key for your company's LiteLLM proxy (from your internal developer portal)
 - Familiarity with REST APIs and JSON
 
 ## Additional resources
 
-- [Google Cloud AI documentation](https://cloud.google.com/ai)
-- [Vertex AI documentation](https://docs.cloud.google.com/vertex-ai/docs)
-- [Agent Development Kit (ADK) documentation](https://adk.dev/)
-- [Google Cloud AI codelabs](https://codelabs.developers.google.com/?cat=AI)
-- [Gemini API documentation](https://ai.google.dev/gemini-api/docs)
+- [Claude Developer Platform documentation](https://platform.claude.com/docs)
+- [Claude Code documentation](https://code.claude.com/docs)
+- [Claude Agent SDK documentation](https://platform.claude.com/docs/en/api/agent-sdk/overview)
+- [Model Context Protocol](https://modelcontextprotocol.io)
+- [Anthropic Cookbook](https://github.com/anthropics/anthropic-cookbook)
+- [Anthropic engineering blog](https://www.anthropic.com/engineering)
 
 ## Contributing
 

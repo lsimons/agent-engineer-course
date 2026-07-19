@@ -41,7 +41,9 @@ hooks = [
   {
     id = "lychee",
     name = "lychee (broken link check)",
-    entry = "lychee --no-progress --config .lychee.toml",
+    # --root-dir + --fallback-extensions let lychee resolve the site's
+    # root-relative routes (/NN-chapter-name/) to the source .md files
+    entry = "bash -c 'lychee --no-progress --config .lychee.toml --root-dir \"$(pwd)/docs/src/content/docs\" --fallback-extensions md \"$@\"' --",
     language = "system",
     types = ["markdown"],
   }

@@ -399,7 +399,7 @@ Too many MCP tools degrade agent performance. Each tool definition consumes cont
 
 Analysis of 5,200 open-source MCP servers found that over half rely on long-lived static API keys. Only about 8.5% use modern auth like OAuth.
 
-**Mitigation:** Use short-lived scoped credentials. Store secrets in a secret manager (like Google Cloud Secret Manager), not in environment variables or config files. Rotate credentials regularly.
+**Mitigation:** Use short-lived scoped credentials. Store secrets in a secret manager, not in environment variables or config files. Rotate credentials regularly.
 
 ### Security checklist for MCP deployments
 
@@ -416,19 +416,15 @@ Analysis of 5,200 open-source MCP servers found that over half rely on long-live
 
 ______________________________________________________________________
 
-## MCP on Google Cloud
+## MCP in your agent stack
 
-Google Cloud provides several integration points for MCP:
+### Claude Code and the Claude Agent SDK as MCP clients
 
-### ADK and MCP
+Claude Code has built-in support for MCP servers - configure them once (per-project or globally) and any tools, resources, and prompts they expose become available to the agent, subject to your permission settings. The [Claude Agent SDK](https://platform.claude.com/docs/en/api/agent-sdk/overview) inherits the same MCP configuration, so an agent you build with the SDK connects to the same servers your interactive Claude Code sessions use, with no separate setup.
 
-Google's Agent Development Kit (ADK) has built-in support for MCP tools. You can connect to any MCP server and use its tools within your ADK agent.
+### Enterprise MCP gateways
 
-For details on configuring MCP tools in ADK, see the [ADK MCP Tools documentation](https://adk.dev/tools/mcp-tools/).
-
-### Apigee as an MCP gateway
-
-For enterprise deployments, [Apigee](https://cloud.google.com/apigee) can serve as an API and agent gateway for MCP. This adds:
+For enterprise deployments, an API gateway (such as Apigee, Kong, or a similar product) can serve as an API and agent gateway for MCP. This adds:
 
 - Rate limiting and quota management
 - Authentication and authorization policies
@@ -436,11 +432,11 @@ For enterprise deployments, [Apigee](https://cloud.google.com/apigee) can serve 
 - Tool registry and discovery
 - Traffic management across multiple MCP servers
 
-This is particularly useful when you have many teams deploying MCP servers and need centralized governance.
+This is particularly useful when you have many teams deploying MCP servers and need centralized governance - check whether your company already runs one before building your own.
 
-### Model Armor
+### Guardrail and safety layers
 
-[Model Armor](https://cloud.google.com/security/products/model-armor) can filter and validate inputs and outputs flowing through MCP tool calls, adding protection against prompt injection and data exfiltration through tool interactions.
+Dedicated guardrail products (for example, Google Cloud's Model Armor, or similar offerings from other vendors) can filter and validate inputs and outputs flowing through MCP tool calls, adding protection against prompt injection and data exfiltration through tool interactions. Review [Lesson 10's guardrails guidance](/10-guardrails-and-safety/) and your company's own AI safety tooling before relying on any single product for this.
 
 ______________________________________________________________________
 
@@ -513,7 +509,7 @@ Do you need to connect to an external service?
 |
 +-- Does the service have a REST API?
     |
-    +-- Yes: Build an MCP server or use ADK OpenAPI tools
+    +-- Yes: Build an MCP server, or use your framework's built-in tool generation from the OpenAPI spec
     +-- No: Build a custom function tool or MCP server
 ```
 
@@ -526,7 +522,7 @@ ______________________________________________________________________
 - The decision is per-integration, not system-wide - most production agents use both MCP and CLI
 - Start with CLI as the default; add MCP when you need auth, multi-tenancy, or tool discovery
 - MCP security requires active attention - audit servers, limit permissions, validate outputs
-- On Google Cloud, ADK supports MCP natively, and Apigee can serve as an enterprise MCP gateway
+- Claude Code and the Claude Agent SDK support MCP natively; an enterprise API gateway can add rate limiting, auth, and governance at scale
 - Keep MCP servers focused: 5-20 well-described tools per server, concise outputs, clear error messages
 
 ______________________________________________________________________
@@ -534,11 +530,11 @@ ______________________________________________________________________
 ## Further reading
 
 - [MCP Specification](https://modelcontextprotocol.io/)
-- [ADK MCP Tools](https://adk.dev/tools/mcp-tools/)
+- [Claude Code documentation](https://code.claude.com/docs)
+- [Claude Agent SDK documentation](https://platform.claude.com/docs/en/api/agent-sdk/overview)
 - [OWASP MCP Top 10](https://owasp.org/www-project-mcp-top-10/)
 - [Agentic AI Foundation (AAIF)](https://www.linuxfoundation.org/press/linux-foundation-announces-the-formation-of-the-agentic-ai-foundation)
 - [mcp2cli - Bridge MCP to CLI](https://github.com/knowsuchagency/mcp2cli)
-- [Google Cloud Apigee](https://cloud.google.com/apigee)
 
 ______________________________________________________________________
 

@@ -645,17 +645,17 @@ For a simple question-answering agent, ReAct + Tool Use is probably all you need
 
 ______________________________________________________________________
 
-## Patterns in Google Cloud
+## Patterns with the Claude stack
 
-Google Cloud's [Vertex AI Agent Engine](https://docs.cloud.google.com/agent-builder/agent-engine/overview) provides infrastructure for building agents that use these patterns. The [Agent Development Kit (ADK)](https://adk.dev/) gives you building blocks to implement them.
+The [Claude Agent SDK](https://platform.claude.com/docs/en/api/agent-sdk/overview) packages the same agent loop that Claude Code uses (tools, permissions, subagents, hooks, MCP) as a library, giving you building blocks to implement these patterns.
 
-Key concepts in the Google Cloud ecosystem:
+Key concepts in the Claude stack:
 
-- **Agent Engine** manages the lifecycle of your agents - deployment, scaling, and monitoring
-- **ADK** provides the framework for defining agent behavior, tools, and orchestration
-- **Gemini models** serve as the LLM backbone that powers reasoning in each pattern
+- **Claude Agent SDK** provides the framework for defining agent behavior, tools, and orchestration
+- **Claude models** serve as the LLM backbone that powers reasoning in each pattern
+- **Claude Code** is the interactive, daily-driver agent built on this same loop
 
-We will get hands-on with these in [Lesson 12](/12-getting-started-with-vertex-and-adk/) and [Lesson 13](/13-building-your-first-agent/).
+We will get hands-on with these in [Lesson 12](/12-getting-started-with-claude-code/) and [Lesson 13](/13-building-your-first-agent/).
 
 ______________________________________________________________________
 
@@ -679,9 +679,9 @@ ______________________________________________________________________
 
 ## Further reading
 
-- [Vertex AI Agent Engine overview](https://docs.cloud.google.com/agent-builder/agent-engine/overview)
-- [Agent Development Kit (ADK) documentation](https://adk.dev/)
-- [Google Cloud AI codelabs](https://codelabs.developers.google.com/?cat=AI)
+- [Claude Agent SDK documentation](https://platform.claude.com/docs/en/api/agent-sdk/overview)
+- [Building effective agents (Anthropic engineering blog)](https://www.anthropic.com/engineering)
+- [Model Context Protocol](https://modelcontextprotocol.io)
 
 ______________________________________________________________________
 

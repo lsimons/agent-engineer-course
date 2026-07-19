@@ -14,6 +14,14 @@ This lesson covers two open protocols that solve this problem: the **Model Conte
 
 ______________________________________________________________________
 
+> ⚠️ **Safety first:** Every protocol connection widens your agent's blast radius - each MCP
+> server and each remote agent is a new door into your systems. Before wiring any of this up,
+> revisit [Lesson 10: Guardrails and safety](/10-guardrails-and-safety/) - your company's own
+> internal guardrails apply to every protocol connection you make, not just the tools you write
+> yourself.
+
+______________________________________________________________________
+
 ## Why protocols matter
 
 ### The N x M Integration Problem
@@ -377,32 +385,34 @@ The MCP server handles authentication, request formatting, error handling, and s
 
 - **Separation of concerns.** Tool builders focus on their tool. Agent builders focus on their agent. The protocol handles the interface between them.
 
-### Using MCP tools in ADK
+### Using MCP with Claude
 
-ADK has built-in support for MCP. You can connect to any MCP server and use its tools as if they were native ADK tools.
+Claude Code has built-in support for MCP - register a server in your configuration and its tools show up automatically in your session, with no extra code required. See the [Claude Code documentation](https://code.claude.com/docs) for how to add local and remote MCP servers.
+
+The Anthropic API also supports MCP directly, through an MCP connector on the Messages API. Instead of writing a client that talks to the MCP server yourself, you point Claude at the server's URL and it connects on your behalf:
 
 ```python
-from google.adk.agents import Agent
-from google.adk.tools.mcp_tool import MCPToolset, SseConnectionParams
+import anthropic
 
-# Connect to an MCP server
-mcp_tools = MCPToolset(
-    connection_params=SseConnectionParams(
-        url="http://localhost:3000/mcp",
-    )
-)
+client = anthropic.Anthropic()
 
-agent = Agent(
-    name="mcp_agent",
-    model="gemini-3.5-flash",
-    instruction="You are a helpful assistant with access to external tools.",
-    tools=[mcp_tools],
+response = client.beta.messages.create(
+    model="aws/claude-4-8-opus",
+    max_tokens=1024,
+    betas=["mcp-client-2025-11-20"],
+    mcp_servers=[
+        {"type": "url", "url": "https://<your-mcp-server>", "name": "internal-tools"},
+    ],
+    tools=[
+        {"type": "mcp_toolset", "mcp_server_name": "internal-tools"},
+    ],
+    messages=[{"role": "user", "content": "What tools do you have access to?"}],
 )
 ```
 
-The agent discovers the available tools from the MCP server at runtime. If the server exposes a `search_database` tool and a `create_ticket` tool, your agent can use both without any additional code.
+Claude discovers the available tools from the MCP server at runtime. If the server exposes a `search_database` tool and a `create_ticket` tool, Claude can use both without any additional code on your side.
 
-> **Learn more:** [MCP Tools in ADK](https://adk.dev/tools/mcp-tools/)
+> **Learn more:** [Claude Code documentation](https://code.claude.com/docs) and [Model Context Protocol](https://modelcontextprotocol.io)
 
 ### Limitations and security considerations
 
@@ -515,7 +525,7 @@ You might wonder: why not just call another agent's API directly? You could, but
 - **Standardized discovery** - Find agents without knowing their specific API
 - **Common task lifecycle** - Every agent handles tasks the same way
 - **Streaming by default** - Real-time updates without custom WebSocket code
-- **Cross-framework compatibility** - Your ADK agent can work with a LangChain agent
+- **Cross-framework compatibility** - An agent built with the Claude Agent SDK can work with an agent built in LangChain, Google's ADK, or any other framework
 - **Authentication standards** - Consistent security model across agents
 
 ### When to use A2A vs. MCP
@@ -540,7 +550,7 @@ This is one of the most important distinctions to understand:
 - You would use **MCP** to connect to a flight search API (a tool that takes departure city, arrival city, and date, and returns flights)
 - You would use **A2A** to delegate to a hotel booking agent that can understand preferences like "somewhere quiet near the conference venue" and figure out the best options on its own
 
-> **Learn more:** [A2A in ADK](https://adk.dev/a2a/) and [A2A Protocol Spec](https://a2a-protocol.org/latest/)
+> **Learn more:** [A2A Protocol Spec](https://a2a-protocol.org/latest/)
 
 ______________________________________________________________________
 
@@ -676,7 +686,7 @@ MCP has seen rapid adoption since its introduction. The ecosystem includes:
 
 A2A is newer and the ecosystem is still developing:
 
-- **ADK support** for both creating A2A-compatible agents and connecting to remote A2A agents
+- **Framework integrations** across multiple agent frameworks (including Google's ADK, which originated the protocol) for both creating A2A-compatible agents and connecting to remote A2A agents
 - **Reference implementations** demonstrating common patterns
 - **Growing interest** from organizations building multi-agent systems
 
@@ -725,8 +735,8 @@ ______________________________________________________________________
 
 ## Where to learn more
 
-- **MCP Tools in ADK:** [https://adk.dev/tools/mcp-tools/](https://adk.dev/tools/mcp-tools/)
-- **A2A in ADK:** [https://adk.dev/a2a/](https://adk.dev/a2a/)
+- **Claude Code documentation:** [https://code.claude.com/docs](https://code.claude.com/docs)
+- **Claude Agent SDK documentation:** [https://platform.claude.com/docs/en/api/agent-sdk/overview](https://platform.claude.com/docs/en/api/agent-sdk/overview)
 - **A2A Protocol Specification:** [https://a2a-protocol.org/latest/](https://a2a-protocol.org/latest/)
 - **MCP Specification:** [https://modelcontextprotocol.io](https://modelcontextprotocol.io)
 

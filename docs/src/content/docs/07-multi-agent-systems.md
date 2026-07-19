@@ -141,7 +141,7 @@ In a hierarchical architecture, a supervisor agent (the "manager") receives the 
 - Manager needs to be smart enough to decompose tasks well
 - More complex to implement than sequential
 
-In the [Google Agent Development Kit (ADK)](https://adk.dev/agents/), hierarchical patterns are well supported. You can define a parent agent that delegates to sub-agents, each with their own tools and instructions.
+Claude Code supports hierarchical patterns natively through subagents: a parent agent (or main session) delegates to subagents that each have their own instructions, tools, and permissions. The [Claude Agent SDK](https://platform.claude.com/docs/en/api/agent-sdk/overview) exposes the same subagent mechanism for custom agents you build yourself.
 
 ### 3. collaborative (peer network)
 
@@ -590,11 +590,11 @@ The Resolution Agent compiles the results and generates a customer-facing respon
 - **Testability:** You can test each agent independently. Does the Compliance Agent correctly reject a refund when the customer has too many recent claims? You can test that without involving payments at all.
 - **Auditability:** Every delegation and response is logged. You have a clear trail of who decided what and why.
 
-### Building this with Google ADK
+### Building this with Claude Code subagents
 
-The [Google Agent Development Kit (ADK)](https://adk.dev/agents/) provides built-in support for multi-agent patterns. You can define agents as classes with their own instructions, tools, and sub-agents. The ADK handles message passing between agents and provides tracing for debugging.
+Claude Code provides built-in support for multi-agent patterns through subagents. You define each subagent with its own instructions, tools, and permissions in configuration, and Claude Code handles delegation, message passing, and tracing for debugging. The [Claude Agent SDK](https://platform.claude.com/docs/en/api/agent-sdk/overview) exposes the same subagent mechanism as a library, so you can build the sequential compliance check above (or any of the other patterns) into a custom agent rather than an interactive session.
 
-For workflow agents that follow predictable patterns (like our sequential compliance check), ADK offers [workflow agents](https://adk.dev/agents/workflow-agents/) with built-in sequential, parallel, and loop constructs.
+When agents need to coordinate across separate processes or organizations rather than as subagents within one session, that is the job of an agent-to-agent protocol - covered in [Lesson 14: agent protocols - MCP and A2A](/14-agent-protocols-mcp-and-a2a/).
 
 ## Coordination challenges
 
@@ -721,8 +721,9 @@ A system that reviews user-generated content for policy violations, spam, misinf
 
 ## Further reading
 
-- [Google ADK - Agents Overview](https://adk.dev/agents/) - How to build agents and multi-agent systems with the Agent Development Kit
-- [Google ADK - Workflow Agents](https://adk.dev/agents/workflow-agents/) - Built-in sequential, parallel, and loop patterns for multi-agent workflows
+- [Claude Agent SDK docs](https://platform.claude.com/docs/en/api/agent-sdk/overview) - How to build agents and multi-agent systems, including subagents, with the Claude Agent SDK
+- [Claude Code documentation](https://code.claude.com/docs) - Configuring and running subagents in practice
+- [Anthropic engineering blog](https://www.anthropic.com/engineering) - "Building effective agents" and related posts on multi-agent design
 
 ______________________________________________________________________
 

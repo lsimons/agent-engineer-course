@@ -138,16 +138,30 @@ Input --> [Agent A] --> [Agent B] --> [Agent C] --> Output
 
 **Example:** Code generation pipeline: requirement analysis agent produces a spec, coding agent writes the implementation, testing agent writes tests, review agent checks for issues.
 
-In ADK, this is the `SequentialAgent`:
+With the Claude Agent SDK, you write this pipeline directly in Python: each stage is its own `query()` call, with the previous stage's output feeding the next prompt.
 
 ```python
-pipeline = SequentialAgent(
-    name="code_pipeline",
-    sub_agents=[analyzer, coder, tester, reviewer]
-)
+import anyio
+from claude_agent_sdk import query, ClaudeAgentOptions
+
+async def run_pipeline(task: str):
+    options = ClaudeAgentOptions(allowed_tools=["Read", "Write", "Bash"])
+
+    spec = ""
+    async for message in query(prompt=f"Write a spec for: {task}", options=options):
+        spec += str(message)
+
+    implementation = ""
+    async for message in query(prompt=f"Implement this spec:\n{spec}", options=options):
+        implementation += str(message)
+
+    async for message in query(prompt=f"Write tests for:\n{implementation}", options=options):
+        print(message)
+
+anyio.run(run_pipeline, "a CSV to JSON converter")
 ```
 
-See the [ADK SequentialAgent documentation](https://adk.dev/agents/workflow-agents/sequential-agents/) for implementation details.
+See the [Claude Agent SDK documentation](https://platform.claude.com/docs/en/api/agent-sdk/overview) for the full API surface.
 
 ### Parallel (fan-out / gather)
 
@@ -174,16 +188,30 @@ Input ------+--> [Agent B] --+--> Combine --> Output
 
 **Example:** Code review where a security agent, performance agent, and style agent all review the same PR simultaneously. Results are merged into a single review.
 
-In ADK, this is the `ParallelAgent`:
+With the Claude Agent SDK, you run multiple `query()` calls concurrently - for example using `anyio`'s task groups - and gather the results.
 
 ```python
-review = ParallelAgent(
-    name="code_review",
-    sub_agents=[security_reviewer, performance_reviewer, style_reviewer]
-)
+import anyio
+from claude_agent_sdk import query, ClaudeAgentOptions
+
+async def review_agent(role: str, pr_diff: str, results: dict, options):
+    text = ""
+    async for message in query(prompt=f"Review this diff for {role} issues:\n{pr_diff}", options=options):
+        text += str(message)
+    results[role] = text
+
+async def review_pr(pr_diff: str):
+    options = ClaudeAgentOptions(allowed_tools=["Read"])
+    results = {}
+    async with anyio.create_task_group() as tg:
+        for role in ["security", "performance", "style"]:
+            tg.start_soon(review_agent, role, pr_diff, results, options)
+    return results
+
+anyio.run(review_pr, pr_diff_text)
 ```
 
-See the [ADK ParallelAgent documentation](https://adk.dev/agents/workflow-agents/parallel-agents/) for implementation details.
+See the [Claude Agent SDK documentation](https://platform.claude.com/docs/en/api/agent-sdk/overview) for the full API surface.
 
 ### Loop (iterative refinement)
 
@@ -216,17 +244,29 @@ An agent executes repeatedly until a condition is met. This includes two importa
 
 **Important:** Always set a maximum iteration count. Without it, a loop can run forever if the critic never approves.
 
-In ADK, this is the `LoopAgent`:
+With the Claude Agent SDK, a loop is just a Python `for`/`while` loop around `query()` calls, checking a condition after each iteration and enforcing a maximum iteration count yourself.
 
 ```python
-refiner = LoopAgent(
-    name="content_refiner",
-    sub_agents=[writer, editor],
-    max_iterations=5
-)
+import anyio
+from claude_agent_sdk import query, ClaudeAgentOptions
+
+async def refine(prompt: str, max_iterations: int = 5):
+    options = ClaudeAgentOptions(allowed_tools=["Read", "Write"])
+    draft = prompt
+    for _ in range(max_iterations):
+        async for message in query(prompt=f"Write or improve:\n{draft}", options=options):
+            draft = str(message)
+        approved = False
+        async for message in query(prompt=f"Does this meet the bar? Answer yes or no:\n{draft}", options=options):
+            approved = "yes" in str(message).lower()
+        if approved:
+            break
+    return draft
+
+anyio.run(refine, "a product description")
 ```
 
-See the [ADK LoopAgent documentation](https://adk.dev/agents/workflow-agents/loop-agent/) for implementation details.
+See the [Claude Agent SDK documentation](https://platform.claude.com/docs/en/api/agent-sdk/overview) for the full API surface.
 
 ### Routing (handoff / dispatch)
 
@@ -286,7 +326,7 @@ The coordinator:
 - Simple tasks that do not warrant the coordination overhead
 - When a sequential pipeline would work just as well
 
-In ADK, you can achieve this by wrapping sub-agents as tools using `AgentTool`, letting the coordinator call them like functions.
+The Claude Agent SDK supports this natively through subagents: define specialist subagents (for example in `.claude/agents/`), each with its own system prompt, tools, and permissions, and delegate to them via the `Task` tool. Each subagent runs in its own isolated context window and reports back only its result, keeping the coordinator's context clean even after a large research task.
 
 ### Group chat (roundtable)
 
@@ -661,73 +701,67 @@ ______________________________________________________________________
 Real systems often nest patterns. Here is an example of a content creation system:
 
 ```
-SequentialAgent("content_pipeline")
+content_pipeline (sequential)
   |
-  +-- ParallelAgent("research")
-  |     +-- web_search_agent
-  |     +-- database_query_agent
-  |     +-- document_review_agent
+  +-- research (parallel)
+  |     +-- web_search query()
+  |     +-- database_query query()
+  |     +-- document_review query()
   |
-  +-- LlmAgent("writer")
+  +-- writer query()
   |     (uses research results to draft content)
   |
-  +-- LoopAgent("refinement")
-        +-- editor_agent
-        +-- fact_checker_agent
+  +-- refinement (loop, max_iterations=5)
+        +-- editor query()
+        +-- fact_checker query()
         (loops until both approve)
 ```
 
-This combines parallel research, sequential progression, and iterative refinement into one system. In ADK, each of these workflow agents can contain LLM agents, other workflow agents, or custom agents.
+This combines parallel research, sequential progression, and iterative refinement into one system. With the Claude Agent SDK, each stage is ordinary Python calling `query()` - a task group for the parallel stage, a loop with a max iteration count for refinement - composed however your control flow needs.
 
 ______________________________________________________________________
 
-## Orchestration on Google Cloud with ADK
+## Orchestration with the Claude Agent SDK
 
-Google's Agent Development Kit provides three built-in workflow agent types for deterministic orchestration, plus LLM-driven coordination for dynamic scenarios.
+The Claude Agent SDK packages the same agent loop that powers Claude Code - tools, permissions, subagents, hooks, and MCP - as a library you can call from your own code. Rather than providing separate declarative classes for each control-flow pattern, it gives you the primitives and lets you compose them in plain Python.
 
-### Built-in workflow agents
+### `query()` as the building block
 
-| Agent Type | Control Flow               | ADK Class         |
-| ---------- | -------------------------- | ----------------- |
-| Sequential | Run agents in order        | `SequentialAgent` |
-| Parallel   | Run agents simultaneously  | `ParallelAgent`   |
-| Loop       | Repeat until condition met | `LoopAgent`       |
+Every pattern in this lesson - sequential, parallel, loop, routing, hierarchical - can be built by calling `query()` one or more times and wiring the results together yourself, as shown in the examples above. There is no dedicated `SequentialAgent` or `ParallelAgent` class to learn; ordinary control flow (function calls, `for` loops, `anyio` task groups) plays that role, so orchestration logic reads like the rest of your codebase.
 
-These are deterministic - no LLM is involved in the orchestration decisions. The LLM is only used within the individual sub-agents for their specific tasks.
+### Subagents for hierarchical delegation
 
-### LLM-driven coordination
+For hierarchical (coordinator-worker) orchestration specifically, Claude Code and the Agent SDK have first-class support: define specialist subagents (for example in `.claude/agents/`), each with its own system prompt, tools, and permissions, and delegate to them via the `Task` tool. Each subagent runs in an isolated context window and reports back only its result, keeping the coordinator's context clean.
 
-For dynamic routing, use a parent `LlmAgent` (also called `Agent`) with sub-agents. The parent uses its LLM to decide which sub-agent to delegate to based on the conversation and current state. This is how you implement routing and hierarchical patterns.
+### Hooks for control and validation
 
-### Custom agents
+Hooks let you intercept the agent loop at defined points (before or after a tool call, on user prompt submission, and more) to validate output between steps, enforce policy, or log for observability - turning the "validate between steps" and "instrument for observability" practices covered later in this lesson into configuration rather than custom orchestration code.
 
-For orchestration logic that does not fit the built-in types, you can extend `BaseAgent` to create custom agents with arbitrary control flow.
+### Permissions as a safety boundary
 
-### Agent-as-tool
+`permission_mode` and `allowed_tools`, as used in the examples above, constrain what each `query()` call - and each subagent - is allowed to do. This is a direct mitigation for the "excessive permissions" and "shared mutable state" anti-patterns covered later in this lesson.
 
-ADK lets you wrap any agent as a tool using `AgentTool`. This allows a coordinator agent to call sub-agents as if they were function calls, receiving structured results back.
+### MCP for external tools
 
-For full implementation details, see:
+Like Claude Code, the Agent SDK can connect to MCP servers, so any orchestration pattern you build has the same access to external tools and data covered in [Lesson 16: MCP deep dive](/16-mcp-deep-dive/).
 
-- [ADK Workflow Agents](https://adk.dev/agents/workflow-agents/)
-- [ADK Multi-Agent Systems](https://adk.dev/agents/)
-- [Multi-Agent Patterns in ADK - Google Developers Blog](https://developers.googleblog.com/developers-guide-to-multi-agent-patterns-in-adk/)
+Because the SDK inherits Claude Code's configuration and authentication and honors `ANTHROPIC_BASE_URL`, it works through your company's LiteLLM proxy with no extra setup. For the full API surface, see the [Claude Agent SDK documentation](https://platform.claude.com/docs/en/api/agent-sdk/overview).
 
 ______________________________________________________________________
 
 ## Framework comparison
 
-ADK is one of several frameworks that provide orchestration capabilities. Here is how the major options compare:
+The Claude Agent SDK is one of several frameworks and libraries used for agent orchestration. Here is how it compares to other major options:
 
-| Framework               | Approach                                                                              | Strengths                                                                            | Considerations                                           |
-| ----------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------- |
-| **Google ADK**          | Three deterministic primitives (Sequential, Parallel, Loop) + LLM-driven coordination | Clean separation of workflow vs. reasoning. Deployment to Vertex AI Agent Engine.    | Newer framework, smaller community than LangChain        |
-| **LangGraph**           | Graph-based workflow with nodes and edges                                             | Strongest support for complex branching and conditional logic. Mature observability. | Steeper learning curve                                   |
-| **CrewAI**              | Role-based model where agents are defined like team members                           | Fastest time-to-value. Intuitive YAML-driven configuration.                          | May lack sophistication for complex enterprise scenarios |
-| **AutoGen** (Microsoft) | Conversational architecture with dynamic role-playing                                 | Good for human-in-the-loop and multi-party conversations.                            | Significant setup complexity for production              |
-| **Claude Agent SDK**    | Orchestrator-worker with isolated context windows                                     | Sub-agents use isolated context, sending only relevant info back.                    | Anthropic-specific                                       |
+| Framework               | Approach                                                                              | Strengths                                                                                                             | Considerations                                           |
+| ----------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| **Claude Agent SDK**    | Orchestrator-worker with isolated context windows                                     | Subagents use isolated context, sending only relevant info back. Inherits Claude Code's tools, permissions, and auth. | Anthropic-specific                                       |
+| **Google ADK**          | Three deterministic primitives (Sequential, Parallel, Loop) + LLM-driven coordination | Clean separation of workflow vs. reasoning. Deployment to Vertex AI Agent Engine.                                     | Newer framework, smaller community than LangChain        |
+| **LangGraph**           | Graph-based workflow with nodes and edges                                             | Strongest support for complex branching and conditional logic. Mature observability.                                  | Steeper learning curve                                   |
+| **CrewAI**              | Role-based model where agents are defined like team members                           | Fastest time-to-value. Intuitive YAML-driven configuration.                                                           | May lack sophistication for complex enterprise scenarios |
+| **AutoGen** (Microsoft) | Conversational architecture with dynamic role-playing                                 | Good for human-in-the-loop and multi-party conversations.                                                             | Significant setup complexity for production              |
 
-The choice depends on your priorities: ADK if you want Vertex AI integration and clean workflow primitives, LangGraph if you need complex graph-based flows, CrewAI if you want fast setup with role-based teams.
+The choice depends on your priorities and what your organization has already standardized on. This course uses the Claude Agent SDK because it inherits Claude Code's configuration, tools, and permissions model - if you're already building on Claude, it's the natural fit. Reach for ADK if you want Vertex AI integration and clean workflow primitives, LangGraph if you need complex graph-based flows, or CrewAI if you want fast setup with role-based teams.
 
 ______________________________________________________________________
 
@@ -746,7 +780,7 @@ Do not jump to a hierarchical multi-agent system because it sounds impressive. A
 
 ### Match the model to the task
 
-Not every agent in your orchestration needs the same model. A classification router can use a fast, cheap model (Gemini Flash-Lite). A complex reasoning agent should use a capable model (Gemini Pro). This saves significant cost.
+Not every agent in your orchestration needs the same model. A classification router can use a fast, cheap model (Claude Haiku 4.5). A complex reasoning agent should use a capable model (Claude Opus 4.8). This saves a significant amount over using the most capable model for every step.
 
 ### Set iteration limits
 
@@ -776,7 +810,7 @@ Track performance per agent and per orchestration run:
 
 Use distributed tracing (e.g., OpenTelemetry) to follow a request through multiple agents. This is essential for debugging when things go wrong.
 
-See [ADK Tracing documentation](https://adk.dev/) and [Google Cloud Trace](https://cloud.google.com/trace) for implementation guidance.
+If you are using the Claude Agent SDK, hooks are a natural place to emit this instrumentation without threading it through your own orchestration code. See the [Claude Agent SDK documentation](https://platform.claude.com/docs/en/api/agent-sdk/overview) for details.
 
 ### Design for failure
 
@@ -810,7 +844,7 @@ ______________________________________________________________________
 - Most production systems use a hybrid - deterministic structure with LLM flexibility within steps
 - Core patterns: sequential, parallel, loop, routing, hierarchical, group chat
 - Patterns compose - nest them to build complex systems from simple pieces
-- ADK provides SequentialAgent, ParallelAgent, and LoopAgent for deterministic orchestration, plus LLM-driven coordination for dynamic routing
+- The Claude Agent SDK gives you `query()`, subagents, hooks, and MCP as building blocks - you compose sequential, parallel, and loop control flow yourself in code, while frameworks like ADK, LangGraph, and CrewAI offer alternative, more declarative approaches
 - Start simple. A single well-equipped agent is better than a poorly orchestrated team.
 - Set iteration limits, validate between steps, manage context aggressively, and design for failure
 
@@ -818,9 +852,8 @@ ______________________________________________________________________
 
 ## Further reading
 
-- [ADK Workflow Agents](https://adk.dev/agents/workflow-agents/)
-- [Multi-Agent Patterns in ADK](https://developers.googleblog.com/developers-guide-to-multi-agent-patterns-in-adk/)
-- [Anthropic - Building Effective AI Agents](https://www.anthropic.com/research/building-effective-agents)
+- [Claude Agent SDK documentation](https://platform.claude.com/docs/en/api/agent-sdk/overview)
+- [Anthropic engineering - Building Effective AI Agents](https://www.anthropic.com/engineering)
 - [Microsoft Azure - AI Agent Orchestration Patterns](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns)
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
 - [CrewAI Documentation](https://docs.crewai.com/)
