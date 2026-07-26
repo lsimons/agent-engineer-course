@@ -39,6 +39,22 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Agent Engineer',
+			head: [
+				// Fonts: Merriweather = long-form/body, Merriweather Sans = on-screen/UI.
+				{ tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
+				{
+					tag: 'link',
+					attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true },
+				},
+				{
+					tag: 'link',
+					attrs: {
+						rel: 'stylesheet',
+						href: 'https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Merriweather+Sans:wght@400;700&display=swap',
+					},
+				},
+			],
+			customCss: ['./src/styles/custom.css'],
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/lsimons/agent-engineer-course' }],
 			sidebar: [
 				{
