@@ -59,7 +59,7 @@ This course is split into three parts:
 The course is built as an [Astro](https://astro.build) + [Starlight](https://starlight.astro.build) website, with navigation, search, and interactive widgets in most lessons. It is published at <https://lsimons.github.io/agent-engineer-course/> on every push to `main`. To run it locally:
 
 ```bash
-mise install            # installs the pinned tools (bun, ...) - see mise.toml
+mise install            # installs the pinned tools (bun, ...) - see .mise.toml
 mise run docs-install   # install the site dependencies
 mise run docs-dev       # start the dev server
 ```

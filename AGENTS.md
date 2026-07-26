@@ -18,7 +18,7 @@ lessons.
 - `docs/` - Astro Starlight site (bun). Lesson content:
   `docs/src/content/docs/NN-name.md` (frontmatter `title` + `sidebar.order`,
   no H1 in body). Landing page: `index.mdx`.
-- `mise.toml` - pinned tools (bun, prek, lychee, gitleaks) and tasks run with
+- `.mise.toml` - pinned tools (bun, prek, lychee, gitleaks) and tasks run with
   `mise run docs-install`, `docs-dev`, `docs-build`, `docs-check`. Run
   `mise install` first.
 - Dev server: `mise run docs-dev` → <http://localhost:4321/agent-engineer-course/>
@@ -61,7 +61,7 @@ lessons.
   `feat:` ...). Also add `Assisted-by: <Agent>:<model>` trailer per user
   convention.
 - prek stashes unstaged changes during commit - if a hook needs a file
-  (e.g. mise.toml tool pins), it must be staged in the same commit.
+  (e.g. .mise.toml tool pins), it must be staged in the same commit.
 - lychee resolves internal routes via `--root-dir` (see prek.toml) and
   excludes our own published URL (.lychee.toml).
 - CI (`.github/workflows/ci.yml`) builds + astro-checks on push/PR.
