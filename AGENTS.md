@@ -18,10 +18,10 @@ lessons.
 - `docs/` - Astro Starlight site (bun). Lesson content:
   `docs/src/content/docs/NN-name.md` (frontmatter `title` + `sidebar.order`,
   no H1 in body). Landing page: `index.mdx`.
-- `mise.toml` - pinned tools (bun, just, prek, lychee, gitleaks). Run
+- `mise.toml` - pinned tools (bun, prek, lychee, gitleaks) and tasks run with
+  `mise run docs-install`, `docs-dev`, `docs-build`, `docs-check`. Run
   `mise install` first.
-- `justfile` - `just docs-install`, `docs-dev`, `docs-build`, `docs-check`.
-- Dev server: `just docs-dev` → <http://localhost:4321/agent-engineer-course/>
+- Dev server: `mise run docs-dev` → <http://localhost:4321/agent-engineer-course/>
   (note the base path). Astro 7's `astro dev` daemonizes: manage with
   `astro dev stop|status|logs`.
 
@@ -68,6 +68,6 @@ lessons.
   Deploy (`deploy.yml`) publishes `docs/dist` to GitHub Pages on push to main.
   Dependabot is active (bun + actions, weekly); typescript is held to 6.x
   (@astrojs/check needs ^5||^6) - keep the ignore rule.
-- Verify changes with: `just docs-build`, then curl the dev server; a full
+- Verify changes with: `mise run docs-build`, then curl the dev server; a full
   internal-link audit is: crawl every page's `href="/..."` and expect 200s.
 - The lsimons.github.io root site links here; keep the published URL stable.

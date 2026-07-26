@@ -1,6 +1,34 @@
 [tools]
 bun = "1.3"
 gitleaks = "8.30"
-just = "1.56"
 lychee = "0.24"
 prek = "0.4"
+
+[tasks.docs-install]
+description = "Install the site dependencies (bun)"
+dir = "docs"
+run = "bun install"
+
+[tasks.docs-dev]
+description = "Start the live-reloading dev server"
+dir = "docs"
+run = "bun run dev"
+
+[tasks.docs-build]
+description = "Build the static site into docs/dist"
+dir = "docs"
+run = "bun run build"
+
+[tasks.docs-preview]
+description = "Preview the production build"
+dir = "docs"
+run = "bun run preview"
+
+[tasks.docs-check]
+description = "Astro type/content check"
+dir = "docs"
+run = "bunx astro check"
+
+[tasks.docs-clean]
+description = "Remove build artifacts"
+run = "rm -rf docs/dist docs/.astro"
