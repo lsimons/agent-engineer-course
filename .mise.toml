@@ -5,10 +5,10 @@ minimum_release_age = "7d"
 lockfile = true
 
 [tools]
-bun = "1.3"
-gitleaks = "8.30"
-lychee = "0.24"
-prek = "0.4"
+bun = "1.3.14"
+gitleaks = "8.30.1"
+lychee = "0.24.2"
+prek = "0.4.12"
 
 [tasks.docs-install]
 description = "Install the site dependencies (bun)"
