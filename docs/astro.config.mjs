@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import { unified } from '@astrojs/markdown-remark';
 
 const base = '/agent-engineer-course';
 
@@ -34,7 +35,8 @@ export default defineConfig({
 	site: 'https://lsimons.github.io',
 	base,
 	markdown: {
-		rehypePlugins: [rehypeBaseLinks],
+		// Astro 7.3 deprecates `markdown.rehypePlugins`; plugins go on the processor.
+		processor: unified({ rehypePlugins: [rehypeBaseLinks] }),
 	},
 	integrations: [
 		starlight({
